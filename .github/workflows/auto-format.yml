@@ -23,4 +23,4 @@ jobs:
         with:
           # This part is also where you can pass other options, for example:
           prettier_version: 2.7.1
-        # prettier_options: --write **/*
+          prettier_options: --write **/*.{js,mjs,ts,tsx,yaml,md}
