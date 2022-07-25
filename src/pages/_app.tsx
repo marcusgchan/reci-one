@@ -1,20 +1,46 @@
 // src/pages/_app.tsx
 import { withTRPC } from "@trpc/next";
 import type { AppRouter } from "../server/router";
-import type { AppType } from "next/dist/shared/lib/utils";
+import type { AppType, NextComponentType } from "next/dist/shared/lib/utils";
 import superjson from "superjson";
-import { SessionProvider } from "next-auth/react";
+import { SessionProvider, signIn, useSession } from "next-auth/react";
 import "../styles/globals.css";
+import { AppProps } from "next/app";
 
-const MyApp: AppType = ({
+type CustomPageProps = AppProps & {
+  Component: NextComponentType & { auth?: boolean };
+};
+
+const MyApp = ({
   Component,
   pageProps: { session, ...pageProps },
-}) => {
+}: CustomPageProps) => {
   return (
     <SessionProvider session={session}>
-      <Component {...pageProps} />
+      {Component.auth ? (
+        <Auth>
+          <Component {...pageProps} />
+        </Auth>
+      ) : (
+        <Component {...pageProps} />
+      )}
     </SessionProvider>
   );
+};
+
+const Auth = ({ children }: { children: React.ReactNode }) => {
+  const { status } = useSession();
+  if (status === "loading") {
+    return <div>Loading...</div>;
+  } else if (status === "unauthenticated") {
+    return (
+      <div>
+        <h1>You are not logged in</h1>
+        <button onClick={() => signIn()}>Login</button>
+      </div>
+    );
+  }
+  return <>{children}</>;
 };
 
 const getBaseUrl = () => {
