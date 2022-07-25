@@ -6,6 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "format:write": "npx prettier --write .",
+    "format:check": "npx prettier --check .",
     "lint": "next lint",
     "postinstall": "prisma generate"
   },
@@ -32,6 +34,7 @@
     "eslint": "8.18.0",
     "eslint-config-next": "12.2.1",
     "postcss": "^8.4.14",
+    "prettier": "2.7.1",
     "prisma": "^4.1.0",
     "tailwindcss": "^3.1.6",
     "typescript": "4.7.4"
