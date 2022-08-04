@@ -1,0 +1,16 @@
+version: "3.3"
+
+services:
+  db:
+    image: mysql:8.0.30
+    restart: always
+    environment:
+      - MYSQL_DATABASE=recipe-website
+      - MYSQL_ROOT_PASSWORD=${MY_SQL_ROOT_PASSWORD}
+    volumes:
+      - recipe-db:/var/lib/mysql
+    ports:
+      - "3306:3306"
+
+volumes:
+  recipe-db:
