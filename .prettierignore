@@ -1,4 +1,4 @@
-prisma
+prisma/schema.prisma
 .next
 node_modules
 public
