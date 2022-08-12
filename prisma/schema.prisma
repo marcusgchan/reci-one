@@ -72,18 +72,18 @@ model VerificationToken {
 model Recipe {
   id          String  @id @default(cuid())
   name        String
-  description String
+  description String?
   prepTime    Decimal
   cookTime    Decimal
 
   ingredients    Ingredient[]
   steps          Step[]
-  mealType       MealType
-  cookingMethods CookingMethod[]
-  utensils       Utensil[]
+  mealTypes      MealTypesOnRecipies[]
+  cookingMethods CookingMethodsOnRecipies[]
   images         Image[]
-  recipe         Comment[]
-  nationalities  Nationality[]
+  comments       Comment[]
+  nationalities  NationalitiesOnRecipes[]
+  utensils       RecipiesOnUtensils[]
 
   authorId String @db.VarChar(255)
   author   User   @relation(fields: [authorId], references: [id])
@@ -92,13 +92,13 @@ model Recipe {
 }
 
 model Step {
-  id          Int    @id @default(autoincrement())
   order       Int
   description String @db.VarChar(1000)
 
   recipeId String @db.VarChar(255)
   recipe   Recipe @relation(fields: [recipeId], references: [id])
 
+  @@id([order, recipeId])
   @@map("steps")
 }
 
@@ -115,27 +115,44 @@ model Ingredient {
 }
 
 model CookingMethod {
-  id     String @id @default(cuid())
-  method String @db.VarChar(255)
-
-  recipeId String @db.VarChar(255)
-  recipe   Recipe @relation(fields: [recipeId], references: [id])
+  id       String                     @id @default(cuid())
+  name     String                     @unique @db.VarChar(255)
+  recipies CookingMethodsOnRecipies[]
 
   @@map("cooking_methods")
 }
 
-model Utensil {
-  id String @id @default(cuid())
+model CookingMethodsOnRecipies {
+  cookingMethod   CookingMethod @relation(fields: [cookingMethodId], references: [id])
+  cookingMethodId String
+  Recipe          Recipe        @relation(fields: [recipeId], references: [id])
+  recipeId        String
 
-  recipeId String @db.VarChar(255)
-  recipe   Recipe @relation(fields: [recipeId], references: [id])
+  @@id([cookingMethodId, recipeId])
+  @@map("cooking_methods_on_recipies")
+}
+
+model Utensil {
+  id      String               @id @default(cuid())
+  name    String               @unique
+  recipes RecipiesOnUtensils[]
 
   @@map("utensils")
 }
 
+model RecipiesOnUtensils {
+  recipe    Recipe  @relation(fields: [recipeId], references: [id])
+  recipeId  String
+  utensil   Utensil @relation(fields: [utensilId], references: [id])
+  utensilId String
+
+  @@id([recipeId, utensilId])
+  @@map("recipies_on_utensils")
+}
+
 model Comment {
   id          String   @id @default(cuid())
-  comment     String   @db.VarChar(1000)
+  description String   @db.VarChar(1000)
   dateCreated DateTime @default(now())
   rating      Decimal
 
@@ -146,6 +163,24 @@ model Comment {
   recipe   Recipe @relation(fields: [recipeId], references: [id])
 
   @@map("comments")
+}
+
+model MealTypesOnRecipies {
+  mealType   MealType @relation(fields: [mealTypeId], references: [id])
+  mealTypeId String
+  recipe     Recipe   @relation(fields: [recipeId], references: [id])
+  recipeId   String
+
+  @@id([mealTypeId, recipeId])
+  @@map("meal_types_on_recipies")
+}
+
+model MealType {
+  id       String                @id @default(cuid())
+  name     String                @unique
+  recipies MealTypesOnRecipies[]
+
+  @@map("meal_types")
 }
 
 model Image {
@@ -159,26 +194,25 @@ model Image {
 }
 
 model Nationality {
-  id          String @id @default(cuid())
-  nationality String @db.VarChar(255)
-
-  recipeId String @db.VarChar(255)
-  recipe   Recipe @relation(fields: [recipeId], references: [id])
+  id       String                   @id @default(cuid())
+  name     String                   @unique
+  recipies NationalitiesOnRecipes[]
 
   @@map("nationalities")
+}
+
+model NationalitiesOnRecipes {
+  nationality   Nationality @relation(fields: [nationalityId], references: [id])
+  nationalityId String
+  recipe        Recipe      @relation(fields: [recipeId], references: [id])
+  recipeId      String
+
+  @@id([nationalityId, recipeId])
+  @@map("nationalities_on_recipies")
 }
 
 enum UnitOfMeasurement {
   Imperial
   Metric
   None
-}
-
-enum MealType {
-  Appetizer
-  Main
-  Side
-  Snack
-  Dessert
-  Beverage
 }
