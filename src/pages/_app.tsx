@@ -6,6 +6,8 @@ import superjson from "superjson";
 import { SessionProvider, signIn, useSession } from "next-auth/react";
 import "../styles/globals.css";
 import { AppProps } from "next/app";
+import React, { Fragment, useEffect, useState } from "react";
+import useIsMobile from '../shared/hooks/useIsMobile';
 
 type CustomPageProps = AppProps & {
   Component: NextComponentType & { auth?: boolean };
@@ -19,10 +21,14 @@ const MyApp = ({
     <SessionProvider session={session}>
       {Component.auth ? (
         <Auth>
-          <Component {...pageProps} />
+          <Layout>
+            <Component {...pageProps} />
+          </Layout>
         </Auth>
       ) : (
-        <Component {...pageProps} />
+        <Layout>
+          <Component {...pageProps} />
+        </Layout>
       )}
     </SessionProvider>
   );
@@ -41,6 +47,30 @@ const Auth = ({ children }: { children: React.ReactNode }) => {
     );
   }
   return <>{children}</>;
+};
+
+const Layout = ({children}: {children : React.ReactNode}) => {
+
+  if (useIsMobile()) {
+    return (
+      <>
+        <div>Burger</div>
+        <main>{children}</main>
+      </>
+    );
+  }
+  return (
+    <>
+      <nav className="flex bg-slate-500">
+        <li>HOME</li>
+        <li>SEARCH</li>
+        <li>FAVOURITES</li>
+      </nav>
+      <main>
+        {children}
+      </main>
+    </>
+  );
 };
 
 const getBaseUrl = () => {

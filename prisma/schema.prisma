@@ -75,6 +75,7 @@ model Recipe {
   description String?
   prepTime    Decimal
   cookTime    Decimal
+  mainImage   Bytes?
 
   ingredients    Ingredient[]
   steps          Step[]
