@@ -1,5 +1,6 @@
 import { createRouter } from "./context";
 import { z } from "zod";
+import { listBuckets } from "../../utils/googleStorage";
 
 export const exampleRouter = createRouter()
   .query("hello", {
@@ -16,6 +17,8 @@ export const exampleRouter = createRouter()
   })
   .query("getAll", {
     async resolve({ ctx }) {
+      listBuckets();
+      console.log({ testing: "in here" });
       return await ctx.prisma.recipe.findMany();
     },
   });

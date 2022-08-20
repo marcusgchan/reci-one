@@ -15,6 +15,7 @@
     "postinstall": "prisma generate"
   },
   "dependencies": {
+    "@google-cloud/storage": "^6.4.1",
     "@next-auth/prisma-adapter": "^1.0.4",
     "@prisma/client": "^4.2.1",
     "@trpc/client": "^9.26.2",
