@@ -14,4 +14,7 @@ function defineNextConfig(config) {
 
 export default defineNextConfig({
   reactStrictMode: true,
+  images: {
+    domains: ['storage.googleapis.com']
+  }
 });

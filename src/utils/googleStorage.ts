@@ -6,20 +6,14 @@ import { env } from "../server/env.mjs";
 // helper, see https://github.com/GoogleCloudPlatform/google-cloud-node/blob/master/docs/authentication.md
 const projectId = "curious-context-360023";
 const keyFilename = env.PATH_TO_KEYFILE;
+
 const storage = new Storage({ projectId, keyFilename });
 
-// Makes an authenticated API request.
-async function listBuckets() {
-  try {
-    const [buckets] = await storage.getBuckets();
+const googleStorage = {
+  async getImageLink(path: string) {
+    const url = `https://storage.googleapis.com/storage/${env.BUCKET_NAME}/${path}`;
+    return url;
+  },
+};
 
-    console.log("Buckets:");
-    buckets.forEach((bucket) => {
-      console.log(bucket.name);
-    });
-  } catch (err) {
-    console.error("ERROR:", err);
-  }
-}
-
-export { listBuckets };
+export default googleStorage;

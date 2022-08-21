@@ -9,4 +9,5 @@ export const envSchema = z.object({
   DISCORD_CLIENT_SECRET: z.string(),
   PATH_TO_KEYFILE: z.string(),
   MY_SQL_ROOT_PASSWORD: z.string().optional(),
+  BUCKET_NAME: z.string()
 });
