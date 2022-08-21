@@ -7,4 +7,7 @@ export const envSchema = z.object({
   NEXTAUTH_URL: z.string().url(),
   DISCORD_CLIENT_ID: z.string(),
   DISCORD_CLIENT_SECRET: z.string(),
+  PATH_TO_KEYFILE: z.string(),
+  MY_SQL_ROOT_PASSWORD: z.string().optional(),
+  BUCKET_NAME: z.string(),
 });
