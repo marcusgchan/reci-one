@@ -75,7 +75,7 @@ model Recipe {
   description String?
   prepTime    Decimal
   cookTime    Decimal
-  mainImage   Bytes?
+  mainImage   String  @db.VarChar(255)
 
   ingredients    Ingredient[]
   steps          Step[]
