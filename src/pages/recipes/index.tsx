@@ -9,7 +9,6 @@ const Index = () => {
 
   const isMobile = useIsMobile();
 
-  console.log(data);
   if (isLoading || isError) {
     return <div>IS LOADING</div>;
   }
