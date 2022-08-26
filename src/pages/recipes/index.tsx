@@ -56,7 +56,7 @@ const Recipes = ({
     <>
       {data
         ? data.map(({ id, name }: { id: string; name: string }) => (
-            <RecipeCard id={id} name={name} />
+            <RecipeCard key={id} id={id} name={name} />
           ))
         : []}
     </>
@@ -65,10 +65,7 @@ const Recipes = ({
 
 const RecipeCard = ({ id, name }: { id: string; name: string }) => {
   return (
-    <article
-      key={id}
-      className="flex flex-col bg-accent border border-primary w-60 h-80 mx-auto"
-    >
+    <article className="flex flex-col bg-accent border border-primary w-60 h-80 mx-auto">
       <div className="w-full flex basis-3/5 relative">
         <Image
           layout="fill"
