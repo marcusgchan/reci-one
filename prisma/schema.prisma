@@ -89,7 +89,7 @@ model Recipe {
   authorId String @db.VarChar(255)
   author   User   @relation(fields: [authorId], references: [id])
 
-  @@map("recipies")
+  @@map("recipes")
 }
 
 model Step {
