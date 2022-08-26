@@ -7,7 +7,7 @@ import { SessionProvider, signIn, useSession } from "next-auth/react";
 import "../styles/globals.css";
 import { AppProps } from "next/app";
 import React, { Fragment, useEffect, useState } from "react";
-import useIsMobile from '../shared/hooks/useIsMobile';
+import useIsMobile from "../shared/hooks/useIsMobile";
 
 type CustomPageProps = AppProps & {
   Component: NextComponentType & { auth?: boolean };
@@ -49,8 +49,7 @@ const Auth = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
-const Layout = ({children}: {children : React.ReactNode}) => {
-
+const Layout = ({ children }: { children: React.ReactNode }) => {
   if (useIsMobile()) {
     return (
       <>
@@ -66,9 +65,7 @@ const Layout = ({children}: {children : React.ReactNode}) => {
         <li>SEARCH</li>
         <li>FAVOURITES</li>
       </nav>
-      <main>
-        {children}
-      </main>
+      <main>{children}</main>
     </>
   );
 };
