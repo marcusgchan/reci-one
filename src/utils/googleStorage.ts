@@ -1,8 +1,9 @@
 import { Storage, Bucket } from "@google-cloud/storage";
-import { NextApiRequest } from "next";
 import { env } from "../server/env.mjs";
+import { prisma } from "../server/db/client";
 const Multer = require("multer");
 
+// Note might not scale well
 const multer = Multer({
   storage: Multer.memoryStorage(),
   limits: {
@@ -19,24 +20,50 @@ const keyFilename = env.PATH_TO_KEYFILE;
 const storage = new Storage({ projectId, keyFilename });
 const bucket = storage.bucket(env.BUCKET_NAME);
 
-type StorageBucket = Bucket;
-
 const googleStorage = {
-  async getImageLink(path: string) {
-    const url = `https://storage.googleapis.com/storage/${env.BUCKET_NAME}/${path}`;
-    return url;
-  },
-  async uploadImage(req: any, id: string | undefined, recipeName: string) {
-    multer.array("files", 5)(req, {}, async () => {
-      console.log(req.files);
-      const files = <any[]>req.files;
-      Promise.all(uploadFiles(files, id, recipeName, bucket))
-        .then((urls) => {})
-        .catch();
+  async uploadImage(
+    req: any,
+    id: string | undefined,
+    recipeName: string,
+    recipeId: string
+  ) {
+    const uploadPromise = new Promise<string[]>((resolve, reject) => {
+      multer.array("files", 4)(req, {}, async () => {
+        const files = <any[]>req.files;
+        return await Promise.all(uploadFiles(files, id, recipeName, bucket))
+          .then(async (urls) => {
+            // store in db
+            await prisma.user.update({
+              where: {
+                id: id,
+              },
+              data: {
+                recipes: {
+                  update: {
+                    where: {
+                      id: recipeId,
+                    },
+                    data: {
+                      images: {
+                        createMany: {
+                          data: urls.map((url) => ({ link: url })),
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            });
+            resolve(urls);
+          })
+          .catch((e: string) => reject(e));
+      });
     });
-    return "";
+    return await uploadPromise;
   },
 };
+
+type StorageBucket = Bucket;
 
 function uploadFiles(
   files: any,

@@ -12,13 +12,24 @@ export default async function handler(
 
   if (req.method === "POST") {
     const recipeName = req.query.recipeName;
-    if (typeof recipeName === "string") {
-      const url = googleStorage.uploadImage(req, session.user?.id, recipeName);
-      res.status(200).send({ message: "success" });
+    const recipeId = req.query.recipeId;
+    if (typeof recipeName === "string" && typeof recipeId === "string") {
+      try {
+        const urls = await googleStorage.uploadImage(
+          req,
+          session.user?.id,
+          recipeName,
+          recipeId
+        );
+        res.status(200).json(urls);
+      } catch (e) {
+        console.log(e);
+        res.status(500).end();
+      }
     }
     res.status(400).end();
   } else {
-    // Handle any other HTTP method
+    res.status(405).end();
   }
 }
 
