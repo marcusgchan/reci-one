@@ -6,8 +6,7 @@ const Create = () => {
   const uploadFilesMutation = useMutation(
     () => {
       const formData = new FormData();
-      files.forEach((file, i) => {
-        console.log(file.name);
+      files.forEach((file) => {
         formData.append(`files`, file, file.name);
       });
       return fetch(`/api/upload/recipe-images?file=abc.jpeg`, {
@@ -28,10 +27,17 @@ const Create = () => {
     }
   };
   return (
-    <div>
+    <form>
       <input type="file" onChange={handleFilesSelect} multiple />
-      <button onClick={() => uploadFilesMutation.mutate()}>upload</button>
-    </div>
+      <button
+        onClick={(e) => {
+          e.preventDefault();
+          uploadFilesMutation.mutate();
+        }}
+      >
+        upload
+      </button>
+    </form>
   );
 };
 

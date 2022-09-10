@@ -30,9 +30,12 @@ const googleStorage = {
     const uploadPromise = new Promise<string[]>((resolve, reject) => {
       multer.array("files", 4)(req, {}, async () => {
         const files = <any[]>req.files;
+        if (files.length === 0) {
+          reject("No files provided");
+          return;
+        }
         return await Promise.all(uploadFiles(files, id, recipeName, bucket))
           .then(async (urls) => {
-            // store in db
             await prisma.user.update({
               where: {
                 id: id,
@@ -72,25 +75,20 @@ function uploadFiles(
   bucket: StorageBucket
 ): string[] {
   return files.map(({ originalname, buffer }: any) => {
-    new Promise<string>(async (resolve, reject) => {
-      const blob = bucket.file(originalname);
-      const file = bucket.file(
-        `https://storage.googleapis.com/${bucket.name}/${id}/${recipeName}/${blob.name}`
-      );
+    return new Promise<string>(async (resolve, reject) => {
+      const file = bucket.file(`${id}/${recipeName}/${originalname}`);
       try {
-        const fileExist = await file.exists();
+        const fileExist = (await file.exists())[0];
         if (fileExist) {
           reject("File already exist");
           return;
         }
-        const blobStream = blob.createWriteStream();
+        const blobStream = file.createWriteStream();
         blobStream.on("error", (err) =>
           reject("Something went wrong with the file upload")
         );
         blobStream.on("finish", () => {
-          resolve(
-            `https://storage.googleapis.com/${bucket.name}/${id}/${recipeName}/${blob.name}`
-          );
+          resolve(`https://storage.googleapis.com/${bucket.name}/${file.name}`);
         });
         blobStream.end(buffer);
       } catch (e) {

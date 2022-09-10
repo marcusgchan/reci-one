@@ -23,7 +23,7 @@ export default async function handler(
         );
         res.status(200).json(urls);
       } catch (e) {
-        console.log(e);
+        console.error(e);
         res.status(500).end();
       }
     }
