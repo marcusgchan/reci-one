@@ -6,15 +6,20 @@ import {
   DEFAULT_NATIONALITIES,
   DEFAULT_COOKING_METHODS,
 } from "./data";
+import { config } from "../src/server/config";
 
 const prisma = new PrismaClient();
 
 async function main() {
+  const seedConfig = config.seed;
+
   await createDefaultMealTypes();
   await createDefaultNationalities();
   await createDefaultUtensils();
   await createDefaultCookingMethods();
-  await createDefaultRecipies(); // recipies for testing only
+  if (seedConfig.withTestRecipesAndUser) {
+    await createDefaultRecipies(); // recipies for testing only and also creates test user
+  }
 }
 
 async function createDefaultMealTypes() {
