@@ -59,7 +59,20 @@ const googleStorage = {
             });
             resolve(urls);
           })
-          .catch((e: string) => reject(e));
+          .catch(async (e: string) => {
+            // Delete all files in the folder recipeName since upload failed
+            try {
+              const filesToDelete = (
+                await bucket.getFiles({ prefix: `${id}/${recipeName}/` })
+              )[0];
+              filesToDelete.forEach(async (file) => await file.delete());
+            } catch (e) {
+              console.error(
+                "Unable to delete files on GCS. Note: The files that aren't deleted will lead to a storage leak"
+              );
+            }
+            reject(e);
+          });
       });
     });
     return await uploadPromise;
