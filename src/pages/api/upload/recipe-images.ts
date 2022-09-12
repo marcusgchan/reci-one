@@ -11,14 +11,12 @@ export default async function handler(
   if (!session) return res.status(401).end();
 
   if (req.method === "POST") {
-    const recipeName = req.query.recipeName;
     const recipeId = req.query.recipeId;
-    if (typeof recipeName === "string" && typeof recipeId === "string") {
+    if (typeof recipeId === "string") {
       try {
         const urls = await googleStorage.uploadImage(
           req,
           session.user?.id,
-          recipeName,
           recipeId
         );
         res.status(200).json(urls);

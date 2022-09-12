@@ -21,12 +21,7 @@ const storage = new Storage({ projectId, keyFilename });
 const bucket = storage.bucket(env.BUCKET_NAME);
 
 const googleStorage = {
-  async uploadImage(
-    req: any,
-    id: string | undefined,
-    recipeName: string,
-    recipeId: string
-  ) {
+  async uploadImage(req: any, id: string | undefined, recipeId: string) {
     const uploadPromise = new Promise<string[]>((resolve, reject) => {
       multer.array("files", 4)(req, {}, async () => {
         const files = <any[]>req.files;
@@ -34,7 +29,7 @@ const googleStorage = {
           reject("No files provided");
           return;
         }
-        return await Promise.all(uploadFiles(files, id, recipeName, bucket))
+        return await Promise.all(uploadFiles(files, id, recipeId, bucket))
           .then(async (urls) => {
             await prisma.user.update({
               where: {
@@ -63,7 +58,7 @@ const googleStorage = {
             // Delete all files in the folder recipeName since upload failed
             try {
               const filesToDelete = (
-                await bucket.getFiles({ prefix: `${id}/${recipeName}/` })
+                await bucket.getFiles({ prefix: `${id}/${recipeId}/` })
               )[0];
               filesToDelete.forEach(async (file) => await file.delete());
             } catch (e) {
@@ -84,12 +79,12 @@ type StorageBucket = Bucket;
 function uploadFiles(
   files: any,
   id: string | undefined,
-  recipeName: string,
+  recipeId: string,
   bucket: StorageBucket
 ): string[] {
   return files.map(({ originalname, buffer }: any) => {
     return new Promise<string>(async (resolve, reject) => {
-      const file = bucket.file(`${id}/${recipeName}/${originalname}`);
+      const file = bucket.file(`${id}/${recipeId}/${originalname}`);
       try {
         const fileExist = (await file.exists())[0];
         if (fileExist) {
