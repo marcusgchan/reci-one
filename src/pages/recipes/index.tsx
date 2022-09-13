@@ -15,10 +15,7 @@ const Index = () => {
 
   if (isMobile) {
     return (
-      <section
-        className="grid grid-cols-1 gap-20 mx-auto"
-        style={{ width: "fit-content" }}
-      >
+      <section className="grid grid-cols-1 gap-20 mx-auto w-full max-w-7xl">
         <form className="flex gap-3 sticky top-1 z-10">
           <input type="text" className="border border-primary" />
           <button className="border border-primary bg-white">SEARCH</button>
@@ -31,10 +28,7 @@ const Index = () => {
   }
 
   return (
-    <section
-      className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:col-span-4 gap-20 mx-auto"
-      style={{ width: "fit-content" }}
-    >
+    <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:col-span-4 gap-20 mx-auto w-full max-w-7xl">
       <form className="col-span-1 md:col-span-2 lg:col-span-3 xl:col-span-4 flex justify-between">
         <div className="flex gap-3">
           <input type="text" className="border border-primary" />
