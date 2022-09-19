@@ -54,17 +54,17 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   const { status } = useSession();
   if (useIsMobile()) {
     return (
-      <>
+      <section>
         <MobileNav />
-        <main>{children}</main>
-      </>
+        <main className="p-10">{children}</main>
+      </section>
     );
   }
   return (
-    <>
+    <section className="p-10 h-screen flex flex-col max-w-7xl mx-auto">
       <DesktopNav />
-      <main>{children}</main>
-    </>
+      <main className="py-4 flex-1 min-h-0 h-full">{children}</main>
+    </section>
   );
 };
 

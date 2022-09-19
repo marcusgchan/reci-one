@@ -5,10 +5,27 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        accent: "#0ea5e9",
+        'accent-500': "#B48714",
+        'accent-400': "#D6B665",
         primary: "#171717",
         secondary: "#fafafa",
       },
+      animation: {
+        'fade-in-down': 'fade-in-down 300ms ease-in forwards',
+      },
+      keyframes: {
+        'fade-in-down': {
+          '0%': {
+            opacity: 0,
+            transform: 'translate(0, -10px)'
+          },
+          '100%': {
+            opacity: 1,
+            transform: 'translate(0, 0px)'
+          },
+
+        }
+      }
     },
   },
   plugins: [],

@@ -1,20 +1,21 @@
 import { useSession } from "next-auth/react";
 import React, { useState } from "react";
+import { FaBars } from "react-icons/fa";
 
 export function DesktopNav() {
   return (
-    <nav className="flex bg-slate-500 justify-between px-3 text-2xl min-w-0">
+    <nav className="flex justify-between px-3 text-2xl border-primary border-4 w-full p-2">
       <div>
         <a>
           <h2>Cookbook</h2>
         </a>
       </div>
-      <div className="flex gap-6 min-w-0">
-        <a>abcd</a>
-        <a>abcd</a>
-        <a>abcd</a>
-        <a>abcd</a>
-        <LoggedIn />
+      <div className="flex gap-6 min-w-0 text-accent-500">
+        <a>HOME</a>
+        <a>FAVOURITES</a>
+        <a>MY RECIPES</a>
+        <a>NOTES</a>
+        {/* <LoggedIn /> */}
       </div>
     </nav>
   );
@@ -26,12 +27,12 @@ export function MobileNav() {
   return (
     <>
       <button onClick={toggleMenu} className="fixed top-3 right-3">
-        Burger
+        <FaBars size="20" />
       </button>
       <nav
         className={`${
-          isOpen ? "translate-x-0" : ""
-        } transition-transform translate-x-full fixed flex flex-col gap-5 justify-center items-center text-2xl inset-0 h-full w-full min-width-0 bg-gray-600 text-slate-50`}
+          isOpen ? "translate-x-0" : "translate-x-full"
+        } z-40 transition-transform fixed flex flex-col gap-5 justify-center items-center text-2xl inset-0 h-full w-full min-width-0 bg-secondary`}
       >
         <button
           onClick={toggleMenu}
@@ -39,11 +40,11 @@ export function MobileNav() {
         >
           X
         </button>
-        <LoggedIn />
-        <a>abcd</a>
-        <a>abcd</a>
-        <a>abcd</a>
-        <a>abcd</a>
+        {/* <LoggedIn /> */}
+        <a>HOME</a>
+        <a>FAVOURITES</a>
+        <a>MY RECIPES</a>
+        <a>NOTES</a>
       </nav>
     </>
   );

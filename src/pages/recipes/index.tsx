@@ -3,10 +3,11 @@ import { trpc } from "../../utils/trpc";
 import useIsMobile from "../../shared/hooks/useIsMobile";
 import Image from "next/image";
 import { inferQueryOutput } from "../../utils/trpc";
+import { useAutoAnimate } from "@formkit/auto-animate/react";
 
 const Index = () => {
   const { data, isLoading, isError } = trpc.useQuery(["recipes.getAll"]);
-
+  // const [parent] = useAutoAnimate(/* optional config */);
   const isMobile = useIsMobile();
 
   if (isLoading || isError) {
@@ -26,17 +27,18 @@ const Index = () => {
       </section>
     );
   }
-
   return (
-    <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:col-span-4 gap-20 mx-auto w-full max-w-7xl">
-      <form className="col-span-1 md:col-span-2 lg:col-span-3 xl:col-span-4 flex justify-between">
+    <section className="flex flex-col h-full gap-4">
+      <form className="flex justify-between">
         <div className="flex gap-3">
-          <input type="text" className="border border-primary" />
-          <button className="border border-primary">SEARCH</button>
+          <input type="text" className="border-[3px] border-primary p-1 w-72" />
+          <button className="border-primary border-[3px] p-2">SEARCH</button>
         </div>
-        <button>FILTER</button>
+        <button className="border-primary border-[3px] p-2">FILTER</button>
       </form>
-      <Recipes data={data} />
+      <section className="h-full overflow-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-10 mx-auto w-full">
+        <Recipes data={data} />
+      </section>
     </section>
   );
 };
@@ -59,16 +61,17 @@ const Recipes = ({
 
 const RecipeCard = ({ id, name }: { id: string; name: string }) => {
   return (
-    <article className="flex flex-col bg-accent border border-primary w-60 h-80 mx-auto">
+    <article className="flex flex-col gap-4 w-full h-full mx-auto animate-fade-in-down aspect-[1/1.3]">
       <div className="w-full flex basis-3/5 relative">
         <Image
           layout="fill"
           objectFit="cover"
+          alt={name}
           src="https://storage.googleapis.com/recipe-website-bucket/test-images/apple-550x396.jpeg"
         />
       </div>
-      <div className="flex flex-1 justify-center items-center border-t border-primary">
-        <h2>{name} </h2>
+      <div className="flex flex-1 justify-center items-center bg-accent-400">
+        <h2 className="text-secondary font-medium tracking-wide">{name}</h2>
       </div>
     </article>
   );

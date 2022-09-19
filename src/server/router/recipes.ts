@@ -28,7 +28,6 @@ export const recipesRouter = createRouter()
           },
         },
       });
-      console.log(recipes);
       return recipes;
     },
   });
