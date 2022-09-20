@@ -55,8 +55,10 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   if (useIsMobile()) {
     return (
       <section>
-        <MobileNav />
-        <main className="p-10">{children}</main>
+        <div className="relative z-20">
+          <MobileNav />
+        </div>
+        <main className="flex flex-col isolate z-10">{children}</main>
       </section>
     );
   }

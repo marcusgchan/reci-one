@@ -1,3 +1,5 @@
+const defaultTheme = require('tailwindcss/defaultTheme')
+
 /** @type {import('tailwindcss').Config} */
 
 module.exports = {
@@ -9,6 +11,9 @@ module.exports = {
         'accent-400': "#D6B665",
         primary: "#171717",
         secondary: "#fafafa",
+      },
+      borderWidth: {
+        '3': '3px'
       },
       animation: {
         'fade-in-down': 'fade-in-down 300ms ease-in forwards',

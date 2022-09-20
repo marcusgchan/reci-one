@@ -1,13 +1,14 @@
 import { useSession } from "next-auth/react";
 import React, { useState } from "react";
 import { FaBars } from "react-icons/fa";
+import { GrFormClose } from "react-icons/gr";
 
 export function DesktopNav() {
   return (
     <nav className="flex justify-between px-3 text-2xl border-primary border-4 w-full p-2">
       <div>
-        <a>
-          <h2>Cookbook</h2>
+        <a href="#" className="text-3xl tracking-wider">
+          Reci<span className="text-accent-500 ">One</span>
         </a>
       </div>
       <div className="flex gap-6 min-w-0 text-accent-500">
@@ -25,28 +26,39 @@ export function MobileNav() {
   const [isOpen, setIsOpen] = useState(false);
   const toggleMenu = () => setIsOpen((io) => !io);
   return (
-    <>
-      <button onClick={toggleMenu} className="fixed top-3 right-3">
-        <FaBars size="20" />
+    <nav className="flex justify-between py-4 px-10 isolate md:max-w-7xl max-w-xl w-full mx-auto">
+      <h1>
+        <a href="#" className="text-3xl tracking-wider">
+          Reci<span className="text-accent-500 ">One</span>
+        </a>
+      </h1>
+      <button onClick={toggleMenu} className="">
+        <FaBars size="30" />
       </button>
-      <nav
+      <ul
         className={`${
           isOpen ? "translate-x-0" : "translate-x-full"
-        } z-40 transition-transform fixed flex flex-col gap-5 justify-center items-center text-2xl inset-0 h-full w-full min-width-0 bg-secondary`}
+        } fixed inset-0 flex transition-transform flex-col justify-center items-center bg-secondary text-xl gap-2`}
       >
-        <button
-          onClick={toggleMenu}
-          className="absolute top-3 right-3 text-accent"
-        >
-          X
-        </button>
-        {/* <LoggedIn /> */}
-        <a>HOME</a>
-        <a>FAVOURITES</a>
-        <a>MY RECIPES</a>
-        <a>NOTES</a>
-      </nav>
-    </>
+        <li className="absolute top-[12px] right-[15px]">
+          <button onClick={toggleMenu}>
+            <GrFormClose size={35} />
+          </button>
+        </li>
+        <li>
+          <a>HOME</a>
+        </li>
+        <li>
+          <a>FAVOURITES</a>
+        </li>
+        <li>
+          <a>MY RECIPES</a>
+        </li>
+        <li>
+          <a>NOTES</a>
+        </li>
+      </ul>
+    </nav>
   );
 }
 
