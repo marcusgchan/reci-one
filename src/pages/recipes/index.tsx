@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo, useState } from "react";
 import { trpc } from "../../utils/trpc";
 import useIsMobile from "../../shared/hooks/useIsMobile";
 import Image from "next/image";
@@ -6,9 +6,17 @@ import { inferQueryOutput } from "../../utils/trpc";
 import { AiOutlineArrowUp, AiOutlineFilter } from "react-icons/ai";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 
+type Recipes = inferQueryOutput<"recipes.getAll">;
+
 const Index = () => {
   const { data, isLoading, isError } = trpc.useQuery(["recipes.getAll"]);
-  // const [parent] = useAutoAnimate(/* optional config */);
+  const [search, setSearch] = useState("");
+  const filteredData = useMemo(
+    () => data?.filter((recipe) => recipe.name.includes(search)),
+    [data, search]
+  );
+
+  const [parent] = useAutoAnimate<HTMLElement>(/* optional config */);
   const isMobile = useIsMobile();
 
   if (isLoading || isError) {
@@ -17,22 +25,24 @@ const Index = () => {
 
   if (isMobile) {
     return (
-      <section className="grid grid-cols-1 gap-8 mx-auto w-full md:max-w-7xl max-w-xl p-10">
+      <section className="grid grid-cols-1 gap-8 mx-auto w-full md:max-w-7xl max-w-lg pt-4 py-8 px-8">
         <form className="flex flex-col gap-3 top-1">
           <input
             type="text"
+            value={search}
+            onChange={(e) => setSearch(e.currentTarget.value)}
             className="border-3 border-primary p-1 tracking-wide"
           />
           <button className="border-primary border-3 p-2">SEARCH</button>
         </form>
         <section className="grid grid-cols-1 gap-10">
-          <Recipes data={data} />
+          <Recipes data={filteredData} />
         </section>
-        <button className="fixed bottom-3 left-1 border-primary border-3 rounded-full p-1 bg-accent-400">
-          <AiOutlineArrowUp size={30} />
+        <button className="fixed bottom-3 left-1 rounded-full p-2 bg-accent-300">
+          <AiOutlineArrowUp size={30} color="white" />
         </button>
-        <button className="fixed bottom-3 right-1 border-3 border-primary rounded-full p-1">
-          <AiOutlineFilter size={30} />
+        <button className="fixed bottom-3 right-1 bg-accent-300 rounded-full p-2">
+          <AiOutlineFilter size={30} color="white" />
         </button>
       </section>
     );
@@ -43,24 +53,25 @@ const Index = () => {
         <div className="flex gap-3">
           <input
             type="text"
+            value={search}
+            onChange={(e) => setSearch(e.currentTarget.value)}
             className="border-3 border-primary p-1 w-72 tracking-wide"
           />
           <button className="border-primary border-3 p-2">SEARCH</button>
         </div>
         <button className="border-primary border-3 p-2">FILTER</button>
       </form>
-      <section className="h-full overflow-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-10 mx-auto w-full">
-        <Recipes data={data} />
+      <section
+        ref={parent}
+        className="h-full overflow-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-10 mx-auto w-full auto-rows-min"
+      >
+        <Recipes data={filteredData} />
       </section>
     </section>
   );
 };
 
-const Recipes = ({
-  data,
-}: {
-  data: inferQueryOutput<"recipes.getAll"> | undefined;
-}) => {
+const Recipes = ({ data }: { data: Recipes | undefined }) => {
   return (
     <>
       {data

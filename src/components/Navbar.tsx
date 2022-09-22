@@ -26,7 +26,7 @@ export function MobileNav() {
   const [isOpen, setIsOpen] = useState(false);
   const toggleMenu = () => setIsOpen((io) => !io);
   return (
-    <nav className="flex justify-between py-4 px-10 isolate md:max-w-7xl max-w-xl w-full mx-auto">
+    <nav className="flex justify-between py-4 px-10 isolate md:max-w-7xl max-w-lg w-full mx-auto">
       <h1>
         <a href="#" className="text-3xl tracking-wider">
           Reci<span className="text-accent-500 ">One</span>
