@@ -5,38 +5,63 @@ import Image from "next/image";
 import { inferQueryOutput } from "../../utils/trpc";
 import { AiOutlineArrowUp, AiOutlineFilter } from "react-icons/ai";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
+import { Loader } from "../../shared/components/Loader";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { GetRecipesQuery, getRecipesSchema } from "../../shared/schemas/recipe";
 
-type Recipes = inferQueryOutput<"recipes.getAll">;
+type Recipes = inferQueryOutput<"recipes.getMyRecipes">;
 
 const Index = () => {
-  const { data, isLoading, isError } = trpc.useQuery(["recipes.getAll"]);
-  const [search, setSearch] = useState("");
-  const filteredData = useMemo(
-    () => data?.filter((recipe) => recipe.name.includes(search)),
-    [data, search]
-  );
+  const { data, isLoading, isError } = trpc.useQuery([
+    "recipes.getMyRecipes",
+    {
+      search: "",
+      filters: {
+        ingredientsInclude: [],
+        ingredientsExclude: [],
+        nationalitiesInclude: [],
+        nationalitiesExclude: [],
+        prepTimeMin: Number.MIN_VALUE,
+        prepTimeMax: Number.MAX_VALUE,
+        cookTimeMin: Number.MIN_VALUE,
+        cookTimeMax: Number.MAX_VALUE,
+        rating: 5,
+      },
+    },
+  ]);
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<GetRecipesQuery>({ resolver: zodResolver(getRecipesSchema) });
 
   const [parent] = useAutoAnimate<HTMLElement>(/* optional config */);
   const isMobile = useIsMobile();
 
+  const onSubmit = (GetAllRecipesQuery: GetRecipesQuery) => {};
+
   if (isLoading || isError) {
-    return <div>IS LOADING</div>;
+    return <Loader />;
   }
 
   if (isMobile) {
     return (
       <section className="grid grid-cols-1 gap-8 mx-auto w-full md:max-w-7xl max-w-lg pt-4 py-8 px-8">
-        <form className="flex flex-col gap-3 top-1">
+        <form
+          className="flex flex-col gap-3 top-1"
+          onSubmit={handleSubmit(onSubmit)}
+        >
           <input
             type="text"
-            value={search}
-            onChange={(e) => setSearch(e.currentTarget.value)}
+            {...register("search")}
             className="border-3 border-primary p-1 tracking-wide"
           />
           <button className="border-primary border-3 p-2">SEARCH</button>
         </form>
         <section className="grid grid-cols-1 gap-10">
-          <Recipes data={filteredData} />
+          <Recipes data={data} />
         </section>
         <button className="fixed bottom-3 left-1 rounded-full p-2 bg-accent-300">
           <AiOutlineArrowUp size={30} color="white" />
@@ -49,12 +74,11 @@ const Index = () => {
   }
   return (
     <section className="flex flex-col h-full gap-4">
-      <form className="flex justify-between">
+      <form className="flex justify-between" onSubmit={handleSubmit(onSubmit)}>
         <div className="flex gap-3">
           <input
             type="text"
-            value={search}
-            onChange={(e) => setSearch(e.currentTarget.value)}
+            {...register("search")}
             className="border-3 border-primary p-1 w-72 tracking-wide"
           />
           <button className="border-primary border-3 p-2">SEARCH</button>
@@ -65,7 +89,7 @@ const Index = () => {
         ref={parent}
         className="h-full overflow-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-10 mx-auto w-full auto-rows-min"
       >
-        <Recipes data={filteredData} />
+        <Recipes data={data} />
       </section>
     </section>
   );
