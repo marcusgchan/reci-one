@@ -8,6 +8,7 @@ import "../styles/globals.css";
 import { AppProps } from "next/app";
 import React, { Fragment, useEffect, useState } from "react";
 import useIsMobile from "../shared/hooks/useIsMobile";
+import { DesktopNav, MobileNav } from "../components/Navbar";
 
 type CustomPageProps = AppProps & {
   Component: NextComponentType & { auth?: boolean };
@@ -50,23 +51,22 @@ const Auth = ({ children }: { children: React.ReactNode }) => {
 };
 
 const Layout = ({ children }: { children: React.ReactNode }) => {
+  const { status } = useSession();
   if (useIsMobile()) {
     return (
-      <>
-        <div>Burger</div>
-        <main>{children}</main>
-      </>
+      <section>
+        <div className="relative z-20">
+          <MobileNav />
+        </div>
+        <main className="flex flex-col isolate z-10">{children}</main>
+      </section>
     );
   }
   return (
-    <>
-      <nav className="flex bg-slate-500">
-        <li>HOME</li>
-        <li>SEARCH</li>
-        <li>FAVOURITES</li>
-      </nav>
-      <main>{children}</main>
-    </>
+    <section className="p-10 h-screen flex flex-col max-w-7xl mx-auto">
+      <DesktopNav />
+      <main className="py-4 flex-1 min-h-0 h-full">{children}</main>
+    </section>
   );
 };
 

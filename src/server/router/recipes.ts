@@ -1,5 +1,8 @@
 import { createRouter } from "./context";
 import { z } from "zod";
+import { getRecipesSchema } from "../../shared/schemas/recipe";
+import { TRPCError } from "@trpc/server";
+import { recipeService } from "../services/recipesService";
 
 export const recipesRouter = createRouter()
   .query("hello", {
@@ -14,21 +17,11 @@ export const recipesRouter = createRouter()
       };
     },
   })
-  .query("getAll", {
-    async resolve({ ctx }) {
-      const recipes = await ctx.prisma.recipe.findMany({
-        select: {
-          id: true,
-          name: true,
-          images: {
-            select: {
-              id: true,
-              link: true,
-            },
-          },
-        },
-      });
-      console.log(recipes);
-      return recipes;
+  .query("getMyRecipes", {
+    input: getRecipesSchema,
+    async resolve({ ctx, input }) {
+      const userId = ctx.session?.user?.id;
+      if (!userId) throw new TRPCError({ code: "UNAUTHORIZED" });
+      return await recipeService.getMyRecipes(ctx, userId, input);
     },
   });
