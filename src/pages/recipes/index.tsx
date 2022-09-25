@@ -11,8 +11,17 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { GetRecipesQuery, getRecipesSchema } from "@/schemas/recipe";
 
 type Recipes = inferQueryOutput<"recipes.getMyRecipes">;
+const scopes = ["PUBLIC", "PRIVATE", "ALL"] as const;
 
 const Index = () => {
+  const [sharingScopeIndex, setSharingScopeIndex] = useState(0);
+  const toggleSharingScope = () => {
+    if (sharingScopeIndex === scopes.length - 1) {
+      setSharingScopeIndex(0);
+    } else {
+      setSharingScopeIndex(sharingScopeIndex + 1);
+    }
+  };
   const { data, isLoading, isError } = trpc.useQuery([
     "recipes.getMyRecipes",
     {
@@ -59,6 +68,12 @@ const Index = () => {
             className="border-3 border-primary p-1 tracking-wide"
           />
           <button className="border-primary border-3 p-2">SEARCH</button>
+          <button
+            onClick={toggleSharingScope}
+            className="border-primary border-3 p-2 self-end"
+          >
+            {scopes[sharingScopeIndex]}
+          </button>
         </form>
         <section className="grid grid-cols-1 gap-10">
           <Recipes data={data} />
@@ -83,7 +98,15 @@ const Index = () => {
           />
           <button className="border-primary border-3 p-2">SEARCH</button>
         </div>
-        <button className="border-primary border-3 p-2">FILTER</button>
+        <div className="flex gap-2">
+          <button
+            onClick={toggleSharingScope}
+            className="border-primary border-3 p-2"
+          >
+            {scopes[sharingScopeIndex]}
+          </button>
+          <button className="border-primary border-3 p-2">FILTER</button>
+        </div>
       </form>
       <section
         ref={parent}
@@ -109,7 +132,11 @@ const Recipes = ({ data }: { data: Recipes | undefined }) => {
 
 const RecipeCard = ({ id, name }: { id: string; name: string }) => {
   return (
-    <article className="flex flex-col gap-4 w-full h-full mx-auto animate-fade-in-down aspect-[1/1.3]">
+    <article
+      tabIndex={0}
+      role="button"
+      className="flex flex-col gap-4 w-full h-full mx-auto animate-fade-in-down aspect-[1/1.3]"
+    >
       <div className="w-full flex basis-3/5 relative">
         <Image
           layout="fill"

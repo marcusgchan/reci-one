@@ -2,37 +2,51 @@ import { useSession } from "next-auth/react";
 import React, { useState } from "react";
 import { FaBars } from "react-icons/fa";
 import { GrFormClose } from "react-icons/gr";
+import { useRouter } from "next/router";
 
 export function DesktopNav() {
+  const router = useRouter();
   return (
     <nav className="flex justify-between px-3 text-2xl border-primary border-4 w-full p-2">
-      <div>
-        <a href="#" className="text-3xl tracking-wider">
+      <h1>
+        <a className="text-3xl tracking-wider" tabIndex={0}>
           Reci<span className="text-accent-500 ">One</span>
         </a>
-      </div>
-      <div className="flex gap-6 min-w-0 text-accent-500">
-        <a>HOME</a>
-        <a>FAVOURITES</a>
-        <a>MY RECIPES</a>
-        <a>NOTES</a>
+      </h1>
+      <ul className="flex gap-6 min-w-0 text-accent-500">
+        <li>
+          <a tabIndex={0}>HOME</a>
+        </li>
+        <li>
+          <a tabIndex={0}>FAVOURITES</a>
+        </li>
+        <li>
+          <a onClick={() => router.push("/recipes")}>RECIPES</a>
+        </li>
+        <li>
+          <a tabIndex={0}>NOTES</a>
+        </li>
+        <li>
+          <a tabIndex={0}>ADD RECIPE</a>
+        </li>
         {/* <LoggedIn /> */}
-      </div>
+      </ul>
     </nav>
   );
 }
 
 export function MobileNav() {
+  const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const toggleMenu = () => setIsOpen((io) => !io);
   return (
     <nav className="flex justify-between py-4 px-10 isolate md:max-w-7xl max-w-lg w-full mx-auto">
       <h1>
-        <a href="#" className="text-3xl tracking-wider">
+        <a tabIndex={0} className="text-3xl tracking-wider">
           Reci<span className="text-accent-500 ">One</span>
         </a>
       </h1>
-      <button onClick={toggleMenu} className="">
+      <button onFocus={toggleMenu} onClick={toggleMenu} className="">
         <FaBars size="30" />
       </button>
       <ul
@@ -46,16 +60,21 @@ export function MobileNav() {
           </button>
         </li>
         <li>
-          <a>HOME</a>
+          <a tabIndex={0}>HOME</a>
         </li>
         <li>
-          <a>FAVOURITES</a>
+          <a tabIndex={0}>FAVOURITES</a>
         </li>
         <li>
-          <a>MY RECIPES</a>
+          <a tabIndex={0} onClick={() => router.push("/recipes")}>
+            RECIPES
+          </a>
         </li>
         <li>
-          <a>NOTES</a>
+          <a tabIndex={0}>NOTES</a>
+        </li>
+        <li>
+          <a tabIndex={0}>ADD RECIPE</a>
         </li>
       </ul>
     </nav>
