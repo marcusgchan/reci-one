@@ -2,6 +2,7 @@ import { z } from "zod";
 
 export const getRecipesSchema = z.object({
   search: z.string(),
+  viewScope: z.enum(["PUBLIC", "PRIVATE", "ALL"] as const),
   filters: z.object({
     ingredientsInclude: z.string().array(),
     ingredientsExclude: z.string().array(),

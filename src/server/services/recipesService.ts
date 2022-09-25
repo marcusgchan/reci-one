@@ -12,7 +12,8 @@ async function getMyRecipes(
 ) {
   return await ctx.prisma.recipe.findMany({
     where: {
-      authorId: userId, // Replace with "cl7b4r5n20216kb6vj9fucbt1" for testing
+      authorId: userId, // Replace with "id of test user" if want seeded recipes
+      viewScope: input.viewScope,
       name: {
         contains: input.search,
       },

@@ -26,6 +26,7 @@ const Index = () => {
     "recipes.getMyRecipes",
     {
       search: "",
+      viewScope: scopes[sharingScopeIndex] || "PRIVATE",
       filters: {
         ingredientsInclude: [],
         ingredientsExclude: [],
