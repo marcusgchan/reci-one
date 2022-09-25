@@ -14,7 +14,17 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
-    "noUncheckedIndexedAccess": true
+    "noUncheckedIndexedAccess": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/components/*": ["src/components/*"],
+      "@/prisma/*": ["src/prisma/*"],
+      "@/router/*": ["src/server/router"],
+      "@/shared/components/*": ["src/shared/components"],
+      "@/shared/hooks/*": ["src/shared/hooks/*"],
+      "@/schemas/*": ["src/schemas/*"],
+      "@/utils/*": ["src/utils/*"]
+    }
   },
   "include": [
     "next-env.d.ts",

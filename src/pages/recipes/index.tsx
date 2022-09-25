@@ -8,7 +8,7 @@ import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { Loader } from "../../shared/components/Loader";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { GetRecipesQuery, getRecipesSchema } from "../../shared/schemas/recipe";
+import { GetRecipesQuery, getRecipesSchema } from "@/schemas/recipe";
 
 type Recipes = inferQueryOutput<"recipes.getMyRecipes">;
 

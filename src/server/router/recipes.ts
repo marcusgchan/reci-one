@@ -1,6 +1,6 @@
 import { createRouter } from "./context";
 import { z } from "zod";
-import { getRecipesSchema } from "../../shared/schemas/recipe";
+import { getRecipesSchema } from "../../schemas/recipe";
 import { TRPCError } from "@trpc/server";
 import { recipeService } from "../services/recipesService";
 

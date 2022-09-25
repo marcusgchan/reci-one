@@ -1,4 +1,4 @@
-import { GetRecipesQuery } from "../../shared/schemas/recipe";
+import { GetRecipesQuery } from "../../schemas/recipe";
 import { Context } from "../router/context";
 
 export const recipeService = {
