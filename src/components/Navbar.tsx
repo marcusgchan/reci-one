@@ -9,25 +9,35 @@ export function DesktopNav() {
   return (
     <nav className="flex justify-between px-3 text-2xl border-primary border-4 w-full p-2">
       <h1>
-        <a className="text-3xl tracking-wider" tabIndex={0}>
+        <a className="text-3xl tracking-wider cursor-pointer" tabIndex={0}>
           Reci<span className="text-accent-500 ">One</span>
         </a>
       </h1>
       <ul className="flex gap-6 min-w-0 text-accent-500">
         <li>
-          <a tabIndex={0}>HOME</a>
+          <a className="cursor-pointer" tabIndex={0}>
+            HOME
+          </a>
         </li>
         <li>
-          <a tabIndex={0}>FAVOURITES</a>
+          <a className="cursor-pointer" tabIndex={0}>
+            FAVOURITES
+          </a>
         </li>
         <li>
-          <a onClick={() => router.push("/recipes")}>RECIPES</a>
+          <a className="cursor-pointer" onClick={() => router.push("/recipes")}>
+            RECIPES
+          </a>
         </li>
         <li>
-          <a tabIndex={0}>NOTES</a>
+          <a className="cursor-pointer" tabIndex={0}>
+            NOTES
+          </a>
         </li>
         <li>
-          <a tabIndex={0}>ADD RECIPE</a>
+          <a className="cursor-pointer" tabIndex={0}>
+            ADD RECIPE
+          </a>
         </li>
         {/* <LoggedIn /> */}
       </ul>
@@ -60,21 +70,33 @@ export function MobileNav() {
           </button>
         </li>
         <li>
-          <a tabIndex={0}>HOME</a>
+          <a tabIndex={0} className="cursor-pointer">
+            HOME
+          </a>
         </li>
         <li>
-          <a tabIndex={0}>FAVOURITES</a>
+          <a tabIndex={0} className="cursor-pointer">
+            FAVOURITES
+          </a>
         </li>
         <li>
-          <a tabIndex={0} onClick={() => router.push("/recipes")}>
+          <a
+            tabIndex={0}
+            className="cursor-pointer"
+            onClick={() => router.push("/recipes")}
+          >
             RECIPES
           </a>
         </li>
         <li>
-          <a tabIndex={0}>NOTES</a>
+          <a tabIndex={0} className="cursor-pointer">
+            NOTES
+          </a>
         </li>
         <li>
-          <a tabIndex={0}>ADD RECIPE</a>
+          <a tabIndex={0} className="cursor-pointer">
+            ADD RECIPE
+          </a>
         </li>
       </ul>
     </nav>
