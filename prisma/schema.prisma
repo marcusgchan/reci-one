@@ -12,10 +12,6 @@ datasource db {
   referentialIntegrity = "prisma"
 }
 
-model Example {
-  id String @id @default(cuid())
-}
-
 // Necessary for Next auth
 model Account {
   id                String  @id @default(cuid())
@@ -95,6 +91,7 @@ model Recipe {
 model Step {
   order       Int
   description String @db.VarChar(1000)
+  isHeader    Boolean @default(false)
 
   recipeId String @db.VarChar(255)
   recipe   Recipe @relation(fields: [recipeId], references: [id])
@@ -104,14 +101,14 @@ model Step {
 }
 
 model Ingredient {
-  id          String            @id @default(cuid())
-  name        String
-  unit        UnitOfMeasurement
-  measurement Decimal
+  order       Int
+  name         String            
+  isHeader    Boolean           @default(false)
 
   recipeId String @db.VarChar(255)
   recipe   Recipe @relation(fields: [recipeId], references: [id])
 
+  @@id([order, recipeId])
   @@map("ingredients")
 }
 

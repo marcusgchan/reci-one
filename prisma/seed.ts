@@ -125,9 +125,8 @@ async function createDefaultRecipies() {
           authorId: testUser1.id,
           ingredients: {
             create: Array.from({ length: 6 }).map((_, index) => ({
+              order: index,
               name: faker.commerce.productName(),
-              unit: "Metric",
-              measurement: faker.datatype.number(),
             })),
           },
           steps: {
