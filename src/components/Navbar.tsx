@@ -13,28 +13,28 @@ export function DesktopNav() {
           Reci<span className="text-accent-500 ">One</span>
         </a>
       </h1>
-      <ul className="flex gap-6 min-w-0 text-accent-500">
-        <li>
+      <ul className="flex gap-4 text-xl min-w-0 text-accent-500">
+        <li className="grid place-items-center">
           <a className="cursor-pointer" tabIndex={0}>
             HOME
           </a>
         </li>
-        <li>
+        <li className="grid place-items-center">
           <a className="cursor-pointer" tabIndex={0}>
             FAVOURITES
           </a>
         </li>
-        <li>
+        <li className="grid place-items-center">
           <a className="cursor-pointer" onClick={() => router.push("/recipes")}>
             RECIPES
           </a>
         </li>
-        <li>
+        <li className="grid place-items-center">
           <a className="cursor-pointer" tabIndex={0}>
             NOTES
           </a>
         </li>
-        <li>
+        <li className="grid place-items-center">
           <a className="cursor-pointer" tabIndex={0}>
             ADD RECIPE
           </a>
