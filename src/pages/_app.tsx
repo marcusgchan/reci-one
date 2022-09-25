@@ -51,7 +51,6 @@ const Auth = ({ children }: { children: React.ReactNode }) => {
 };
 
 const Layout = ({ children }: { children: React.ReactNode }) => {
-  const { status } = useSession();
   if (useIsMobile()) {
     return (
       <section>
