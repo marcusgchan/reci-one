@@ -9,29 +9,36 @@ import { AppProps } from "next/app";
 import React, { Fragment, useEffect, useState } from "react";
 import useIsMobile from "../shared/hooks/useIsMobile";
 import { DesktopNav, MobileNav } from "../components/Navbar";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 type CustomPageProps = AppProps & {
   Component: NextComponentType & { auth?: boolean };
 };
+
+const queryClient = new QueryClient();
 
 const MyApp = ({
   Component,
   pageProps: { session, ...pageProps },
 }: CustomPageProps) => {
   return (
-    <SessionProvider session={session}>
-      {Component.auth ? (
-        <Auth>
+    <QueryClientProvider client={queryClient}>
+      <SessionProvider session={session}>
+        {Component.auth ? (
+          <Auth>
+            <Layout>
+              <Component {...pageProps} />
+            </Layout>
+          </Auth>
+        ) : (
           <Layout>
             <Component {...pageProps} />
           </Layout>
-        </Auth>
-      ) : (
-        <Layout>
-          <Component {...pageProps} />
-        </Layout>
-      )}
-    </SessionProvider>
+        )}
+      </SessionProvider>
+      <ReactQueryDevtools initialIsOpen={false} />
+    </QueryClientProvider>
   );
 };
 
@@ -51,20 +58,21 @@ const Auth = ({ children }: { children: React.ReactNode }) => {
 };
 
 const Layout = ({ children }: { children: React.ReactNode }) => {
-  const { status } = useSession();
   if (useIsMobile()) {
     return (
       <section>
-        <div className="relative z-20">
+        <header className="relative z-20">
           <MobileNav />
-        </div>
+        </header>
         <main className="flex flex-col isolate z-10">{children}</main>
       </section>
     );
   }
   return (
     <section className="p-10 h-screen flex flex-col max-w-7xl mx-auto">
-      <DesktopNav />
+      <header>
+        <DesktopNav />
+      </header>
       <main className="py-4 flex-1 min-h-0 h-full">{children}</main>
     </section>
   );

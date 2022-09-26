@@ -10,13 +10,25 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { GetRecipesQuery, getRecipesSchema } from "@/schemas/recipe";
 
-type Recipes = inferQueryOutput<"recipes.getMyRecipes">;
+type Recipes = inferQueryOutput<"recipes.getRecipes">;
+const scopes = ["PRIVATE", "PUBLIC", "ALL"] as const;
 
 const Index = () => {
-  const { data, isLoading, isError } = trpc.useQuery([
-    "recipes.getMyRecipes",
+  const [sharingScopeIndex, setSharingScopeIndex] = useState(0);
+  const toggleSharingScope = (e: React.MouseEvent) => {
+    e.preventDefault();
+    refetch();
+    if (sharingScopeIndex === scopes.length - 1) {
+      setSharingScopeIndex(0);
+    } else {
+      setSharingScopeIndex(sharingScopeIndex + 1);
+    }
+  };
+  const { data, isLoading, isError, refetch } = trpc.useQuery([
+    "recipes.getRecipes",
     {
       search: "",
+      viewScope: scopes[sharingScopeIndex] || "PRIVATE",
       filters: {
         ingredientsInclude: [],
         ingredientsExclude: [],
@@ -42,8 +54,8 @@ const Index = () => {
 
   const onSubmit = (GetAllRecipesQuery: GetRecipesQuery) => {};
 
-  if (isLoading || isError) {
-    return <Loader />;
+  if (isError) {
+    return <h2>something went wrong</h2>;
   }
 
   if (isMobile) {
@@ -59,9 +71,15 @@ const Index = () => {
             className="border-3 border-primary p-1 tracking-wide"
           />
           <button className="border-primary border-3 p-2">SEARCH</button>
+          <button
+            onClick={toggleSharingScope}
+            className="border-primary border-3 p-2 self-end"
+          >
+            {scopes[sharingScopeIndex]}
+          </button>
         </form>
         <section className="grid grid-cols-1 gap-10">
-          <Recipes data={data} />
+          {isLoading ? <Loader /> : <Recipes data={data} />}
         </section>
         <button className="fixed bottom-3 left-1 rounded-full p-2 bg-accent-300">
           <AiOutlineArrowUp size={30} color="white" />
@@ -83,13 +101,21 @@ const Index = () => {
           />
           <button className="border-primary border-3 p-2">SEARCH</button>
         </div>
-        <button className="border-primary border-3 p-2">FILTER</button>
+        <div className="flex gap-2">
+          <button
+            onClick={toggleSharingScope}
+            className="border-primary border-3 p-2"
+          >
+            {scopes[sharingScopeIndex]}
+          </button>
+          <button className="border-primary border-3 p-2">FILTER</button>
+        </div>
       </form>
       <section
         ref={parent}
         className="h-full overflow-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-10 mx-auto w-full auto-rows-min"
       >
-        <Recipes data={data} />
+        {isLoading ? <Loader /> : <Recipes data={data} />}
       </section>
     </section>
   );
@@ -109,9 +135,14 @@ const Recipes = ({ data }: { data: Recipes | undefined }) => {
 
 const RecipeCard = ({ id, name }: { id: string; name: string }) => {
   return (
-    <article className="flex flex-col gap-4 w-full h-full mx-auto animate-fade-in-down aspect-[1/1.3]">
+    <article
+      tabIndex={0}
+      role="button"
+      className="flex flex-col gap-4 w-full h-full mx-auto animate-fade-in-down aspect-[1/1.3]"
+    >
       <div className="w-full flex basis-3/5 relative">
         <Image
+          priority={true}
           layout="fill"
           objectFit="cover"
           alt={name}

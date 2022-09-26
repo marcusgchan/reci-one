@@ -77,6 +77,7 @@ async function createDefaultRecipies() {
           prepTime: faker.datatype.float(),
           mainImage:
             "https://storage.googleapis.com/recipe-website-bucket/test-images/apple-550x396.jpeg",
+          viewScope: "PRIVATE",
           mealTypes: {
             create: [
               {
@@ -125,9 +126,8 @@ async function createDefaultRecipies() {
           authorId: testUser1.id,
           ingredients: {
             create: Array.from({ length: 6 }).map((_, index) => ({
+              order: index,
               name: faker.commerce.productName(),
-              unit: "Metric",
-              measurement: faker.datatype.number(),
             })),
           },
           steps: {
