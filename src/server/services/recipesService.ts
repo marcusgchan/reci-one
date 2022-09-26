@@ -1,3 +1,4 @@
+import { Recipe } from "@prisma/client";
 import { GetRecipesQuery } from "../../schemas/recipe";
 import { Context } from "../router/context";
 
@@ -10,35 +11,55 @@ async function getRecipes(
   userId: string,
   input: GetRecipesQuery
 ) {
-  return await ctx.prisma.recipe.findMany({
-    where: {
-      authorId: userId, // Replace with "id of test user" if want seeded recipes
-      viewScope: input.viewScope,
-      name: {
-        contains: input.search,
-      },
-      ingredients: getIncludeExcludeItems(
-        "name",
-        "ingredientsInclude",
-        "ingredientsExclude",
-        input
-      ),
-      nationalities: getIncludeExcludeItems(
-        "name",
-        "nationalitiesInclude",
-        "nationalitiesExclude",
-        input
-      ),
-      prepTime: {
-        gt: input.filters.prepTimeMin,
-        lt: input.filters.prepTimeMax,
-      },
-      cookTime: {
-        gt: input.filters.cookTimeMin,
-        lt: input.filters.cookTimeMax,
-      },
-    },
-  });
+  const myRecipes = [] as Recipe[];
+  if (input.viewScope !== "PUBLIC") {
+    myRecipes.push(
+      ...(await ctx.prisma.recipe.findMany({
+        where: {
+          authorId: userId, // Replace with "id of test user" if want seeded recipes
+          name: {
+            contains: input.search,
+          },
+          ingredients: getIncludeExcludeItems(
+            "name",
+            "ingredientsInclude",
+            "ingredientsExclude",
+            input
+          ),
+          nationalities: getIncludeExcludeItems(
+            "name",
+            "nationalitiesInclude",
+            "nationalitiesExclude",
+            input
+          ),
+          prepTime: {
+            gt: input.filters.prepTimeMin,
+            lt: input.filters.prepTimeMax,
+          },
+          cookTime: {
+            gt: input.filters.cookTimeMin,
+            lt: input.filters.cookTimeMax,
+          },
+        },
+      }))
+    );
+  }
+  const publicRecipes = [] as Recipe[];
+  if (input.viewScope === "PUBLIC") {
+    publicRecipes.push(
+      ...(await ctx.prisma.recipe.findMany({
+        where: {
+          id: {
+            not: {
+              equals: userId,
+            },
+          },
+          isPublic: true,
+        },
+      }))
+    );
+  }
+  return [...myRecipes, ...publicRecipes];
 }
 
 function getIncludeExcludeItems(

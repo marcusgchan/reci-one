@@ -9,29 +9,36 @@ import { AppProps } from "next/app";
 import React, { Fragment, useEffect, useState } from "react";
 import useIsMobile from "../shared/hooks/useIsMobile";
 import { DesktopNav, MobileNav } from "../components/Navbar";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 type CustomPageProps = AppProps & {
   Component: NextComponentType & { auth?: boolean };
 };
+
+const queryClient = new QueryClient();
 
 const MyApp = ({
   Component,
   pageProps: { session, ...pageProps },
 }: CustomPageProps) => {
   return (
-    <SessionProvider session={session}>
-      {Component.auth ? (
-        <Auth>
+    <QueryClientProvider client={queryClient}>
+      <SessionProvider session={session}>
+        {Component.auth ? (
+          <Auth>
+            <Layout>
+              <Component {...pageProps} />
+            </Layout>
+          </Auth>
+        ) : (
           <Layout>
             <Component {...pageProps} />
           </Layout>
-        </Auth>
-      ) : (
-        <Layout>
-          <Component {...pageProps} />
-        </Layout>
-      )}
-    </SessionProvider>
+        )}
+      </SessionProvider>
+      <ReactQueryDevtools initialIsOpen={false} />
+    </QueryClientProvider>
   );
 };
 

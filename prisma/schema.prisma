@@ -72,8 +72,8 @@ model Recipe {
   prepTime    Decimal
   cookTime    Decimal
   mainImage   String  @db.VarChar(255)
+  isPublic    Boolean @default(false)
 
-  viewScope      ViewScope                  @default(PRIVATE)
   ingredients    Ingredient[]
   steps          Step[]
   mealTypes      MealTypesOnRecipies[]
@@ -208,10 +208,4 @@ model NationalitiesOnRecipes {
 
   @@id([nationalityId, recipeId])
   @@map("nationalities_on_recipies")
-}
-
-enum ViewScope {
-  PUBLIC
-  PRIVATE
-  ALL
 }

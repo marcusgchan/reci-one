@@ -15,14 +15,17 @@ const scopes = ["PRIVATE", "PUBLIC", "ALL"] as const;
 
 const Index = () => {
   const [sharingScopeIndex, setSharingScopeIndex] = useState(0);
-  const toggleSharingScope = () => {
+  const [search, setSearch] = useState("");
+  const toggleSharingScope = (e: React.MouseEvent) => {
+    e.preventDefault();
+    refetch();
     if (sharingScopeIndex === scopes.length - 1) {
       setSharingScopeIndex(0);
     } else {
       setSharingScopeIndex(sharingScopeIndex + 1);
     }
   };
-  const { data, isLoading, isError } = trpc.useQuery([
+  const { data, isLoading, isError, refetch } = trpc.useQuery([
     "recipes.getMyRecipes",
     {
       search: "",
@@ -52,8 +55,8 @@ const Index = () => {
 
   const onSubmit = (GetAllRecipesQuery: GetRecipesQuery) => {};
 
-  if (isLoading || isError) {
-    return <Loader />;
+  if (isError) {
+    return <h2>something went wrong</h2>;
   }
 
   if (isMobile) {
@@ -77,7 +80,7 @@ const Index = () => {
           </button>
         </form>
         <section className="grid grid-cols-1 gap-10">
-          <Recipes data={data} />
+          {isLoading ? <Loader /> : <Recipes data={data} />}
         </section>
         <button className="fixed bottom-3 left-1 rounded-full p-2 bg-accent-300">
           <AiOutlineArrowUp size={30} color="white" />
@@ -94,7 +97,8 @@ const Index = () => {
         <div className="flex gap-3">
           <input
             type="text"
-            {...register("search")}
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
             className="border-3 border-primary p-1 w-72 tracking-wide"
           />
           <button className="border-primary border-3 p-2">SEARCH</button>
@@ -113,7 +117,7 @@ const Index = () => {
         ref={parent}
         className="h-full overflow-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-10 mx-auto w-full auto-rows-min"
       >
-        <Recipes data={data} />
+        {isLoading ? <Loader /> : <Recipes data={data} />}
       </section>
     </section>
   );
@@ -140,6 +144,7 @@ const RecipeCard = ({ id, name }: { id: string; name: string }) => {
     >
       <div className="w-full flex basis-3/5 relative">
         <Image
+          priority={true}
           layout="fill"
           objectFit="cover"
           alt={name}
