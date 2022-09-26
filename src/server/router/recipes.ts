@@ -17,7 +17,7 @@ export const recipesRouter = createRouter()
       };
     },
   })
-  .query("getMyRecipes", {
+  .query("getRecipes", {
     input: getRecipesSchema,
     async resolve({ ctx, input }) {
       const userId = ctx.session?.user?.id;

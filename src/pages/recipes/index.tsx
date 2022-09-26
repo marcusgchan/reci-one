@@ -10,12 +10,11 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { GetRecipesQuery, getRecipesSchema } from "@/schemas/recipe";
 
-type Recipes = inferQueryOutput<"recipes.getMyRecipes">;
+type Recipes = inferQueryOutput<"recipes.getRecipes">;
 const scopes = ["PRIVATE", "PUBLIC", "ALL"] as const;
 
 const Index = () => {
   const [sharingScopeIndex, setSharingScopeIndex] = useState(0);
-  const [search, setSearch] = useState("");
   const toggleSharingScope = (e: React.MouseEvent) => {
     e.preventDefault();
     refetch();
@@ -26,7 +25,7 @@ const Index = () => {
     }
   };
   const { data, isLoading, isError, refetch } = trpc.useQuery([
-    "recipes.getMyRecipes",
+    "recipes.getRecipes",
     {
       search: "",
       viewScope: scopes[sharingScopeIndex] || "PRIVATE",
@@ -97,8 +96,7 @@ const Index = () => {
         <div className="flex gap-3">
           <input
             type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            {...register("search")}
             className="border-3 border-primary p-1 w-72 tracking-wide"
           />
           <button className="border-primary border-3 p-2">SEARCH</button>
