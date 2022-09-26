@@ -72,8 +72,8 @@ model Recipe {
   prepTime    Decimal
   cookTime    Decimal
   mainImage   String  @db.VarChar(255)
-  viewScope   String
 
+  viewScope      ViewScope                  @default(PRIVATE)
   ingredients    Ingredient[]
   steps          Step[]
   mealTypes      MealTypesOnRecipies[]
@@ -210,8 +210,8 @@ model NationalitiesOnRecipes {
   @@map("nationalities_on_recipies")
 }
 
-enum UnitOfMeasurement {
-  Imperial
-  Metric
-  None
+enum ViewScope {
+  PUBLIC
+  PRIVATE
+  ALL
 }

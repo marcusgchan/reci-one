@@ -22,6 +22,6 @@ export const recipesRouter = createRouter()
     async resolve({ ctx, input }) {
       const userId = ctx.session?.user?.id;
       if (!userId) throw new TRPCError({ code: "UNAUTHORIZED" });
-      return await recipeService.getMyRecipes(ctx, userId, input);
+      return await recipeService.getRecipes(ctx, userId, input);
     },
   });

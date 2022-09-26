@@ -77,6 +77,7 @@ async function createDefaultRecipies() {
           prepTime: faker.datatype.float(),
           mainImage:
             "https://storage.googleapis.com/recipe-website-bucket/test-images/apple-550x396.jpeg",
+          viewScope: "PRIVATE",
           mealTypes: {
             create: [
               {

@@ -2,10 +2,10 @@ import { GetRecipesQuery } from "../../schemas/recipe";
 import { Context } from "../router/context";
 
 export const recipeService = {
-  getMyRecipes,
+  getRecipes: getRecipes,
 };
 
-async function getMyRecipes(
+async function getRecipes(
   ctx: Context,
   userId: string,
   input: GetRecipesQuery

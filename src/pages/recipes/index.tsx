@@ -11,7 +11,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { GetRecipesQuery, getRecipesSchema } from "@/schemas/recipe";
 
 type Recipes = inferQueryOutput<"recipes.getMyRecipes">;
-const scopes = ["PUBLIC", "PRIVATE", "ALL"] as const;
+const scopes = ["PRIVATE", "PUBLIC", "ALL"] as const;
 
 const Index = () => {
   const [sharingScopeIndex, setSharingScopeIndex] = useState(0);
