@@ -1,19 +1,19 @@
 // src/pages/_app.tsx
 import { withTRPC } from "@trpc/next";
 import type { AppRouter } from "../server/router";
-import type { AppType, NextComponentType } from "next/dist/shared/lib/utils";
+import type { NextComponentType } from "next/dist/shared/lib/utils";
 import superjson from "superjson";
 import { SessionProvider, signIn, useSession } from "next-auth/react";
 import "../styles/globals.css";
 import { AppProps } from "next/app";
-import React, { Fragment, useEffect, useState } from "react";
+import React from "react";
 import useIsMobile from "../shared/hooks/useIsMobile";
 import { DesktopNav, MobileNav } from "../components/Navbar";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 type CustomPageProps = AppProps & {
-  Component: NextComponentType & { auth?: boolean };
+  Component: NextComponentType & { auth?: boolean; hideNav?: boolean };
 };
 
 const queryClient = new QueryClient();
@@ -27,12 +27,12 @@ const MyApp = ({
       <SessionProvider session={session}>
         {Component.auth ? (
           <Auth>
-            <Layout>
+            <Layout hideNav={Component.hideNav}>
               <Component {...pageProps} />
             </Layout>
           </Auth>
         ) : (
-          <Layout>
+          <Layout hideNav={Component.hideNav}>
             <Component {...pageProps} />
           </Layout>
         )}
@@ -57,23 +57,33 @@ const Auth = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
-const Layout = ({ children }: { children: React.ReactNode }) => {
+const Layout = ({
+  children,
+  hideNav,
+}: {
+  children: React.ReactNode;
+  hideNav: boolean | undefined;
+}) => {
   if (useIsMobile()) {
     return (
-      <section>
-        <header className="relative z-20">
-          <MobileNav />
-        </header>
+      <section className="p-5 h-screen flex flex-col gap-4">
+        {!hideNav && (
+          <header className="relative z-20">
+            <MobileNav />
+          </header>
+        )}
         <main className="flex flex-col isolate z-10">{children}</main>
       </section>
     );
   }
   return (
-    <section className="p-10 h-screen flex flex-col max-w-7xl mx-auto">
-      <header>
-        <DesktopNav />
-      </header>
-      <main className="py-4 flex-1 min-h-0 h-full">{children}</main>
+    <section className="p-5 h-screen flex flex-col max-w-7xl mx-auto gap-4">
+      {!hideNav && (
+        <header>
+          <DesktopNav />
+        </header>
+      )}
+      <main className="flex-1 min-h-0 h-full">{children}</main>
     </section>
   );
 };

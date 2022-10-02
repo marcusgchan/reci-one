@@ -7,39 +7,38 @@ import { useRouter } from "next/router";
 export function DesktopNav() {
   const router = useRouter();
   return (
-    <nav className="flex justify-between px-3 text-2xl border-primary border-4 w-full p-2">
+    <nav className="flex justify-between px-3 text-2xl text-gray-500 border-gray-500 border-4 w-full p-2">
       <h1>
-        <a className="text-3xl tracking-wider cursor-pointer" tabIndex={0}>
+        <a className="text-3xl tracking-wider cursor-pointer">
           Reci<span className="text-accent-500 ">One</span>
         </a>
       </h1>
       <ul className="flex gap-4 text-xl min-w-0 text-accent-500">
         <li className="grid place-items-center">
-          <a className="cursor-pointer" tabIndex={0}>
-            HOME
-          </a>
+          <button className="cursor-pointer">HOME</button>
         </li>
         <li className="grid place-items-center">
-          <a className="cursor-pointer" tabIndex={0}>
-            FAVOURITES
-          </a>
+          <button className="cursor-pointer">FAVOURITES</button>
         </li>
         <li className="grid place-items-center">
-          <a className="cursor-pointer" onClick={() => router.push("/recipes")}>
+          <button
+            className="cursor-pointer"
+            onClick={() => router.push("/recipes")}
+          >
             RECIPES
-          </a>
+          </button>
         </li>
         <li className="grid place-items-center">
-          <a className="cursor-pointer" tabIndex={0}>
-            NOTES
-          </a>
+          <button className="cursor-pointer">NOTES</button>
         </li>
         <li className="grid place-items-center">
-          <a className="cursor-pointer" tabIndex={0}>
+          <button
+            className="cursor-pointer"
+            onClick={() => router.push("/recipes/create")}
+          >
             ADD RECIPE
-          </a>
+          </button>
         </li>
-        {/* <LoggedIn /> */}
       </ul>
     </nav>
   );
@@ -50,7 +49,7 @@ export function MobileNav() {
   const [isOpen, setIsOpen] = useState(false);
   const toggleMenu = () => setIsOpen((io) => !io);
   return (
-    <nav className="flex justify-between py-4 px-10 isolate md:max-w-7xl max-w-lg w-full mx-auto">
+    <nav className="flex justify-between isolate md:max-w-7xl max-w-lg w-full mx-auto">
       <h1>
         <a tabIndex={0} className="text-3xl tracking-wider">
           Reci<span className="text-accent-500 ">One</span>
@@ -70,33 +69,29 @@ export function MobileNav() {
           </button>
         </li>
         <li>
-          <a tabIndex={0} className="cursor-pointer">
-            HOME
-          </a>
+          <button className="cursor-pointer">HOME</button>
         </li>
         <li>
-          <a tabIndex={0} className="cursor-pointer">
-            FAVOURITES
-          </a>
+          <button className="cursor-pointer">FAVOURITES</button>
         </li>
         <li>
-          <a
-            tabIndex={0}
+          <button
             className="cursor-pointer"
             onClick={() => router.push("/recipes")}
           >
             RECIPES
-          </a>
+          </button>
         </li>
         <li>
-          <a tabIndex={0} className="cursor-pointer">
-            NOTES
-          </a>
+          <button className="cursor-pointer">NOTES</button>
         </li>
         <li>
-          <a tabIndex={0} className="cursor-pointer">
+          <button
+            className="cursor-pointer"
+            onClick={() => router.push("/recipes/create")}
+          >
             ADD RECIPE
-          </a>
+          </button>
         </li>
       </ul>
     </nav>
