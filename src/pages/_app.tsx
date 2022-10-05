@@ -72,7 +72,9 @@ const Layout = ({
             <MobileNav />
           </header>
         )}
-        <main className="flex flex-col isolate z-10">{children}</main>
+        <main className="flex-1 flex-col min-h-0 isolate z-10 h-full overflow-scroll">
+          {children}
+        </main>
       </section>
     );
   }
@@ -83,7 +85,7 @@ const Layout = ({
           <DesktopNav />
         </header>
       )}
-      <main className="flex-1 min-h-0 h-full">{children}</main>
+      <main className="flex-1 min-h-0 h-full overflow-scroll">{children}</main>
     </section>
   );
 };
