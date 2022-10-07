@@ -1,13 +1,66 @@
 import { CustomReactFC } from "@/shared/types";
 import { RecipeUpload } from "../../components/recipes/RecipeUpload";
-import React, { useId, useState } from "react";
+import React, { useId, useRef, useState } from "react";
 import { BiMinus } from "react-icons/bi";
 import { GrDrag } from "react-icons/gr";
 import { CheckIcon, ChevronUpDownIcon } from "@heroicons/react/20/solid";
 import { Combobox } from "@headlessui/react";
+import { useDropdownQuery } from "@/components/recipes/useDropdownQuery";
+import { AddRecipeMutation } from "@/schemas/recipe";
+import { v4 as uuidv4 } from "uuid";
+import { Ingredient } from "@prisma/client";
 
 const Create: CustomReactFC = () => {
   const id = useId();
+  const {
+    mealTypesData,
+    cookingMethodsData,
+    nationalitiesData,
+    isError,
+    isLoading,
+  } = useDropdownQuery();
+  const [formData, setFormData] = useState<AddRecipeMutation>({
+    name: "",
+    description: "",
+    ingredients: [
+      { id: uuidv4(), order: 1, name: "", isHeader: false },
+      { id: uuidv4(), order: 2, name: "", isHeader: false },
+      { id: uuidv4(), order: 3, name: "", isHeader: false },
+    ],
+    steps: [
+      { id: uuidv4(), order: 1, name: "", isHeader: false },
+      { id: uuidv4(), order: 2, name: "", isHeader: false },
+      { id: uuidv4(), order: 3, name: "", isHeader: false },
+    ],
+    prepTime: null,
+    cookTime: null,
+    isPublic: false,
+  });
+  const updateIngredientInput = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    id: string
+  ) => {
+    setFormData((fd) => {
+      const indexToUpdate = fd.ingredients.findIndex(
+        (ingredient) => ingredient.id === id
+      );
+      if (indexToUpdate === -1) throw new Error("Id must exist");
+      const copy = fd.ingredients.map((x) => x);
+      const objectToUpdate = copy[indexToUpdate];
+      objectToUpdate!.name = e.target.value;
+      return { ...fd, steps: fd.steps.map((x) => x), ingredients: copy };
+    });
+  };
+  const handleStepChange = () => {};
+  const removeIngredient = (id: string) => {
+    setFormData((fd) => {
+      return {
+        ...fd,
+        steps: fd.steps.map((x) => x),
+        ingredients: fd.ingredients.filter((ingrdient) => ingrdient.id !== id),
+      };
+    });
+  };
   return (
     <section>
       <form className="w-full max-w-lg mx-auto text-gray-500 grid gap-5 pb-2">
@@ -15,7 +68,11 @@ const Create: CustomReactFC = () => {
           <NameDesImgSection />
         </SectionWrapper>
         <SectionWrapper>
-          <IngredientsSection />
+          <IngredientsSection
+            updateIngredientInput={updateIngredientInput}
+            removeIngredient={removeIngredient}
+            ingredients={formData.ingredients}
+          />
         </SectionWrapper>
         <SectionWrapper>
           <StepsSection />
@@ -34,27 +91,6 @@ const Create: CustomReactFC = () => {
         </SectionWrapper>
       </form>
     </section>
-  );
-};
-
-const TimeSection = () => {
-  return (
-    <div className="flex gap-4">
-      <div className="flex-1">
-        <label htmlFor="">Prep Time</label>
-        <input
-          type="text"
-          className="border-gray-500 border-2 w-full inline-block"
-        />
-      </div>
-      <div className="flex-1">
-        <label htmlFor="">Cook Time</label>
-        <input
-          type="text"
-          className="border-gray-500 border-2 w-full inline-block"
-        />
-      </div>
-    </div>
   );
 };
 
@@ -81,7 +117,39 @@ const NameDesImgSection = () => {
   );
 };
 
-const IngredientsSection = () => {
+const TimeSection = () => {
+  return (
+    <div className="flex gap-4">
+      <div className="flex-1">
+        <label htmlFor="">Prep Time</label>
+        <input
+          type="text"
+          className="border-gray-500 border-2 w-full inline-block"
+        />
+      </div>
+      <div className="flex-1">
+        <label htmlFor="">Cook Time</label>
+        <input
+          type="text"
+          className="border-gray-500 border-2 w-full inline-block"
+        />
+      </div>
+    </div>
+  );
+};
+
+const IngredientsSection = ({
+  updateIngredientInput,
+  removeIngredient,
+  ingredients,
+}: {
+  updateIngredientInput: (
+    e: React.ChangeEvent<HTMLInputElement>,
+    id: string
+  ) => void;
+  removeIngredient: (id: string) => void;
+  ingredients: AddRecipeMutation["ingredients"];
+}) => {
   return (
     <>
       <h2>Add Ingredients</h2>
@@ -89,7 +157,17 @@ const IngredientsSection = () => {
         Enter ingredients below. One ingredient per line and it should include
         the measurements. Add optional headers to group ingredients
       </p>
-      <DraggableInput />
+      {ingredients.map(({ id, name }) => {
+        return (
+          <DraggableInput
+            key={id}
+            id={id}
+            value={name}
+            remove={removeIngredient}
+            onChange={updateIngredientInput}
+          />
+        );
+      })}
     </>
   );
 };
@@ -272,15 +350,27 @@ const StepsSection = () => {
   );
 };
 
-const DraggableInput = () => {
+const DraggableInput = ({
+  id,
+  remove,
+  onChange,
+  value,
+}: {
+  id: string;
+  remove: (id: string) => void;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>, id: string) => void;
+  value: string | number;
+}) => {
   return (
     <div className="flex items-center gap-2">
       <GrDrag size={20} className="cursor-grab" />
       <input
         type="text"
+        value={value}
+        onChange={(e) => onChange(e, id)}
         className="border-gray-500 border-2 flex-1 p-1 tracking-wide"
       />
-      <BiMinus size={30} />
+      <BiMinus size={30} onClick={(e) => remove(id)} />
     </div>
   );
 };

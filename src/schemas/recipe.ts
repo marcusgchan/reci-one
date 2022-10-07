@@ -16,3 +16,28 @@ export const getRecipesSchema = z.object({
   }),
 });
 export type GetRecipesQuery = z.infer<typeof getRecipesSchema>;
+
+export const addRecipeSchema = z.object({
+  name: z.string(),
+  description: z.string(),
+  ingredients: z
+    .object({
+      id: z.string(),
+      order: z.number().int(),
+      name: z.string(),
+      isHeader: z.boolean(),
+    })
+    .array(),
+  steps: z
+    .object({
+      id: z.string(),
+      order: z.number().int(),
+      name: z.string(),
+      isHeader: z.boolean(),
+    })
+    .array(),
+  prepTime: z.number().nullable(),
+  cookTime: z.number().nullable(),
+  isPublic: z.boolean(),
+});
+export type AddRecipeMutation = z.infer<typeof addRecipeSchema>;

@@ -201,7 +201,7 @@ export const DEFAULT_NATIONALITIES = [
   "Zambian",
   "Zimbabwean",
 ];
-export const DEFAULT_UTENSILS = ["Pot", "Air-fryer", "Knife", "Instant"];
+// export const DEFAULT_UTENSILS = ["Pot", "Air-fryer", "Knife", "Instant"];
 export const DEFAULT_COOKING_METHODS = [
   "Baked",
   "Boiled",

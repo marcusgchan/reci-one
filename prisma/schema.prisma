@@ -81,7 +81,6 @@ model Recipe {
   images         Image[]
   comments       Comment[]
   nationalities  NationalitiesOnRecipes[]
-  utensils       RecipiesOnUtensils[]
 
   authorId String @db.VarChar(255)
   author   User   @relation(fields: [authorId], references: [id])
@@ -90,9 +89,9 @@ model Recipe {
 }
 
 model Step {
-  order       Int
-  description String  @db.VarChar(1000)
-  isHeader    Boolean @default(false)
+  order    Int
+  name     String  @db.VarChar(1000)
+  isHeader Boolean @default(false)
 
   recipeId String @db.VarChar(255)
   recipe   Recipe @relation(fields: [recipeId], references: [id])
@@ -129,24 +128,6 @@ model CookingMethodsOnRecipies {
 
   @@id([cookingMethodId, recipeId])
   @@map("cooking_methods_on_recipies")
-}
-
-model Utensil {
-  id      String               @id @default(cuid())
-  name    String               @unique
-  recipes RecipiesOnUtensils[]
-
-  @@map("utensils")
-}
-
-model RecipiesOnUtensils {
-  recipe    Recipe  @relation(fields: [recipeId], references: [id])
-  recipeId  String
-  utensil   Utensil @relation(fields: [utensilId], references: [id])
-  utensilId String
-
-  @@id([recipeId, utensilId])
-  @@map("recipies_on_utensils")
 }
 
 model Comment {

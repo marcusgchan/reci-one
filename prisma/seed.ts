@@ -1,7 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import { faker } from "@faker-js/faker";
 import {
-  DEFAULT_UTENSILS,
   DEFAULT_MEAL_TYPES,
   DEFAULT_NATIONALITIES,
   DEFAULT_COOKING_METHODS,
@@ -15,7 +14,6 @@ async function main() {
 
   await createDefaultMealTypes();
   await createDefaultNationalities();
-  await createDefaultUtensils();
   await createDefaultCookingMethods();
   if (seedConfig.withTestRecipesAndUser) {
     await createDefaultRecipies(); // recipies for testing only and also creates test user
@@ -33,13 +31,6 @@ async function createDefaultNationalities() {
   console.log("Creating Nationalities...");
   await prisma.nationality.createMany({
     data: DEFAULT_NATIONALITIES.map((nationality) => ({ name: nationality })),
-  });
-}
-
-async function createDefaultUtensils() {
-  console.log("Creating Utensils...");
-  await prisma.utensil.createMany({
-    data: DEFAULT_UTENSILS.map((utensil) => ({ name: utensil })),
   });
 }
 
@@ -63,7 +54,6 @@ async function createDefaultRecipies() {
   });
 
   const mealTypes = await prisma.mealType.findMany();
-  const utensils = await prisma.utensil.findMany();
   const nationalities = await prisma.nationality.findMany();
   const cookingMethods = await prisma.cookingMethod.findMany();
 
@@ -96,15 +86,6 @@ async function createDefaultRecipies() {
               },
             ],
           },
-          utensils: {
-            create: {
-              utensil: {
-                connect: {
-                  id: utensils[0]?.id,
-                },
-              },
-            },
-          },
           nationalities: {
             create: {
               nationality: {
@@ -133,7 +114,7 @@ async function createDefaultRecipies() {
           steps: {
             create: Array.from({ length: 7 }).map((_, index) => ({
               order: index,
-              description: faker.commerce.productDescription(),
+              name: faker.commerce.productDescription(),
             })),
           },
         },
