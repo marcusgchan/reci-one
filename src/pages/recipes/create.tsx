@@ -10,6 +10,8 @@ import { AddRecipeMutation } from "@/schemas/recipe";
 import { v4 as uuidv4 } from "uuid";
 import { Ingredient } from "@prisma/client";
 
+type StringInputNames = "name" | "description";
+
 const Create: CustomReactFC = () => {
   const id = useId();
   const {
@@ -45,19 +47,69 @@ const Create: CustomReactFC = () => {
         (ingredient) => ingredient.id === id
       );
       if (indexToUpdate === -1) throw new Error("Id must exist");
-      const copy = fd.ingredients.map((x) => x);
+      const copy = fd.ingredients.map((x) => ({ ...x }));
       const objectToUpdate = copy[indexToUpdate];
       objectToUpdate!.name = e.target.value;
       return { ...fd, steps: fd.steps.map((x) => x), ingredients: copy };
     });
   };
-  const handleStepChange = () => {};
   const removeIngredient = (id: string) => {
     setFormData((fd) => {
       return {
         ...fd,
-        steps: fd.steps.map((x) => x),
         ingredients: fd.ingredients.filter((ingrdient) => ingrdient.id !== id),
+      };
+    });
+  };
+  const addIngredient = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    setFormData((fd) => {
+      return {
+        ...fd,
+        ingredients: [
+          ...fd.ingredients,
+          {
+            id: uuidv4(),
+            order: fd.ingredients.length + 1,
+            name: "",
+            isHeader: false,
+          },
+        ],
+      };
+    });
+  };
+  const updateStepInput = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    id: string
+  ) => {
+    setFormData((fd) => {
+      const indexToUpdate = fd.steps.findIndex(
+        (ingredient) => ingredient.id === id
+      );
+      if (indexToUpdate === -1) throw new Error("Id must exist");
+      const copy = fd.steps.map((x) => ({ ...x }));
+      const objectToUpdate = copy[indexToUpdate];
+      objectToUpdate!.name = e.target.value;
+      return { ...fd, steps: copy, ingredients: fd.ingredients.map((x) => x) };
+    });
+  };
+  const removeStep = (id: string) => {
+    setFormData((fd) => {
+      return {
+        ...fd,
+        steps: fd.steps.filter((step) => step.id !== id),
+      };
+    });
+  };
+
+  const handleStringInput = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+    name: StringInputNames
+  ) => {
+    setFormData((fd) => {
+      return {
+        ...fd,
+        [name]: e.target.value,
       };
     });
   };
@@ -65,17 +117,25 @@ const Create: CustomReactFC = () => {
     <section>
       <form className="w-full max-w-lg mx-auto text-gray-500 grid gap-5 pb-2">
         <SectionWrapper>
-          <NameDesImgSection />
+          <NameDesImgSection
+            name={formData.name}
+            handleStringInput={handleStringInput}
+          />
         </SectionWrapper>
         <SectionWrapper>
           <IngredientsSection
             updateIngredientInput={updateIngredientInput}
             removeIngredient={removeIngredient}
             ingredients={formData.ingredients}
+            addIngredient={addIngredient}
           />
         </SectionWrapper>
         <SectionWrapper>
-          <StepsSection />
+          <StepsSection
+            updateStepInput={updateStepInput}
+            removeStep={removeStep}
+            steps={formData.steps}
+          />
         </SectionWrapper>
         <SectionWrapper>
           <TimeSection />
@@ -94,7 +154,16 @@ const Create: CustomReactFC = () => {
   );
 };
 
-const NameDesImgSection = () => {
+const NameDesImgSection = ({
+  name,
+  handleStringInput,
+}: {
+  name: AddRecipeMutation["name"];
+  handleStringInput: (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+    name: StringInputNames
+  ) => void;
+}) => {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2">
       <div className="flex shrink-0 flex-1 flex-col gap-4 min-w-[50%]">
@@ -102,12 +171,18 @@ const NameDesImgSection = () => {
           <label className="block">Name</label>
           <input
             type="text"
+            value={name}
+            onChange={(e) => handleStringInput(e, "name")}
             className="border-gray-500 border-2 w-full inline-block"
           />
         </div>
         <div>
           <label className="block">Description</label>
-          <textarea rows={5} className="border-gray-500 border-2 w-full" />
+          <textarea
+            rows={5}
+            className="border-gray-500 border-2 w-full"
+            onChange={(e) => handleStringInput(e, "description")}
+          />
         </div>
       </div>
       <div className="flex-1 shrink-0 bg-red-300">
@@ -123,14 +198,14 @@ const TimeSection = () => {
       <div className="flex-1">
         <label htmlFor="">Prep Time</label>
         <input
-          type="text"
+          type="number"
           className="border-gray-500 border-2 w-full inline-block"
         />
       </div>
       <div className="flex-1">
         <label htmlFor="">Cook Time</label>
         <input
-          type="text"
+          type="number"
           className="border-gray-500 border-2 w-full inline-block"
         />
       </div>
@@ -142,6 +217,7 @@ const IngredientsSection = ({
   updateIngredientInput,
   removeIngredient,
   ingredients,
+  addIngredient,
 }: {
   updateIngredientInput: (
     e: React.ChangeEvent<HTMLInputElement>,
@@ -149,6 +225,7 @@ const IngredientsSection = ({
   ) => void;
   removeIngredient: (id: string) => void;
   ingredients: AddRecipeMutation["ingredients"];
+  addIngredient: (e: React.MouseEvent<HTMLButtonElement>) => void;
 }) => {
   return (
     <>
@@ -168,6 +245,15 @@ const IngredientsSection = ({
           />
         );
       })}
+      <div className="flex gap-2">
+        <button
+          onClick={(e) => addIngredient(e)}
+          className="border-gray-500 border-2 p-1"
+        >
+          ADD INGREDIENT
+        </button>
+        <button className="border-gray-500 border-2 p-1">ADD HEADER</button>
+      </div>
     </>
   );
 };
@@ -337,7 +423,15 @@ const SectionWrapper = ({ children }: { children: React.ReactNode }) => {
   return <div className="flex flex-col gap-4">{children}</div>;
 };
 
-const StepsSection = () => {
+const StepsSection = ({
+  updateStepInput,
+  removeStep,
+  steps,
+}: {
+  updateStepInput: (e: React.ChangeEvent<HTMLInputElement>, id: string) => void;
+  removeStep: (id: string) => void;
+  steps: AddRecipeMutation["steps"];
+}) => {
   return (
     <>
       <h2>Add Steps</h2>
@@ -345,7 +439,17 @@ const StepsSection = () => {
         Enter Steps below. One Step per line. Add optional headers to group
         steps
       </p>
-      <DraggableInput />
+      {steps.map(({ id, name }) => {
+        return (
+          <DraggableInput
+            key={id}
+            id={id}
+            value={name}
+            remove={removeStep}
+            onChange={updateStepInput}
+          />
+        );
+      })}
     </>
   );
 };
