@@ -3,7 +3,6 @@ import { trpc } from "@/utils/trpc";
 export const useDropdownQuery = () => {
   let isError = false;
   let isLoading = true;
-  let data = [];
   const {
     data: mealTypesData,
     isError: mealTypeIsError,

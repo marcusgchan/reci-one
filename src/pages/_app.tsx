@@ -11,6 +11,7 @@ import useIsMobile from "../shared/hooks/useIsMobile";
 import { DesktopNav, MobileNav } from "../components/Navbar";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { Loader } from "@/shared/components/Loader";
 
 type CustomPageProps = AppProps & {
   Component: NextComponentType & { auth?: boolean; hideNav?: boolean };
@@ -45,7 +46,7 @@ const MyApp = ({
 const Auth = ({ children }: { children: React.ReactNode }) => {
   const { status } = useSession();
   if (status === "loading") {
-    return <div>Loading...</div>;
+    return <Loader />;
   } else if (status === "unauthenticated") {
     return (
       <div>

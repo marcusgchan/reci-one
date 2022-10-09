@@ -1,6 +1,6 @@
 import { createRouter } from "./context";
 import { z } from "zod";
-import { getRecipesSchema } from "../../schemas/recipe";
+import { addRecipeSchema, getRecipesSchema } from "@/schemas/recipe";
 import { TRPCError } from "@trpc/server";
 import { recipeService } from "../services/recipesService";
 
@@ -23,5 +23,12 @@ export const recipesRouter = createRouter()
       const userId = ctx.session?.user?.id;
       if (!userId) throw new TRPCError({ code: "UNAUTHORIZED" });
       return await recipeService.getRecipes(ctx, userId, input);
+    },
+  })
+  .mutation("addRecipe", {
+    input: addRecipeSchema,
+    async resolve({ ctx, input }) {
+      const userId = ctx.session?.user?.id;
+      if (!userId) throw new TRPCError({ code: "UNAUTHORIZED" });
     },
   });

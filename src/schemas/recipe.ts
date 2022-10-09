@@ -1,4 +1,9 @@
 import { z } from "zod";
+import {
+  DEFAULT_MEAL_TYPES,
+  DEFAULT_NATIONALITIES,
+  DEFAULT_COOKING_METHODS,
+} from "@/prisma/data";
 
 export const getRecipesSchema = z.object({
   search: z.string(),
@@ -22,7 +27,6 @@ export const addRecipeSchema = z.object({
   description: z.string(),
   ingredients: z
     .object({
-      id: z.string(),
       order: z.number().int(),
       name: z.string(),
       isHeader: z.boolean(),
@@ -30,7 +34,6 @@ export const addRecipeSchema = z.object({
     .array(),
   steps: z
     .object({
-      id: z.string(),
       order: z.number().int(),
       name: z.string(),
       isHeader: z.boolean(),
@@ -39,5 +42,46 @@ export const addRecipeSchema = z.object({
   prepTime: z.number().nullable(),
   cookTime: z.number().nullable(),
   isPublic: z.boolean(),
+  mealTypes: z
+    .object({
+      name: z.string(),
+    })
+    .array()
+    .refine((mealTypes) => {
+      const set = new Set();
+      for (const { name } of mealTypes) {
+        if (set.has(name) || !DEFAULT_MEAL_TYPES.includes(name)) return false;
+        set.add(name);
+      }
+      return true;
+    }),
+  nationalities: z
+    .object({
+      name: z.string(),
+    })
+    .array()
+    .refine((nationalities) => {
+      const set = new Set();
+      for (const { name } of nationalities) {
+        if (set.has(name) || !DEFAULT_NATIONALITIES.includes(name))
+          return false;
+        set.add(name);
+      }
+      return true;
+    }),
+  cookingMethods: z
+    .object({
+      name: z.string(),
+    })
+    .array()
+    .refine((cookingMethods) => {
+      const set = new Set();
+      for (const { name } of cookingMethods) {
+        if (set.has(name) || !DEFAULT_COOKING_METHODS.includes(name))
+          return false;
+        set.add(name);
+      }
+      return true;
+    }),
 });
 export type AddRecipeMutation = z.infer<typeof addRecipeSchema>;

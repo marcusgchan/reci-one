@@ -8,12 +8,28 @@ import { Combobox } from "@headlessui/react";
 import { useDropdownQuery } from "@/components/recipes/useDropdownQuery";
 import { AddRecipeMutation } from "@/schemas/recipe";
 import { v4 as uuidv4 } from "uuid";
-import { Ingredient } from "@prisma/client";
+import { MealType, Nationality, CookingMethod } from "@prisma/client";
+import { Loader } from "@/shared/components/Loader";
+import { trpc } from "@/utils/trpc";
+import {
+  DEFAULT_COOKING_METHODS,
+  DEFAULT_MEAL_TYPES,
+  DEFAULT_NATIONALITIES,
+} from "@/prisma/data";
 
 type StringInputNames = "name" | "description";
+interface AddRecipeMutationWithId extends AddRecipeMutation {
+  ingredients: { id: string; name: string; order: number; isHeader: boolean }[];
+  steps: { id: string; name: string; order: number; isHeader: boolean }[];
+  nationalities: { id: string; name: string }[];
+  mealTypes: { id: string; name: string }[];
+  cookingMethods: { id: string; name: string }[];
+}
 
 const Create: CustomReactFC = () => {
   const id = useId();
+  const mutation = trpc.useMutation(["recipes.addRecipe"]);
+
   const {
     mealTypesData,
     cookingMethodsData,
@@ -21,7 +37,7 @@ const Create: CustomReactFC = () => {
     isError,
     isLoading,
   } = useDropdownQuery();
-  const [formData, setFormData] = useState<AddRecipeMutation>({
+  const [formData, setFormData] = useState<AddRecipeMutationWithId>({
     name: "",
     description: "",
     ingredients: [
@@ -37,6 +53,9 @@ const Create: CustomReactFC = () => {
     prepTime: null,
     cookTime: null,
     isPublic: false,
+    cookingMethods: [],
+    mealTypes: [],
+    nationalities: [],
   });
   const updateIngredientInput = (
     e: React.ChangeEvent<HTMLInputElement>,
@@ -105,7 +124,6 @@ const Create: CustomReactFC = () => {
       };
     });
   };
-
   const handleStringInput = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
     name: StringInputNames
@@ -117,6 +135,19 @@ const Create: CustomReactFC = () => {
       };
     });
   };
+
+  const addMealType = (mealType: MealType) => {
+    setFormData((fd) => {
+      return {
+        ...fd,
+        mealTypes: [...fd.mealTypes, { ...mealType }],
+      };
+    });
+  };
+
+  if (isLoading) {
+    return <Loader />;
+  }
   return (
     <section>
       <form className="w-full max-w-lg mx-auto text-gray-500 grid gap-5 pb-2">
@@ -146,14 +177,18 @@ const Create: CustomReactFC = () => {
           <TimeSection />
         </SectionWrapper>
         <SectionWrapper>
-          <MealTypeSection />
+          <MealTypeSection
+            mealTypesFormData={formData.mealTypes}
+            mealTypes={mealTypesData || []}
+            addMealType={addMealType}
+          />
         </SectionWrapper>
-        <SectionWrapper>
+        {/* <SectionWrapper>
           <NationalitySection />
         </SectionWrapper>
         <SectionWrapper>
           <CookingMethodsSection />
-        </SectionWrapper>
+        </SectionWrapper> */}
       </form>
     </section>
   );
@@ -229,7 +264,7 @@ const IngredientsSection = ({
     id: string
   ) => void;
   removeIngredient: (id: string) => void;
-  ingredients: AddRecipeMutation["ingredients"];
+  ingredients: AddRecipeMutationWithId["ingredients"];
   addItem: (
     e: React.MouseEvent<HTMLButtonElement>,
     isHeader: boolean,
@@ -279,14 +314,40 @@ const CookingMethodsSection = () => {
       <h2>Add Cooking methods</h2>
       <p>Add optional cooking methods to filter meals easier in the future</p>
       <div className="flex gap-2 items-stretch">
-        <SearchableSelect />
+        {/* <SearchableSelect /> */}
         <button className="border-2 border-gray-500 p-1">ADD</button>
       </div>
     </>
   );
 };
 
-const MealTypeSection = () => {
+const MealTypeSection = ({
+  mealTypes,
+  mealTypesFormData,
+  addMealType,
+}: {
+  mealTypes: MealType[];
+  mealTypesFormData: AddRecipeMutationWithId["mealTypes"];
+  addMealType: (mealType: MealType) => void;
+}) => {
+  const [searchQuery, setSearchQuery] = useState("");
+  const handleQueryChange = (e: React.ChangeEvent<HTMLInputElement>) =>
+    setSearchQuery(e.target.value);
+  // const handleAdd = (e: React.MouseEvent<HTMLButtonElement>) => {
+  //   e.preventDefault();
+  //   if (
+  //     !DEFAULT_NATIONALITIES.map((nationality) =>
+  //       nationality.toLocaleLowerCase()
+  //     ).includes(searchQuery.toLowerCase())
+  //   ) {
+  //     console.log("test");
+  //     console.log(searchQuery);
+  //     return;
+  //   }
+  //   console.log("adding");
+  //   addMealType(searchQuery);
+  //   setSearchQuery("");
+  // };
   return (
     <>
       <h2>Add Mealtypes</h2>
@@ -294,23 +355,21 @@ const MealTypeSection = () => {
         Add optional meal types to make filter by meals easier in the future
       </p>
       <div className="flex gap-2 items-stretch">
-        <SearchableSelect />
-        <button className="border-2 border-gray-500 p-1">ADD</button>
+        <SearchableSelect
+          data={mealTypes}
+          handleAdd={addMealType}
+          selectedData={mealTypesFormData}
+        />
+        {/* <button onClick={handleAdd} className="border-2 border-gray-500 p-1">
+          ADD
+        </button> */}
       </div>
       <div>
-        <Chips />
-        <Chips />
-        <Chips />
-        <Chips />
-        <Chips />
-        <Chips />
-        <Chips />
-        <Chips />
-        <Chips />
-        <Chips />
-        <Chips />
-        <Chips />
+        {mealTypesFormData.map(({ id, name }) => (
+          <Chip key={id} data={name} />
+        ))}
       </div>
+      <div className="h-10"></div>
     </>
   );
 };
@@ -321,22 +380,22 @@ const NationalitySection = () => {
       <h2>Add Nationalities</h2>
       <p>Add optional nationalities to filter by meals easier in the future</p>
       <div className="flex gap-2 items-stretch">
-        <SearchableSelect />
+        {/* <SearchableSelect /> */}
         <button className="border-2 border-gray-500 p-1">ADD</button>
       </div>
     </>
   );
 };
 
-const Chips = () => {
+const Chip = ({ data }: { data: string }) => {
   return (
     <span className="inline-flex items-center rounded-full bg-indigo-100 py-0.5 pl-2.5 pr-1 text-sm font-medium text-indigo-700">
-      Large
+      {data}
       <button
         type="button"
         className="ml-0.5 inline-flex h-4 w-4 flex-shrink-0 items-center justify-center rounded-full text-indigo-400 hover:bg-indigo-200 hover:text-indigo-500 focus:bg-indigo-500 focus:text-white focus:outline-none"
       >
-        <span className="sr-only">Remove large option</span>
+        <span className="sr-only">Remove {data} option</span>
         <svg
           className="h-2 w-2"
           stroke="currentColor"
@@ -354,19 +413,23 @@ function classNames(...classes: (string | boolean)[]) {
   return classes.filter(Boolean).join(" ");
 }
 
-const SearchableSelect = () => {
-  const people = [
-    { id: 1, name: "Leslie Alexander" },
-    // More users...
-  ];
+const SearchableSelect = ({
+  data,
+  handleAdd,
+  selectedData,
+}: {
+  data: MealType[];
+  handleAdd: (value: MealType) => void;
+  selectedData: MealType[];
+}) => {
   const [query, setQuery] = useState("");
-  const [selectedPerson, setSelectedPerson] = useState();
+  const [selectedPerson, setSelectedPerson] = useState<MealType | "">();
 
-  const filteredPeople =
+  const filteredData =
     query === ""
-      ? people
-      : people.filter((person) => {
-          return person.name.toLowerCase().includes(query.toLowerCase());
+      ? data
+      : data.filter((mealType) => {
+          return mealType.name.toLowerCase().includes(query.toLowerCase());
         });
 
   return (
@@ -374,27 +437,35 @@ const SearchableSelect = () => {
       className="flex-1"
       as="div"
       value={selectedPerson}
-      onChange={setSelectedPerson}
+      onChange={(e: MealType) => {
+        if (selectedData.filter((data) => data.id === e.id).length > 0) {
+          setSelectedPerson("");
+          return;
+        }
+        handleAdd(e);
+        setSelectedPerson("");
+      }}
     >
       <div className="relative">
         <Combobox.Input
+          autoCorrect="false"
           className="w-full border-2 border-gray-500 bg-white py-2 pl-3 pr-10 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:text-sm"
-          onChange={(event) => setQuery(event.target.value)}
-          displayValue={(person) => person?.name}
+          onChange={(e) => setQuery(e.target.value)}
+          displayValue={(mealType: MealType) => mealType?.name}
         />
         <Combobox.Button className="absolute inset-y-0 right-0 flex items-center rounded-r-md px-2 focus:outline-none">
           <ChevronUpDownIcon
-            className="h-5 w-5 text-gray-400"
+            className="h-5 w-full text-gray-400"
             aria-hidden="true"
           />
         </Combobox.Button>
 
-        {filteredPeople.length > 0 && (
+        {filteredData.length > 0 && (
           <Combobox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
-            {filteredPeople.map((person) => (
+            {filteredData.map((data) => (
               <Combobox.Option
-                key={person.id}
-                value={person}
+                key={data.id}
+                value={data}
                 className={({ active }) =>
                   classNames(
                     "relative cursor-default select-none py-2 pl-3 pr-9",
@@ -410,10 +481,10 @@ const SearchableSelect = () => {
                         selected && "font-semibold"
                       )}
                     >
-                      {person.name}
+                      {data.name}
                     </span>
 
-                    {selected && (
+                    {selectedData.map((data) => data.id).includes(data.id) && (
                       <span
                         className={classNames(
                           "absolute inset-y-0 right-0 flex items-center pr-4",
@@ -446,7 +517,7 @@ const StepsSection = ({
 }: {
   updateStepInput: (e: React.ChangeEvent<HTMLInputElement>, id: string) => void;
   removeStep: (id: string) => void;
-  steps: AddRecipeMutation["steps"];
+  steps: AddRecipeMutationWithId["steps"];
   addItem: (
     e: React.MouseEvent<HTMLButtonElement>,
     isHeader: boolean,
