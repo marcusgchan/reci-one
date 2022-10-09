@@ -144,6 +144,14 @@ const Create: CustomReactFC = () => {
       };
     });
   };
+  const deleteMealType = (id: string) => {
+    setFormData((fd) => {
+      return {
+        ...fd,
+        mealTypes: fd.mealTypes.filter((mealType) => mealType.id !== id),
+      };
+    });
+  };
 
   if (isLoading) {
     return <Loader />;
@@ -181,6 +189,7 @@ const Create: CustomReactFC = () => {
             mealTypesFormData={formData.mealTypes}
             mealTypes={mealTypesData || []}
             addMealType={addMealType}
+            deleteMealType={deleteMealType}
           />
         </SectionWrapper>
         {/* <SectionWrapper>
@@ -325,32 +334,16 @@ const MealTypeSection = ({
   mealTypes,
   mealTypesFormData,
   addMealType,
+  deleteMealType,
 }: {
   mealTypes: MealType[];
   mealTypesFormData: AddRecipeMutationWithId["mealTypes"];
   addMealType: (mealType: MealType) => void;
+  deleteMealType: (id: string) => void;
 }) => {
-  const [searchQuery, setSearchQuery] = useState("");
-  const handleQueryChange = (e: React.ChangeEvent<HTMLInputElement>) =>
-    setSearchQuery(e.target.value);
-  // const handleAdd = (e: React.MouseEvent<HTMLButtonElement>) => {
-  //   e.preventDefault();
-  //   if (
-  //     !DEFAULT_NATIONALITIES.map((nationality) =>
-  //       nationality.toLocaleLowerCase()
-  //     ).includes(searchQuery.toLowerCase())
-  //   ) {
-  //     console.log("test");
-  //     console.log(searchQuery);
-  //     return;
-  //   }
-  //   console.log("adding");
-  //   addMealType(searchQuery);
-  //   setSearchQuery("");
-  // };
   return (
     <>
-      <h2>Add Mealtypes</h2>
+      <h2>Add Meal Types</h2>
       <p>
         Add optional meal types to make filter by meals easier in the future
       </p>
@@ -360,13 +353,10 @@ const MealTypeSection = ({
           handleAdd={addMealType}
           selectedData={mealTypesFormData}
         />
-        {/* <button onClick={handleAdd} className="border-2 border-gray-500 p-1">
-          ADD
-        </button> */}
       </div>
       <div>
         {mealTypesFormData.map(({ id, name }) => (
-          <Chip key={id} data={name} />
+          <Chip key={id} id={id} data={name} deleteChip={deleteMealType} />
         ))}
       </div>
       <div className="h-10"></div>
@@ -387,16 +377,26 @@ const NationalitySection = () => {
   );
 };
 
-const Chip = ({ data }: { data: string }) => {
+const Chip = ({
+  data,
+  id,
+  deleteChip,
+}: {
+  data: string;
+  id: string;
+  deleteChip: (id: string) => void;
+}) => {
   return (
     <span className="inline-flex items-center rounded-full bg-indigo-100 py-0.5 pl-2.5 pr-1 text-sm font-medium text-indigo-700">
       {data}
       <button
+        onClick={() => deleteChip(id)}
         type="button"
         className="ml-0.5 inline-flex h-4 w-4 flex-shrink-0 items-center justify-center rounded-full text-indigo-400 hover:bg-indigo-200 hover:text-indigo-500 focus:bg-indigo-500 focus:text-white focus:outline-none"
       >
         <span className="sr-only">Remove {data} option</span>
         <svg
+          onClick={() => deleteChip(id)}
           className="h-2 w-2"
           stroke="currentColor"
           fill="none"
@@ -448,7 +448,7 @@ const SearchableSelect = ({
     >
       <div className="relative">
         <Combobox.Input
-          autoCorrect="false"
+          autoComplete="off"
           className="w-full border-2 border-gray-500 bg-white py-2 pl-3 pr-10 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:text-sm"
           onChange={(e) => setQuery(e.target.value)}
           displayValue={(mealType: MealType) => mealType?.name}
