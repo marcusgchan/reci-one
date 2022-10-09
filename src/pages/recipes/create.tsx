@@ -61,18 +61,22 @@ const Create: CustomReactFC = () => {
       };
     });
   };
-  const addIngredient = (e: React.MouseEvent<HTMLButtonElement>) => {
+  const addItem = (
+    e: React.MouseEvent<HTMLButtonElement>,
+    isHeader: boolean,
+    type: "ingredients" | "steps"
+  ) => {
     e.preventDefault();
     setFormData((fd) => {
       return {
         ...fd,
-        ingredients: [
-          ...fd.ingredients,
+        [type]: [
+          ...fd[type],
           {
             id: uuidv4(),
-            order: fd.ingredients.length + 1,
+            order: fd[type].length + 1,
             name: "",
-            isHeader: false,
+            isHeader: isHeader,
           },
         ],
       };
@@ -127,7 +131,7 @@ const Create: CustomReactFC = () => {
             updateIngredientInput={updateIngredientInput}
             removeIngredient={removeIngredient}
             ingredients={formData.ingredients}
-            addIngredient={addIngredient}
+            addItem={addItem}
           />
         </SectionWrapper>
         <SectionWrapper>
@@ -135,6 +139,7 @@ const Create: CustomReactFC = () => {
             updateStepInput={updateStepInput}
             removeStep={removeStep}
             steps={formData.steps}
+            addItem={addItem}
           />
         </SectionWrapper>
         <SectionWrapper>
@@ -217,7 +222,7 @@ const IngredientsSection = ({
   updateIngredientInput,
   removeIngredient,
   ingredients,
-  addIngredient,
+  addItem,
 }: {
   updateIngredientInput: (
     e: React.ChangeEvent<HTMLInputElement>,
@@ -225,7 +230,11 @@ const IngredientsSection = ({
   ) => void;
   removeIngredient: (id: string) => void;
   ingredients: AddRecipeMutation["ingredients"];
-  addIngredient: (e: React.MouseEvent<HTMLButtonElement>) => void;
+  addItem: (
+    e: React.MouseEvent<HTMLButtonElement>,
+    isHeader: boolean,
+    type: "ingredients" | "steps"
+  ) => void;
 }) => {
   return (
     <>
@@ -234,7 +243,7 @@ const IngredientsSection = ({
         Enter ingredients below. One ingredient per line and it should include
         the measurements. Add optional headers to group ingredients
       </p>
-      {ingredients.map(({ id, name }) => {
+      {ingredients.map(({ id, name, isHeader }) => {
         return (
           <DraggableInput
             key={id}
@@ -242,17 +251,23 @@ const IngredientsSection = ({
             value={name}
             remove={removeIngredient}
             onChange={updateIngredientInput}
+            isHeader={isHeader}
           />
         );
       })}
       <div className="flex gap-2">
         <button
-          onClick={(e) => addIngredient(e)}
+          onClick={(e) => addItem(e, false, "ingredients")}
           className="border-gray-500 border-2 p-1"
         >
           ADD INGREDIENT
         </button>
-        <button className="border-gray-500 border-2 p-1">ADD HEADER</button>
+        <button
+          onClick={(e) => addItem(e, true, "ingredients")}
+          className="border-gray-500 border-2 p-1"
+        >
+          ADD HEADER
+        </button>
       </div>
     </>
   );
@@ -427,10 +442,16 @@ const StepsSection = ({
   updateStepInput,
   removeStep,
   steps,
+  addItem,
 }: {
   updateStepInput: (e: React.ChangeEvent<HTMLInputElement>, id: string) => void;
   removeStep: (id: string) => void;
   steps: AddRecipeMutation["steps"];
+  addItem: (
+    e: React.MouseEvent<HTMLButtonElement>,
+    isHeader: boolean,
+    type: "ingredients" | "steps"
+  ) => void;
 }) => {
   return (
     <>
@@ -439,7 +460,7 @@ const StepsSection = ({
         Enter Steps below. One Step per line. Add optional headers to group
         steps
       </p>
-      {steps.map(({ id, name }) => {
+      {steps.map(({ id, name, isHeader }) => {
         return (
           <DraggableInput
             key={id}
@@ -447,9 +468,24 @@ const StepsSection = ({
             value={name}
             remove={removeStep}
             onChange={updateStepInput}
+            isHeader={isHeader}
           />
         );
       })}
+      <div className="flex gap-2">
+        <button
+          onClick={(e) => addItem(e, false, "steps")}
+          className="border-gray-500 border-2 p-1"
+        >
+          ADD STEP
+        </button>
+        <button
+          onClick={(e) => addItem(e, true, "steps")}
+          className="border-gray-500 border-2 p-1"
+        >
+          ADD HEADER
+        </button>
+      </div>
     </>
   );
 };
@@ -459,11 +495,13 @@ const DraggableInput = ({
   remove,
   onChange,
   value,
+  isHeader,
 }: {
   id: string;
   remove: (id: string) => void;
   onChange: (e: React.ChangeEvent<HTMLInputElement>, id: string) => void;
   value: string | number;
+  isHeader: boolean;
 }) => {
   return (
     <div className="flex items-center gap-2">
@@ -472,7 +510,9 @@ const DraggableInput = ({
         type="text"
         value={value}
         onChange={(e) => onChange(e, id)}
-        className="border-gray-500 border-2 flex-1 p-1 tracking-wide"
+        className={`${
+          isHeader ? "font-extrabold" : ""
+        } border-gray-500 border-2 flex-1 p-1 tracking-wide`}
       />
       <BiMinus size={30} onClick={(e) => remove(id)} />
     </div>
