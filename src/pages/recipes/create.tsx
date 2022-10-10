@@ -24,6 +24,7 @@ import {
 
 type StringInputNames = "name" | "description";
 type NumberInputNames = "prepTime" | "cookTime";
+type AddToListTypes = "mealTypes" | "nationalities" | "cookingMethods";
 interface AddRecipeMutationWithId extends AddRecipeMutation {
   ingredients: { id: string; name: string; order: number; isHeader: boolean }[];
   steps: { id: string; name: string; order: number; isHeader: boolean }[];
@@ -152,11 +153,15 @@ const Create: CustomReactFC = () => {
       };
     });
   };
-  const addMealType = (mealType: MealType) => {
+
+  const addToList = (
+    type: AddToListTypes,
+    objToAdd: MealType | Nationality | CookingMethod
+  ) => {
     setFormData((fd) => {
       return {
         ...fd,
-        mealTypes: [...fd.mealTypes, { ...mealType }],
+        [type]: [...fd[type], { ...objToAdd }],
       };
     });
   };
@@ -208,7 +213,7 @@ const Create: CustomReactFC = () => {
           <MealTypeSection
             mealTypesFormData={formData.mealTypes}
             mealTypes={mealTypesData || []}
-            addMealType={addMealType}
+            addToList={addToList}
             deleteMealType={deleteMealType}
           />
         </SectionWrapper>
@@ -368,12 +373,15 @@ const CookingMethodsSection = () => {
 const MealTypeSection = ({
   mealTypes,
   mealTypesFormData,
-  addMealType,
+  addToList,
   deleteMealType,
 }: {
   mealTypes: MealType[];
   mealTypesFormData: AddRecipeMutationWithId["mealTypes"];
-  addMealType: (mealType: MealType) => void;
+  addToList: (
+    type: AddToListTypes,
+    objToAdd: MealType | CookingMethod | Nationality
+  ) => void;
   deleteMealType: (id: string) => void;
 }) => {
   return (
@@ -385,7 +393,9 @@ const MealTypeSection = ({
       <div className="flex gap-2 items-stretch">
         <SearchableSelect
           data={mealTypes}
-          handleAdd={addMealType}
+          handleAdd={(objToAdd: MealType | CookingMethod | Nationality) =>
+            addToList("mealTypes", objToAdd)
+          }
           selectedData={mealTypesFormData}
         />
       </div>
@@ -472,7 +482,7 @@ const SearchableSelect = ({
       className="flex-1"
       as="div"
       value={selectedPerson}
-      onChange={(e: MealType) => {
+      onChange={(e: MealType | Nationality | CookingMethod) => {
         if (selectedData.filter((data) => data.id === e.id).length > 0) {
           setSelectedPerson("");
           return;
