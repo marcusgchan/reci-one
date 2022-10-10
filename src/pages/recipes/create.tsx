@@ -211,12 +211,17 @@ const Create: CustomReactFC = () => {
             deleteFromList={deleteFromList}
           />
         </SectionWrapper>
-        {/* <SectionWrapper>
-          <NationalitySection />
+        <SectionWrapper>
+          <NationalitySection
+            nationalitiesFormData={formData.nationalities}
+            nationalities={nationalitiesData || []}
+            addToList={addToList}
+            deleteFromList={deleteFromList}
+          />
         </SectionWrapper>
         <SectionWrapper>
           <CookingMethodsSection />
-        </SectionWrapper> */}
+        </SectionWrapper>
       </form>
     </section>
   );
@@ -400,19 +405,43 @@ const MealTypeSection = ({
           />
         ))}
       </div>
-      <div className="h-10"></div>
     </>
   );
 };
 
-const NationalitySection = () => {
+const NationalitySection = ({
+  nationalities,
+  nationalitiesFormData,
+  addToList,
+  deleteFromList,
+}: {
+  nationalities: Nationality[];
+  nationalitiesFormData: AddRecipeMutationWithId["nationalities"];
+  addToList: (type: DropdownListFields, objToAdd: DropdownListValues) => void;
+  deleteFromList: (type: DropdownListFields, id: string) => void;
+}) => {
   return (
     <>
       <h2>Add Nationalities</h2>
       <p>Add optional nationalities to filter by meals easier in the future</p>
       <div className="flex gap-2 items-stretch">
-        {/* <SearchableSelect /> */}
-        <button className="border-2 border-gray-500 p-1">ADD</button>
+        <SearchableSelect
+          data={nationalities}
+          handleAdd={(objToAdd: DropdownListValues) =>
+            addToList("nationalities", objToAdd)
+          }
+          selectedData={nationalitiesFormData}
+        />
+      </div>
+      <div>
+        {nationalitiesFormData.map(({ id, name }) => (
+          <Chip
+            key={id}
+            id={id}
+            data={name}
+            deleteChip={(id: string) => deleteFromList("nationalities", id)}
+          />
+        ))}
       </div>
     </>
   );
