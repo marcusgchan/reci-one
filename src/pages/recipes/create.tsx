@@ -77,7 +77,11 @@ const Create: CustomReactFC = () => {
       const copy = fd.ingredients.map((x) => ({ ...x }));
       const objectToUpdate = copy[indexToUpdate];
       objectToUpdate!.name = e.target.value;
-      return { ...fd, steps: fd.steps.map((x) => x), ingredients: copy };
+      return {
+        ...fd,
+        steps: fd.steps.map((x) => ({ ...x })),
+        ingredients: copy,
+      };
     });
   };
   const removeIngredient = (id: string) => {
@@ -85,6 +89,31 @@ const Create: CustomReactFC = () => {
       return {
         ...fd,
         ingredients: fd.ingredients.filter((ingrdient) => ingrdient.id !== id),
+      };
+    });
+  };
+  const updateStepInput = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    id: string
+  ) => {
+    setFormData((fd) => {
+      const indexToUpdate = fd.steps.findIndex((step) => step.id === id);
+      if (indexToUpdate === -1) throw new Error("Id must exist");
+      const copy = fd.steps.map((x) => ({ ...x }));
+      const objectToUpdate = copy[indexToUpdate];
+      objectToUpdate!.name = e.target.value;
+      return {
+        ...fd,
+        steps: copy,
+        ingredients: fd.ingredients.map((x) => ({ ...x })),
+      };
+    });
+  };
+  const removeStep = (id: string) => {
+    setFormData((fd) => {
+      return {
+        ...fd,
+        steps: fd.steps.filter((step) => step.id !== id),
       };
     });
   };
@@ -109,43 +138,9 @@ const Create: CustomReactFC = () => {
       };
     });
   };
-  const updateStepInput = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    id: string
-  ) => {
-    setFormData((fd) => {
-      const indexToUpdate = fd.steps.findIndex(
-        (ingredient) => ingredient.id === id
-      );
-      if (indexToUpdate === -1) throw new Error("Id must exist");
-      const copy = fd.steps.map((x) => ({ ...x }));
-      const objectToUpdate = copy[indexToUpdate];
-      objectToUpdate!.name = e.target.value;
-      return { ...fd, steps: copy, ingredients: fd.ingredients.map((x) => x) };
-    });
-  };
-  const removeStep = (id: string) => {
-    setFormData((fd) => {
-      return {
-        ...fd,
-        steps: fd.steps.filter((step) => step.id !== id),
-      };
-    });
-  };
-  const handleStringInput = (
+  const handleBasicInput = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-    name: StringInputNames
-  ) => {
-    setFormData((fd) => {
-      return {
-        ...fd,
-        [name]: e.target.value,
-      };
-    });
-  };
-  const handleNumberInput = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-    name: NumberInputNames
+    name: StringInputNames | NumberInputNames
   ) => {
     setFormData((fd) => {
       return {
@@ -173,7 +168,6 @@ const Create: CustomReactFC = () => {
       };
     });
   };
-
   if (isLoading) {
     return <Loader />;
   }
@@ -183,7 +177,7 @@ const Create: CustomReactFC = () => {
         <SectionWrapper>
           <NameDesImgSection
             name={formData.name}
-            handleStringInput={handleStringInput}
+            handleStringInput={handleBasicInput}
           />
         </SectionWrapper>
         <SectionWrapper>
@@ -206,7 +200,7 @@ const Create: CustomReactFC = () => {
           <TimeSection
             cookTime={formData.cookTime}
             prepTime={formData.prepTime}
-            handleNumberInput={handleNumberInput}
+            handleBasicInput={handleBasicInput}
           />
         </SectionWrapper>
         <SectionWrapper>
@@ -269,11 +263,11 @@ const NameDesImgSection = ({
 const TimeSection = ({
   cookTime,
   prepTime,
-  handleNumberInput,
+  handleBasicInput,
 }: {
   cookTime: AddRecipeMutation["cookTime"];
   prepTime: AddRecipeMutation["prepTime"];
-  handleNumberInput: (
+  handleBasicInput: (
     e: React.ChangeEvent<HTMLInputElement>,
     type: NumberInputNames
   ) => void;
@@ -285,7 +279,7 @@ const TimeSection = ({
         <input
           type="number"
           value={prepTime}
-          onChange={(e) => handleNumberInput(e, "prepTime")}
+          onChange={(e) => handleBasicInput(e, "prepTime")}
           className="border-gray-500 border-2 w-full inline-block"
         />
       </div>
@@ -294,7 +288,7 @@ const TimeSection = ({
         <input
           type="number"
           value={cookTime}
-          onChange={(e) => handleNumberInput(e, "cookTime")}
+          onChange={(e) => handleBasicInput(e, "cookTime")}
           className="border-gray-500 border-2 w-full inline-block"
         />
       </div>
