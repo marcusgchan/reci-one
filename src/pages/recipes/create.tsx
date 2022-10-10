@@ -24,7 +24,8 @@ import {
 
 type StringInputNames = "name" | "description";
 type NumberInputNames = "prepTime" | "cookTime";
-type AddToListTypes = "mealTypes" | "nationalities" | "cookingMethods";
+type DropdownListFields = "mealTypes" | "nationalities" | "cookingMethods";
+type DropdownListValues = MealType | CookingMethod | Nationality;
 interface AddRecipeMutationWithId extends AddRecipeMutation {
   ingredients: { id: string; name: string; order: number; isHeader: boolean }[];
   steps: { id: string; name: string; order: number; isHeader: boolean }[];
@@ -153,9 +154,8 @@ const Create: CustomReactFC = () => {
       };
     });
   };
-
   const addToList = (
-    type: AddToListTypes,
+    type: DropdownListFields,
     objToAdd: MealType | Nationality | CookingMethod
   ) => {
     setFormData((fd) => {
@@ -378,10 +378,7 @@ const MealTypeSection = ({
 }: {
   mealTypes: MealType[];
   mealTypesFormData: AddRecipeMutationWithId["mealTypes"];
-  addToList: (
-    type: AddToListTypes,
-    objToAdd: MealType | CookingMethod | Nationality
-  ) => void;
+  addToList: (type: DropdownListFields, objToAdd: DropdownListValues) => void;
   deleteMealType: (id: string) => void;
 }) => {
   return (
@@ -393,7 +390,7 @@ const MealTypeSection = ({
       <div className="flex gap-2 items-stretch">
         <SearchableSelect
           data={mealTypes}
-          handleAdd={(objToAdd: MealType | CookingMethod | Nationality) =>
+          handleAdd={(objToAdd: DropdownListValues) =>
             addToList("mealTypes", objToAdd)
           }
           selectedData={mealTypesFormData}
