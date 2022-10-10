@@ -8,19 +8,9 @@ import { Combobox } from "@headlessui/react";
 import { useDropdownQuery } from "@/components/recipes/useDropdownQuery";
 import { AddRecipeMutation } from "@/schemas/recipe";
 import { v4 as uuidv4 } from "uuid";
-import type {
-  MealType,
-  Nationality,
-  CookingMethod,
-  Recipe,
-} from "@prisma/client";
+import type { MealType, Nationality, CookingMethod } from "@prisma/client";
 import { Loader } from "@/shared/components/Loader";
 import { trpc } from "@/utils/trpc";
-import {
-  DEFAULT_COOKING_METHODS,
-  DEFAULT_MEAL_TYPES,
-  DEFAULT_NATIONALITIES,
-} from "@/prisma/data";
 
 type StringInputNames = "name" | "description";
 type NumberInputNames = "prepTime" | "cookTime";
