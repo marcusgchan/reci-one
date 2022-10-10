@@ -385,7 +385,7 @@ const CookingMethodsSection = ({
           selectedData={cookingMethodsFormData}
         />
       </div>
-      <div>
+      <ChipContainer>
         {cookingMethodsFormData.map(({ id, name }) => (
           <Chip
             key={id}
@@ -394,7 +394,7 @@ const CookingMethodsSection = ({
             deleteChip={(id: string) => deleteFromList("cookingMethods", id)}
           />
         ))}
-      </div>
+      </ChipContainer>
     </>
   );
 };
@@ -425,7 +425,7 @@ const MealTypeSection = ({
           selectedData={mealTypesFormData}
         />
       </div>
-      <div>
+      <ChipContainer>
         {mealTypesFormData.map(({ id, name }) => (
           <Chip
             key={id}
@@ -434,7 +434,7 @@ const MealTypeSection = ({
             deleteChip={(id: string) => deleteFromList("mealTypes", id)}
           />
         ))}
-      </div>
+      </ChipContainer>
     </>
   );
 };
@@ -463,7 +463,7 @@ const NationalitySection = ({
           selectedData={nationalitiesFormData}
         />
       </div>
-      <div>
+      <ChipContainer>
         {nationalitiesFormData.map(({ id, name }) => (
           <Chip
             key={id}
@@ -472,9 +472,13 @@ const NationalitySection = ({
             deleteChip={(id: string) => deleteFromList("nationalities", id)}
           />
         ))}
-      </div>
+      </ChipContainer>
     </>
   );
+};
+
+const ChipContainer = ({ children }: { children: React.ReactNode }) => {
+  return <div className="flex flex-wrap gap-2">{children}</div>;
 };
 
 const Chip = ({
