@@ -39,47 +39,45 @@ export const addRecipeSchema = z.object({
       isHeader: z.boolean(),
     })
     .array(),
-  prepTime: z.number().nullable(),
-  cookTime: z.number().nullable(),
+  prepTime: z.number(),
+  cookTime: z.number(),
   isPublic: z.boolean(),
   mealTypes: z
     .object({
-      name: z.string(),
+      id: z.string(),
     })
     .array()
     .refine((mealTypes) => {
       const set = new Set();
-      for (const { name } of mealTypes) {
-        if (set.has(name) || !DEFAULT_MEAL_TYPES.includes(name)) return false;
+      for (const { id } of mealTypes) {
+        if (set.has(name) || !DEFAULT_MEAL_TYPES.includes(id)) return false;
         set.add(name);
       }
       return true;
     }),
   nationalities: z
     .object({
-      name: z.string(),
+      id: z.string(),
     })
     .array()
     .refine((nationalities) => {
       const set = new Set();
-      for (const { name } of nationalities) {
-        if (set.has(name) || !DEFAULT_NATIONALITIES.includes(name))
-          return false;
-        set.add(name);
+      for (const { id } of nationalities) {
+        if (set.has(id) || !DEFAULT_NATIONALITIES.includes(id)) return false;
+        set.add(id);
       }
       return true;
     }),
   cookingMethods: z
     .object({
-      name: z.string(),
+      id: z.string(),
     })
     .array()
     .refine((cookingMethods) => {
       const set = new Set();
-      for (const { name } of cookingMethods) {
-        if (set.has(name) || !DEFAULT_COOKING_METHODS.includes(name))
-          return false;
-        set.add(name);
+      for (const { id } of cookingMethods) {
+        if (set.has(id) || !DEFAULT_COOKING_METHODS.includes(id)) return false;
+        set.add(id);
       }
       return true;
     }),

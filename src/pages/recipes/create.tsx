@@ -8,7 +8,12 @@ import { Combobox } from "@headlessui/react";
 import { useDropdownQuery } from "@/components/recipes/useDropdownQuery";
 import { AddRecipeMutation } from "@/schemas/recipe";
 import { v4 as uuidv4 } from "uuid";
-import { MealType, Nationality, CookingMethod } from "@prisma/client";
+import type {
+  MealType,
+  Nationality,
+  CookingMethod,
+  Recipe,
+} from "@prisma/client";
 import { Loader } from "@/shared/components/Loader";
 import { trpc } from "@/utils/trpc";
 import {
@@ -18,6 +23,7 @@ import {
 } from "@/prisma/data";
 
 type StringInputNames = "name" | "description";
+type NumberInputNames = "prepTime" | "cookTime";
 interface AddRecipeMutationWithId extends AddRecipeMutation {
   ingredients: { id: string; name: string; order: number; isHeader: boolean }[];
   steps: { id: string; name: string; order: number; isHeader: boolean }[];
@@ -50,8 +56,8 @@ const Create: CustomReactFC = () => {
       { id: uuidv4(), order: 2, name: "", isHeader: false },
       { id: uuidv4(), order: 3, name: "", isHeader: false },
     ],
-    prepTime: null,
-    cookTime: null,
+    prepTime: 0,
+    cookTime: 0,
     isPublic: false,
     cookingMethods: [],
     mealTypes: [],
@@ -135,7 +141,17 @@ const Create: CustomReactFC = () => {
       };
     });
   };
-
+  const handleNumberInput = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+    name: NumberInputNames
+  ) => {
+    setFormData((fd) => {
+      return {
+        ...fd,
+        [name]: e.target.value,
+      };
+    });
+  };
   const addMealType = (mealType: MealType) => {
     setFormData((fd) => {
       return {
@@ -182,7 +198,11 @@ const Create: CustomReactFC = () => {
           />
         </SectionWrapper>
         <SectionWrapper>
-          <TimeSection />
+          <TimeSection
+            cookTime={formData.cookTime}
+            prepTime={formData.prepTime}
+            handleNumberInput={handleNumberInput}
+          />
         </SectionWrapper>
         <SectionWrapper>
           <MealTypeSection
@@ -241,13 +261,26 @@ const NameDesImgSection = ({
   );
 };
 
-const TimeSection = () => {
+const TimeSection = ({
+  cookTime,
+  prepTime,
+  handleNumberInput,
+}: {
+  cookTime: AddRecipeMutation["cookTime"];
+  prepTime: AddRecipeMutation["prepTime"];
+  handleNumberInput: (
+    e: React.ChangeEvent<HTMLInputElement>,
+    type: NumberInputNames
+  ) => void;
+}) => {
   return (
     <div className="flex gap-4">
       <div className="flex-1">
         <label htmlFor="">Prep Time</label>
         <input
           type="number"
+          value={prepTime}
+          onChange={(e) => handleNumberInput(e, "prepTime")}
           className="border-gray-500 border-2 w-full inline-block"
         />
       </div>
@@ -255,6 +288,8 @@ const TimeSection = () => {
         <label htmlFor="">Cook Time</label>
         <input
           type="number"
+          value={cookTime}
+          onChange={(e) => handleNumberInput(e, "cookTime")}
           className="border-gray-500 border-2 w-full inline-block"
         />
       </div>
