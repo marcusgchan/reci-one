@@ -220,7 +220,12 @@ const Create: CustomReactFC = () => {
           />
         </SectionWrapper>
         <SectionWrapper>
-          <CookingMethodsSection />
+          <CookingMethodsSection
+            cookingMethodsFormData={formData.cookingMethods}
+            cookingMethods={cookingMethodsData || []}
+            addToList={addToList}
+            deleteFromList={deleteFromList}
+          />
         </SectionWrapper>
       </form>
     </section>
@@ -356,14 +361,39 @@ const IngredientsSection = ({
   );
 };
 
-const CookingMethodsSection = () => {
+const CookingMethodsSection = ({
+  cookingMethods,
+  cookingMethodsFormData,
+  addToList,
+  deleteFromList,
+}: {
+  cookingMethods: CookingMethod[];
+  cookingMethodsFormData: AddRecipeMutationWithId["cookingMethods"];
+  addToList: (type: DropdownListFields, objToAdd: DropdownListValues) => void;
+  deleteFromList: (type: DropdownListFields, id: string) => void;
+}) => {
   return (
     <>
       <h2>Add Cooking methods</h2>
       <p>Add optional cooking methods to filter meals easier in the future</p>
       <div className="flex gap-2 items-stretch">
-        {/* <SearchableSelect /> */}
-        <button className="border-2 border-gray-500 p-1">ADD</button>
+        <SearchableSelect
+          data={cookingMethods}
+          handleAdd={(objToAdd: DropdownListValues) =>
+            addToList("cookingMethods", objToAdd)
+          }
+          selectedData={cookingMethodsFormData}
+        />
+      </div>
+      <div>
+        {cookingMethodsFormData.map(({ id, name }) => (
+          <Chip
+            key={id}
+            id={id}
+            data={name}
+            deleteChip={(id: string) => deleteFromList("cookingMethods", id)}
+          />
+        ))}
       </div>
     </>
   );
