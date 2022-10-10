@@ -160,11 +160,11 @@ const Create: CustomReactFC = () => {
       };
     });
   };
-  const deleteMealType = (id: string) => {
+  const deleteFromList = (type: DropdownListFields, id: string) => {
     setFormData((fd) => {
       return {
         ...fd,
-        mealTypes: fd.mealTypes.filter((mealType) => mealType.id !== id),
+        [type]: fd[type].filter((value) => value.id !== id),
       };
     });
   };
@@ -208,7 +208,7 @@ const Create: CustomReactFC = () => {
             mealTypesFormData={formData.mealTypes}
             mealTypes={mealTypesData || []}
             addToList={addToList}
-            deleteMealType={deleteMealType}
+            deleteFromList={deleteFromList}
           />
         </SectionWrapper>
         {/* <SectionWrapper>
@@ -368,12 +368,12 @@ const MealTypeSection = ({
   mealTypes,
   mealTypesFormData,
   addToList,
-  deleteMealType,
+  deleteFromList,
 }: {
   mealTypes: MealType[];
   mealTypesFormData: AddRecipeMutationWithId["mealTypes"];
   addToList: (type: DropdownListFields, objToAdd: DropdownListValues) => void;
-  deleteMealType: (id: string) => void;
+  deleteFromList: (type: DropdownListFields, id: string) => void;
 }) => {
   return (
     <>
@@ -392,7 +392,12 @@ const MealTypeSection = ({
       </div>
       <div>
         {mealTypesFormData.map(({ id, name }) => (
-          <Chip key={id} id={id} data={name} deleteChip={deleteMealType} />
+          <Chip
+            key={id}
+            id={id}
+            data={name}
+            deleteChip={(id: string) => deleteFromList("mealTypes", id)}
+          />
         ))}
       </div>
       <div className="h-10"></div>
