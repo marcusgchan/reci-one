@@ -11,6 +11,23 @@ import { v4 as uuidv4 } from "uuid";
 import type { MealType, Nationality, CookingMethod } from "@prisma/client";
 import { Loader } from "@/shared/components/Loader";
 import { trpc } from "@/utils/trpc";
+import {
+  DndContext,
+  closestCenter,
+  useSensor,
+  useSensors,
+  PointerSensor,
+  KeyboardSensor,
+  DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  useSortable,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+  arrayMove,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 type StringInputNames = "name" | "description";
 type NumberInputNames = "prepTime" | "cookTime";
@@ -39,14 +56,14 @@ const Create: CustomReactFC = () => {
     name: "",
     description: "",
     ingredients: [
-      { id: uuidv4(), order: 1, name: "", isHeader: false },
-      { id: uuidv4(), order: 2, name: "", isHeader: false },
-      { id: uuidv4(), order: 3, name: "", isHeader: false },
+      { id: uuidv4(), order: 0, name: "a", isHeader: false },
+      { id: uuidv4(), order: 1, name: "b", isHeader: false },
+      { id: uuidv4(), order: 2, name: "c", isHeader: false },
     ],
     steps: [
+      { id: uuidv4(), order: 0, name: "", isHeader: false },
       { id: uuidv4(), order: 1, name: "", isHeader: false },
       { id: uuidv4(), order: 2, name: "", isHeader: false },
-      { id: uuidv4(), order: 3, name: "", isHeader: false },
     ],
     prepTime: 0,
     cookTime: 0,
@@ -158,6 +175,22 @@ const Create: CustomReactFC = () => {
       };
     });
   };
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    console.log(active, over);
+    if (active && over && active.id !== over!.id) {
+      setFormData((fd) => {
+        const oldIndex = fd.ingredients.map(({ id }) => id).indexOf(active.id);
+        const newIndex = fd.ingredients.map(({ id }) => id).indexOf(over.id);
+        console.log({ oldIndex, newIndex });
+        // return arrayMove(items, oldIndex, newIndex);
+        return {
+          ...fd,
+          ingredients: arrayMove(fd.ingredients, oldIndex, newIndex),
+        };
+      });
+    }
+  };
   if (isLoading) {
     return <Loader />;
   }
@@ -176,6 +209,7 @@ const Create: CustomReactFC = () => {
             removeIngredient={removeIngredient}
             ingredients={formData.ingredients}
             addItem={addItem}
+            handleDragEnd={handleDragEnd}
           />
         </SectionWrapper>
         <SectionWrapper>
@@ -301,6 +335,7 @@ const IngredientsSection = ({
   removeIngredient,
   ingredients,
   addItem,
+  handleDragEnd,
 }: {
   updateIngredientInput: (
     e: React.ChangeEvent<HTMLInputElement>,
@@ -313,7 +348,15 @@ const IngredientsSection = ({
     isHeader: boolean,
     type: "ingredients" | "steps"
   ) => void;
+  handleDragEnd: (e: DragEndEvent) => void;
 }) => {
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
   return (
     <>
       <h2>Add Ingredients</h2>
@@ -321,18 +364,31 @@ const IngredientsSection = ({
         Enter ingredients below. One ingredient per line and it should include
         the measurements. Add optional headers to group ingredients
       </p>
-      {ingredients.map(({ id, name, isHeader }) => {
-        return (
-          <DraggableInput
-            key={id}
-            id={id}
-            value={name}
-            remove={removeIngredient}
-            onChange={updateIngredientInput}
-            isHeader={isHeader}
-          />
-        );
-      })}
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragEnd={handleDragEnd}
+      >
+        <SortableContext
+          items={ingredients}
+          strategy={verticalListSortingStrategy}
+        >
+          {ingredients.map(({ id, name, isHeader }) => {
+            return (
+              <SortableItem key={id} id={id}>
+                <DraggableInput
+                  id={id}
+                  value={name}
+                  remove={removeIngredient}
+                  onChange={updateIngredientInput}
+                  isHeader={isHeader}
+                />
+              </SortableItem>
+            );
+          })}
+        </SortableContext>
+      </DndContext>
+
       <div className="flex gap-2">
         <button
           onClick={(e) => addItem(e, false, "ingredients")}
@@ -348,6 +404,21 @@ const IngredientsSection = ({
         </button>
       </div>
     </>
+  );
+};
+
+const SortableItem = (props) => {
+  const { attributes, listeners, setNodeRef, transform, transition } =
+    useSortable({ id: props.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+  return (
+    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
+      {props.children}
+    </div>
   );
 };
 
