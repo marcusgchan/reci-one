@@ -29,6 +29,46 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 
+/**
+ * An extended "PointerSensor" that prevent some
+ * interactive html element(button, input, textarea, select, option...) from dragging
+ */
+class SmartPointerSensor extends PointerSensor {
+  static activators = [
+    {
+      eventName: "onPointerDown" as any,
+      handler: ({ nativeEvent: event }: React.PointerEvent) => {
+        return shouldHandleEvent(event.target as HTMLElement);
+      },
+    },
+  ];
+}
+
+class SmartKeyboardSensor extends KeyboardSensor {
+  static activators = [
+    {
+      eventName: "onKeyDown" as const,
+      handler: ({ nativeEvent: event }: React.KeyboardEvent<Element>) => {
+        console.log(event, shouldHandleEvent(event.target as HTMLElement));
+        return shouldHandleEvent(event.target as HTMLElement);
+      },
+    },
+  ];
+}
+
+function shouldHandleEvent(element: HTMLElement | null) {
+  let cur = element;
+
+  while (cur) {
+    if (cur.dataset && cur.dataset.noDnd) {
+      return false;
+    }
+    cur = cur.parentElement;
+  }
+
+  return true;
+}
+
 type StringInputNames = "name" | "description";
 type NumberInputNames = "prepTime" | "cookTime";
 type DropdownListFields = "mealTypes" | "nationalities" | "cookingMethods";
@@ -149,6 +189,7 @@ const Create: CustomReactFC = () => {
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
     name: StringInputNames | NumberInputNames
   ) => {
+    e.stopPropagation();
     setFormData((fd) => {
       return {
         ...fd,
@@ -180,10 +221,13 @@ const Create: CustomReactFC = () => {
     console.log(active, over);
     if (active && over && active.id !== over!.id) {
       setFormData((fd) => {
-        const oldIndex = fd.ingredients.map(({ id }) => id).indexOf(active.id);
-        const newIndex = fd.ingredients.map(({ id }) => id).indexOf(over.id);
+        const oldIndex = fd.ingredients
+          .map(({ id }) => id)
+          .indexOf(active.id as string);
+        const newIndex = fd.ingredients
+          .map(({ id }) => id)
+          .indexOf(over.id as string);
         console.log({ oldIndex, newIndex });
-        // return arrayMove(items, oldIndex, newIndex);
         return {
           ...fd,
           ingredients: arrayMove(fd.ingredients, oldIndex, newIndex),
@@ -351,8 +395,8 @@ const IngredientsSection = ({
   handleDragEnd: (e: DragEndEvent) => void;
 }) => {
   const sensors = useSensors(
-    useSensor(PointerSensor),
-    useSensor(KeyboardSensor, {
+    useSensor(SmartPointerSensor),
+    useSensor(SmartKeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
     })
   );
@@ -407,9 +451,15 @@ const IngredientsSection = ({
   );
 };
 
-const SortableItem = (props) => {
+const SortableItem = ({
+  id,
+  children,
+}: {
+  id: string;
+  children: React.ReactNode;
+}) => {
   const { attributes, listeners, setNodeRef, transform, transition } =
-    useSortable({ id: props.id });
+    useSortable({ id: id });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -417,7 +467,7 @@ const SortableItem = (props) => {
   };
   return (
     <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
-      {props.children}
+      {children}
     </div>
   );
 };
@@ -742,7 +792,9 @@ const DraggableInput = ({
   return (
     <div className="flex items-center gap-2">
       <GrDrag size={20} className="cursor-grab" />
+      {/* <div data-no-dnd="true" className="flex items-center gap-2 w-full"> */}
       <input
+        data-no-dnd="true"
         type="text"
         value={value}
         onChange={(e) => onChange(e, id)}
@@ -751,6 +803,7 @@ const DraggableInput = ({
         } border-gray-500 border-2 flex-1 p-1 tracking-wide`}
       />
       <BiMinus size={30} onClick={(e) => remove(id)} />
+      {/* </div> */}
     </div>
   );
 };
