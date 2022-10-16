@@ -345,7 +345,7 @@ const IngredientsSection = ({
   addItem: (
     e: React.MouseEvent<HTMLButtonElement>,
     isHeader: boolean,
-    type: "ingredients" | "steps"
+    type: ListFields
   ) => void;
   handleDragEnd: (e: DragEndEvent, type: ListFields) => void;
 }) => {
@@ -692,7 +692,7 @@ const StepsSection = ({
   addItem: (
     e: React.MouseEvent<HTMLButtonElement>,
     isHeader: boolean,
-    type: "ingredients" | "steps"
+    type: ListFields
   ) => void;
   handleDragEnd: (e: DragEndEvent, type: ListFields) => void;
 }) => {
