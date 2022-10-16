@@ -805,9 +805,10 @@ const DraggableInput = ({
     <div className="flex items-center gap-2">
       {canDrag && <GrDrag size={20} className="cursor-grab" />}
       <input
-        data-no-dnd="true"
-        type="text"
         value={value}
+        placeholder={
+          isHeader ? "Ingredient Header placeholder" : "e.g. 2 cups of sugar"
+        }
         disabled={canDrag}
         onChange={(e) => onChange(e, id)}
         className={`${
