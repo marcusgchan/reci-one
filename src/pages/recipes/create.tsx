@@ -28,6 +28,7 @@ import {
   arrayMove,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { useListDnd } from "@/components/recipes/useListDnd";
 
 /**
  * An extended "PointerSensor" that prevent some
@@ -73,6 +74,7 @@ type StringInputNames = "name" | "description";
 type NumberInputNames = "prepTime" | "cookTime";
 type DropdownListFields = "mealTypes" | "nationalities" | "cookingMethods";
 type DropdownListValues = MealType | CookingMethod | Nationality;
+type ListFields = keyof Pick<AddRecipeMutationWithId, "ingredients" | "steps">;
 interface AddRecipeMutationWithId extends AddRecipeMutation {
   ingredients: { id: string; name: string; order: number; isHeader: boolean }[];
   steps: { id: string; name: string; order: number; isHeader: boolean }[];
@@ -216,25 +218,26 @@ const Create: CustomReactFC = () => {
       };
     });
   };
-  const handleDragEnd = (event: DragEndEvent) => {
+  const handleDragEnd = (event: DragEndEvent, type: ListFields) => {
     const { active, over } = event;
     console.log(active, over);
     if (active && over && active.id !== over!.id) {
       setFormData((fd) => {
-        const oldIndex = fd.ingredients
+        const oldIndex = fd[type]
           .map(({ id }) => id)
           .indexOf(active.id as string);
-        const newIndex = fd.ingredients
+        const newIndex = fd[type]
           .map(({ id }) => id)
           .indexOf(over.id as string);
         console.log({ oldIndex, newIndex });
         return {
           ...fd,
-          ingredients: arrayMove(fd.ingredients, oldIndex, newIndex),
+          [type]: arrayMove(fd[type], oldIndex, newIndex),
         };
       });
     }
   };
+
   if (isLoading) {
     return <Loader />;
   }
@@ -256,14 +259,15 @@ const Create: CustomReactFC = () => {
             handleDragEnd={handleDragEnd}
           />
         </SectionWrapper>
-        {/* <SectionWrapper>
+        <SectionWrapper>
           <StepsSection
             updateStepInput={updateStepInput}
             removeStep={removeStep}
             steps={formData.steps}
             addItem={addItem}
+            handleDragEnd={handleDragEnd}
           />
-        </SectionWrapper> */}
+        </SectionWrapper>
         <SectionWrapper>
           <TimeSection
             cookTime={formData.cookTime}
@@ -392,7 +396,7 @@ const IngredientsSection = ({
     isHeader: boolean,
     type: "ingredients" | "steps"
   ) => void;
-  handleDragEnd: (e: DragEndEvent) => void;
+  handleDragEnd: (e: DragEndEvent, type: ListFields) => void;
 }) => {
   const sensors = useSensors(
     useSensor(SmartPointerSensor),
@@ -418,7 +422,7 @@ const IngredientsSection = ({
       <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}
-        onDragEnd={handleDragEnd}
+        onDragEnd={(e) => handleDragEnd(e, "ingredients")}
       >
         <SortableContext
           items={ingredients}
@@ -734,57 +738,74 @@ const SectionWrapper = ({ children }: { children: React.ReactNode }) => {
   return <div className="flex flex-col gap-4">{children}</div>;
 };
 
-// const StepsSection = ({
-//   updateStepInput,
-//   removeStep,
-//   steps,
-//   addItem,
-// }: {
-//   updateStepInput: (e: React.ChangeEvent<HTMLInputElement>, id: string) => void;
-//   removeStep: (id: string) => void;
-//   steps: AddRecipeMutationWithId["steps"];
-//   addItem: (
-//     e: React.MouseEvent<HTMLButtonElement>,
-//     isHeader: boolean,
-//     type: "ingredients" | "steps"
-//   ) => void;
-// }) => {
-//   return (
-//     <>
-//       <h2>Add Steps</h2>
-//       <p>
-//         Enter Steps below. One Step per line. Add optional headers to group
-//         steps
-//       </p>
-//       {steps.map(({ id, name, isHeader }) => {
-//         return (
-//           <DraggableInput
-//             key={id}
-//             id={id}
-//             value={name}
-//             remove={removeStep}
-//             onChange={updateStepInput}
-//             isHeader={isHeader}
-//           />
-//         );
-//       })}
-//       <div className="flex gap-2">
-//         <button
-//           onClick={(e) => addItem(e, false, "steps")}
-//           className="border-gray-500 border-2 p-1"
-//         >
-//           ADD STEP
-//         </button>
-//         <button
-//           onClick={(e) => addItem(e, true, "steps")}
-//           className="border-gray-500 border-2 p-1"
-//         >
-//           ADD HEADER
-//         </button>
-//       </div>
-//     </>
-//   );
-// };
+const StepsSection = ({
+  updateStepInput,
+  removeStep,
+  steps,
+  addItem,
+  handleDragEnd,
+}: {
+  updateStepInput: (e: React.ChangeEvent<HTMLInputElement>, id: string) => void;
+  removeStep: (id: string) => void;
+  steps: AddRecipeMutationWithId["steps"];
+  addItem: (
+    e: React.MouseEvent<HTMLButtonElement>,
+    isHeader: boolean,
+    type: "ingredients" | "steps"
+  ) => void;
+  handleDragEnd: (e: DragEndEvent, type: ListFields) => void;
+}) => {
+  const { canDrag, toggleCanDrag, sensors } = useListDnd();
+  return (
+    <>
+      <h2>Add Steps</h2>
+      <p>
+        Enter Steps below. One Step per line. Add optional headers to group
+        steps
+      </p>
+
+      <button className="self-start" onClick={toggleCanDrag}>
+        Toggle drag
+      </button>
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragEnd={(e) => handleDragEnd(e, "steps")}
+      >
+        <SortableContext items={steps} strategy={verticalListSortingStrategy}>
+          {steps.map(({ id, name, isHeader }) => {
+            return (
+              <SortableItem key={id} id={id} canDrag={canDrag}>
+                <DraggableInput
+                  id={id}
+                  canDrag={canDrag}
+                  value={name}
+                  remove={removeStep}
+                  onChange={updateStepInput}
+                  isHeader={isHeader}
+                />
+              </SortableItem>
+            );
+          })}
+        </SortableContext>
+      </DndContext>
+      <div className="flex gap-2">
+        <button
+          onClick={(e) => addItem(e, false, "steps")}
+          className="border-gray-500 border-2 p-1"
+        >
+          ADD STEP
+        </button>
+        <button
+          onClick={(e) => addItem(e, true, "steps")}
+          className="border-gray-500 border-2 p-1"
+        >
+          ADD HEADER
+        </button>
+      </div>
+    </>
+  );
+};
 
 const DraggableInput = ({
   id,
@@ -806,6 +827,7 @@ const DraggableInput = ({
       {canDrag && <GrDrag size={20} className="cursor-grab" />}
       <input
         value={value}
+        data-no-dnd="true"
         placeholder={
           isHeader ? "Ingredient Header placeholder" : "e.g. 2 cups of sugar"
         }
