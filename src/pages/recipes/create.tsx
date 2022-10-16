@@ -11,64 +11,15 @@ import { v4 as uuidv4 } from "uuid";
 import type { MealType, Nationality, CookingMethod } from "@prisma/client";
 import { Loader } from "@/shared/components/Loader";
 import { trpc } from "@/utils/trpc";
-import {
-  DndContext,
-  closestCenter,
-  useSensor,
-  useSensors,
-  PointerSensor,
-  KeyboardSensor,
-  DragEndEvent,
-} from "@dnd-kit/core";
+import { DndContext, closestCenter, DragEndEvent } from "@dnd-kit/core";
 import {
   SortableContext,
   useSortable,
-  sortableKeyboardCoordinates,
   verticalListSortingStrategy,
   arrayMove,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { useListDnd } from "@/components/recipes/useListDnd";
-
-/**
- * An extended "PointerSensor" that prevent some
- * interactive html element(button, input, textarea, select, option...) from dragging
- */
-class SmartPointerSensor extends PointerSensor {
-  static activators = [
-    {
-      eventName: "onPointerDown" as any,
-      handler: ({ nativeEvent: event }: React.PointerEvent) => {
-        return shouldHandleEvent(event.target as HTMLElement);
-      },
-    },
-  ];
-}
-
-class SmartKeyboardSensor extends KeyboardSensor {
-  static activators = [
-    {
-      eventName: "onKeyDown" as const,
-      handler: ({ nativeEvent: event }: React.KeyboardEvent<Element>) => {
-        console.log(event, shouldHandleEvent(event.target as HTMLElement));
-        return shouldHandleEvent(event.target as HTMLElement);
-      },
-    },
-  ];
-}
-
-function shouldHandleEvent(element: HTMLElement | null) {
-  let cur = element;
-
-  while (cur) {
-    if (cur.dataset && cur.dataset.noDnd) {
-      return false;
-    }
-    cur = cur.parentElement;
-  }
-
-  return true;
-}
 
 type StringInputNames = "name" | "description";
 type NumberInputNames = "prepTime" | "cookTime";
@@ -398,17 +349,7 @@ const IngredientsSection = ({
   ) => void;
   handleDragEnd: (e: DragEndEvent, type: ListFields) => void;
 }) => {
-  const sensors = useSensors(
-    useSensor(SmartPointerSensor),
-    useSensor(SmartKeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    })
-  );
-  const [canDrag, setCanDrag] = useState(false);
-  const toggleCanDrag = (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault();
-    setCanDrag((cd) => !cd);
-  };
+  const { canDrag, toggleCanDrag, sensors } = useListDnd();
   return (
     <>
       <h2>Add Ingredients</h2>
