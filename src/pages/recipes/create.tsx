@@ -120,7 +120,7 @@ const Create: CustomReactFC = () => {
   const addItem = (
     e: React.MouseEvent<HTMLButtonElement>,
     isHeader: boolean,
-    type: "ingredients" | "steps"
+    type: ListFields
   ) => {
     e.preventDefault();
     setFormData((fd) => {
@@ -374,6 +374,11 @@ const IngredientsSection = ({
               <SortableItem key={id} id={id} canDrag={canDrag}>
                 <DraggableInput
                   id={id}
+                  placeholder={
+                    isHeader
+                      ? "Ingredient Header placeholder"
+                      : "e.g. 2 cups of sugar"
+                  }
                   canDrag={canDrag}
                   value={name}
                   remove={removeIngredient}
@@ -719,6 +724,9 @@ const StepsSection = ({
               <SortableItem key={id} id={id} canDrag={canDrag}>
                 <DraggableInput
                   id={id}
+                  placeholder={
+                    isHeader ? "Steps Header placeholder" : "e.g. Soup"
+                  }
                   canDrag={canDrag}
                   value={name}
                   remove={removeStep}
@@ -755,6 +763,7 @@ const DraggableInput = ({
   value,
   isHeader,
   canDrag,
+  placeholder,
 }: {
   id: string;
   remove: (id: string) => void;
@@ -762,6 +771,7 @@ const DraggableInput = ({
   value: string | number;
   isHeader: boolean;
   canDrag: boolean;
+  placeholder: string;
 }) => {
   return (
     <div className="flex items-center gap-2">
@@ -769,9 +779,7 @@ const DraggableInput = ({
       <input
         value={value}
         data-no-dnd="true"
-        placeholder={
-          isHeader ? "Ingredient Header placeholder" : "e.g. 2 cups of sugar"
-        }
+        placeholder={placeholder}
         disabled={canDrag}
         onChange={(e) => onChange(e, id)}
         className={`${
