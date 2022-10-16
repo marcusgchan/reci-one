@@ -256,14 +256,14 @@ const Create: CustomReactFC = () => {
             handleDragEnd={handleDragEnd}
           />
         </SectionWrapper>
-        <SectionWrapper>
+        {/* <SectionWrapper>
           <StepsSection
             updateStepInput={updateStepInput}
             removeStep={removeStep}
             steps={formData.steps}
             addItem={addItem}
           />
-        </SectionWrapper>
+        </SectionWrapper> */}
         <SectionWrapper>
           <TimeSection
             cookTime={formData.cookTime}
@@ -400,7 +400,11 @@ const IngredientsSection = ({
       coordinateGetter: sortableKeyboardCoordinates,
     })
   );
-
+  const [canDrag, setCanDrag] = useState(false);
+  const toggleCanDrag = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    setCanDrag((cd) => !cd);
+  };
   return (
     <>
       <h2>Add Ingredients</h2>
@@ -408,6 +412,9 @@ const IngredientsSection = ({
         Enter ingredients below. One ingredient per line and it should include
         the measurements. Add optional headers to group ingredients
       </p>
+      <button className="self-start" onClick={toggleCanDrag}>
+        Toggle drag
+      </button>
       <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}
@@ -419,9 +426,10 @@ const IngredientsSection = ({
         >
           {ingredients.map(({ id, name, isHeader }) => {
             return (
-              <SortableItem key={id} id={id}>
+              <SortableItem key={id} id={id} canDrag={canDrag}>
                 <DraggableInput
                   id={id}
+                  canDrag={canDrag}
                   value={name}
                   remove={removeIngredient}
                   onChange={updateIngredientInput}
@@ -454,12 +462,14 @@ const IngredientsSection = ({
 const SortableItem = ({
   id,
   children,
+  canDrag,
 }: {
   id: string;
   children: React.ReactNode;
+  canDrag: boolean;
 }) => {
   const { attributes, listeners, setNodeRef, transform, transition } =
-    useSortable({ id: id });
+    useSortable({ id: id, disabled: !canDrag });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -724,57 +734,57 @@ const SectionWrapper = ({ children }: { children: React.ReactNode }) => {
   return <div className="flex flex-col gap-4">{children}</div>;
 };
 
-const StepsSection = ({
-  updateStepInput,
-  removeStep,
-  steps,
-  addItem,
-}: {
-  updateStepInput: (e: React.ChangeEvent<HTMLInputElement>, id: string) => void;
-  removeStep: (id: string) => void;
-  steps: AddRecipeMutationWithId["steps"];
-  addItem: (
-    e: React.MouseEvent<HTMLButtonElement>,
-    isHeader: boolean,
-    type: "ingredients" | "steps"
-  ) => void;
-}) => {
-  return (
-    <>
-      <h2>Add Steps</h2>
-      <p>
-        Enter Steps below. One Step per line. Add optional headers to group
-        steps
-      </p>
-      {steps.map(({ id, name, isHeader }) => {
-        return (
-          <DraggableInput
-            key={id}
-            id={id}
-            value={name}
-            remove={removeStep}
-            onChange={updateStepInput}
-            isHeader={isHeader}
-          />
-        );
-      })}
-      <div className="flex gap-2">
-        <button
-          onClick={(e) => addItem(e, false, "steps")}
-          className="border-gray-500 border-2 p-1"
-        >
-          ADD STEP
-        </button>
-        <button
-          onClick={(e) => addItem(e, true, "steps")}
-          className="border-gray-500 border-2 p-1"
-        >
-          ADD HEADER
-        </button>
-      </div>
-    </>
-  );
-};
+// const StepsSection = ({
+//   updateStepInput,
+//   removeStep,
+//   steps,
+//   addItem,
+// }: {
+//   updateStepInput: (e: React.ChangeEvent<HTMLInputElement>, id: string) => void;
+//   removeStep: (id: string) => void;
+//   steps: AddRecipeMutationWithId["steps"];
+//   addItem: (
+//     e: React.MouseEvent<HTMLButtonElement>,
+//     isHeader: boolean,
+//     type: "ingredients" | "steps"
+//   ) => void;
+// }) => {
+//   return (
+//     <>
+//       <h2>Add Steps</h2>
+//       <p>
+//         Enter Steps below. One Step per line. Add optional headers to group
+//         steps
+//       </p>
+//       {steps.map(({ id, name, isHeader }) => {
+//         return (
+//           <DraggableInput
+//             key={id}
+//             id={id}
+//             value={name}
+//             remove={removeStep}
+//             onChange={updateStepInput}
+//             isHeader={isHeader}
+//           />
+//         );
+//       })}
+//       <div className="flex gap-2">
+//         <button
+//           onClick={(e) => addItem(e, false, "steps")}
+//           className="border-gray-500 border-2 p-1"
+//         >
+//           ADD STEP
+//         </button>
+//         <button
+//           onClick={(e) => addItem(e, true, "steps")}
+//           className="border-gray-500 border-2 p-1"
+//         >
+//           ADD HEADER
+//         </button>
+//       </div>
+//     </>
+//   );
+// };
 
 const DraggableInput = ({
   id,
@@ -782,28 +792,33 @@ const DraggableInput = ({
   onChange,
   value,
   isHeader,
+  canDrag,
 }: {
   id: string;
   remove: (id: string) => void;
   onChange: (e: React.ChangeEvent<HTMLInputElement>, id: string) => void;
   value: string | number;
   isHeader: boolean;
+  canDrag: boolean;
 }) => {
   return (
     <div className="flex items-center gap-2">
-      <GrDrag size={20} className="cursor-grab" />
-      {/* <div data-no-dnd="true" className="flex items-center gap-2 w-full"> */}
+      {canDrag && <GrDrag size={20} className="cursor-grab" />}
       <input
         data-no-dnd="true"
         type="text"
         value={value}
+        disabled={canDrag}
         onChange={(e) => onChange(e, id)}
         className={`${
           isHeader ? "font-extrabold" : ""
         } border-gray-500 border-2 flex-1 p-1 tracking-wide`}
       />
-      <BiMinus size={30} onClick={(e) => remove(id)} />
-      {/* </div> */}
+      {!canDrag && (
+        <button onClick={(e) => remove(id)}>
+          <BiMinus size={30} />
+        </button>
+      )}
     </div>
   );
 };
