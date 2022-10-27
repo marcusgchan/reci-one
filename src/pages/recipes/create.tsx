@@ -71,17 +71,17 @@ const Create: CustomReactFC = () => {
     id: string
   ) => {
     setFormData((fd) => {
-      const indexToUpdate = fd.ingredients.findIndex(
-        (ingredient) => ingredient.id === id
-      );
-      if (indexToUpdate === -1) throw new Error("Id must exist");
-      const copy = fd.ingredients.map((x) => ({ ...x }));
-      const objectToUpdate = copy[indexToUpdate];
-      objectToUpdate!.name = e.target.value;
       return {
         ...fd,
-        steps: fd.steps.map((x) => ({ ...x })),
-        ingredients: copy,
+        ingredients: fd.ingredients.map((ingredient) => {
+          if (ingredient.id === id) {
+            return {
+              ...ingredient,
+              name: e.target.value,
+            };
+          }
+          return ingredient;
+        }),
       };
     });
   };
