@@ -89,23 +89,15 @@ const Create: CustomReactFC = () => {
       };
     });
   };
-  const removeIngredient = (id: string) => {
+  const removeListInput = (id: string, type: ListInputFields) => {
     setFormData((fd) => {
       return {
         ...fd,
-        ingredients: fd.ingredients.filter((ingrdient) => ingrdient.id !== id),
+        [type]: fd[type].filter((item) => item.id !== id),
       };
     });
   };
-  const removeStep = (id: string) => {
-    setFormData((fd) => {
-      return {
-        ...fd,
-        steps: fd.steps.filter((step) => step.id !== id),
-      };
-    });
-  };
-  const addItem = (
+  const addItemToList = (
     e: React.MouseEvent<HTMLButtonElement>,
     isHeader: boolean,
     type: ListInputFields
@@ -192,19 +184,19 @@ const Create: CustomReactFC = () => {
         </SectionWrapper>
         <SectionWrapper>
           <IngredientsSection
-            updateIngredientInput={updateListInput}
-            removeIngredient={removeIngredient}
+            updateListInput={updateListInput}
+            removeListInput={removeListInput}
             ingredients={formData.ingredients}
-            addItem={addItem}
+            addItemToList={addItemToList}
             handleDragEnd={handleDragEnd}
           />
         </SectionWrapper>
         <SectionWrapper>
           <StepsSection
-            updateStepInput={updateListInput}
-            removeStep={removeStep}
+            updateListInput={updateListInput}
+            removeListInput={removeListInput}
             steps={formData.steps}
-            addItem={addItem}
+            addItemToList={addItemToList}
             handleDragEnd={handleDragEnd}
           />
         </SectionWrapper>
@@ -319,20 +311,20 @@ const TimeSection = ({
 };
 
 const IngredientsSection = ({
-  updateIngredientInput,
-  removeIngredient,
+  updateListInput,
+  removeListInput,
   ingredients,
-  addItem,
+  addItemToList,
   handleDragEnd,
 }: {
-  updateIngredientInput: (
+  updateListInput: (
     e: React.ChangeEvent<HTMLInputElement>,
     id: string,
     type: ListInputFields
   ) => void;
-  removeIngredient: (id: string) => void;
+  removeListInput: (id: string, type: ListInputFields) => void;
   ingredients: AddRecipeMutationWithId["ingredients"];
-  addItem: (
+  addItemToList: (
     e: React.MouseEvent<HTMLButtonElement>,
     isHeader: boolean,
     type: ListInputFields
@@ -376,8 +368,8 @@ const IngredientsSection = ({
                   }
                   canDrag={canDrag}
                   value={name}
-                  remove={removeIngredient}
-                  onChange={updateIngredientInput}
+                  remove={removeListInput}
+                  onChange={updateListInput}
                   isHeader={isHeader}
                 />
               </SortableItem>
@@ -388,13 +380,13 @@ const IngredientsSection = ({
 
       <div className="flex gap-2">
         <button
-          onClick={(e) => addItem(e, false, "ingredients")}
+          onClick={(e) => addItemToList(e, false, "ingredients")}
           className="border-gray-500 border-2 p-1"
         >
           ADD INGREDIENT
         </button>
         <button
-          onClick={(e) => addItem(e, true, "ingredients")}
+          onClick={(e) => addItemToList(e, true, "ingredients")}
           className="border-gray-500 border-2 p-1"
         >
           ADD HEADER
@@ -680,20 +672,20 @@ const SectionWrapper = ({ children }: { children: React.ReactNode }) => {
 };
 
 const StepsSection = ({
-  updateStepInput,
-  removeStep,
+  updateListInput,
+  removeListInput,
   steps,
-  addItem,
+  addItemToList,
   handleDragEnd,
 }: {
-  updateStepInput: (
+  updateListInput: (
     e: React.ChangeEvent<HTMLInputElement>,
     id: string,
     type: ListInputFields
   ) => void;
-  removeStep: (id: string) => void;
+  removeListInput: (id: string, type: ListInputFields) => void;
   steps: AddRecipeMutationWithId["steps"];
-  addItem: (
+  addItemToList: (
     e: React.MouseEvent<HTMLButtonElement>,
     isHeader: boolean,
     type: ListInputFields
@@ -732,8 +724,8 @@ const StepsSection = ({
                   }
                   canDrag={canDrag}
                   value={name}
-                  remove={removeStep}
-                  onChange={updateStepInput}
+                  remove={removeListInput}
+                  onChange={updateListInput}
                   isHeader={isHeader}
                 />
               </SortableItem>
@@ -743,13 +735,13 @@ const StepsSection = ({
       </DndContext>
       <div className="flex gap-2">
         <button
-          onClick={(e) => addItem(e, false, "steps")}
+          onClick={(e) => addItemToList(e, false, "steps")}
           className="border-gray-500 border-2 p-1"
         >
           ADD STEP
         </button>
         <button
-          onClick={(e) => addItem(e, true, "steps")}
+          onClick={(e) => addItemToList(e, true, "steps")}
           className="border-gray-500 border-2 p-1"
         >
           ADD HEADER
@@ -770,7 +762,7 @@ const DraggableInput = ({
   type,
 }: {
   id: string;
-  remove: (id: string) => void;
+  remove: (id: string, type: ListInputFields) => void;
   onChange: (
     e: React.ChangeEvent<HTMLInputElement>,
     id: string,
@@ -796,7 +788,7 @@ const DraggableInput = ({
         } border-gray-500 border-2 flex-1 p-1 tracking-wide`}
       />
       {!canDrag && (
-        <button onClick={(e) => remove(id)}>
+        <button onClick={() => remove(id, type)}>
           <BiMinus size={30} />
         </button>
       )}
