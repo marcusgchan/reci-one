@@ -24,9 +24,12 @@ import { MdCompareArrows } from "react-icons/md";
 
 type StringInputNames = "name" | "description";
 type NumberInputNames = "prepTime" | "cookTime";
-type DropdownListFields = "mealTypes" | "nationalities" | "cookingMethods";
+type DropdownListNames = "mealTypes" | "nationalities" | "cookingMethods";
 type DropdownListValues = MealType | CookingMethod | Nationality;
-type ListFields = keyof Pick<AddRecipeMutationWithId, "ingredients" | "steps">;
+type ListInputFields = keyof Pick<
+  AddRecipeMutationWithId,
+  "ingredients" | "steps"
+>;
 interface AddRecipeMutationWithId extends AddRecipeMutation {
   ingredients: { id: string; name: string; order: number; isHeader: boolean }[];
   steps: { id: string; name: string; order: number; isHeader: boolean }[];
@@ -66,21 +69,22 @@ const Create: CustomReactFC = () => {
     mealTypes: [],
     nationalities: [],
   });
-  const updateIngredientInput = (
+  const updateListInput = (
     e: React.ChangeEvent<HTMLInputElement>,
-    id: string
+    id: string,
+    type: ListInputFields
   ) => {
     setFormData((fd) => {
       return {
         ...fd,
-        ingredients: fd.ingredients.map((ingredient) => {
-          if (ingredient.id === id) {
+        [type]: fd[type].map((item) => {
+          if (item.id === id) {
             return {
-              ...ingredient,
+              ...item,
               name: e.target.value,
             };
           }
-          return ingredient;
+          return item;
         }),
       };
     });
@@ -90,23 +94,6 @@ const Create: CustomReactFC = () => {
       return {
         ...fd,
         ingredients: fd.ingredients.filter((ingrdient) => ingrdient.id !== id),
-      };
-    });
-  };
-  const updateStepInput = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    id: string
-  ) => {
-    setFormData((fd) => {
-      const indexToUpdate = fd.steps.findIndex((step) => step.id === id);
-      if (indexToUpdate === -1) throw new Error("Id must exist");
-      const copy = fd.steps.map((x) => ({ ...x }));
-      const objectToUpdate = copy[indexToUpdate];
-      objectToUpdate!.name = e.target.value;
-      return {
-        ...fd,
-        steps: copy,
-        ingredients: fd.ingredients.map((x) => ({ ...x })),
       };
     });
   };
@@ -121,7 +108,7 @@ const Create: CustomReactFC = () => {
   const addItem = (
     e: React.MouseEvent<HTMLButtonElement>,
     isHeader: boolean,
-    type: ListFields
+    type: ListInputFields
   ) => {
     e.preventDefault();
     setFormData((fd) => {
@@ -152,7 +139,7 @@ const Create: CustomReactFC = () => {
     });
   };
   const addToList = (
-    type: DropdownListFields,
+    type: DropdownListNames,
     objToAdd: MealType | Nationality | CookingMethod
   ) => {
     setFormData((fd) => {
@@ -162,7 +149,7 @@ const Create: CustomReactFC = () => {
       };
     });
   };
-  const deleteFromList = (type: DropdownListFields, id: string) => {
+  const deleteFromList = (type: DropdownListNames, id: string) => {
     setFormData((fd) => {
       return {
         ...fd,
@@ -170,7 +157,7 @@ const Create: CustomReactFC = () => {
       };
     });
   };
-  const handleDragEnd = (event: DragEndEvent, type: ListFields) => {
+  const handleDragEnd = (event: DragEndEvent, type: ListInputFields) => {
     const { active, over } = event;
     console.log(active, over);
     if (active && over && active.id !== over!.id) {
@@ -205,7 +192,7 @@ const Create: CustomReactFC = () => {
         </SectionWrapper>
         <SectionWrapper>
           <IngredientsSection
-            updateIngredientInput={updateIngredientInput}
+            updateIngredientInput={updateListInput}
             removeIngredient={removeIngredient}
             ingredients={formData.ingredients}
             addItem={addItem}
@@ -214,7 +201,7 @@ const Create: CustomReactFC = () => {
         </SectionWrapper>
         <SectionWrapper>
           <StepsSection
-            updateStepInput={updateStepInput}
+            updateStepInput={updateListInput}
             removeStep={removeStep}
             steps={formData.steps}
             addItem={addItem}
@@ -340,16 +327,17 @@ const IngredientsSection = ({
 }: {
   updateIngredientInput: (
     e: React.ChangeEvent<HTMLInputElement>,
-    id: string
+    id: string,
+    type: ListInputFields
   ) => void;
   removeIngredient: (id: string) => void;
   ingredients: AddRecipeMutationWithId["ingredients"];
   addItem: (
     e: React.MouseEvent<HTMLButtonElement>,
     isHeader: boolean,
-    type: ListFields
+    type: ListInputFields
   ) => void;
-  handleDragEnd: (e: DragEndEvent, type: ListFields) => void;
+  handleDragEnd: (e: DragEndEvent, type: ListInputFields) => void;
 }) => {
   const { canDrag, toggleCanDrag, sensors } = useListDnd();
   return (
@@ -380,6 +368,7 @@ const IngredientsSection = ({
               <SortableItem key={id} id={id} canDrag={canDrag}>
                 <DraggableInput
                   id={id}
+                  type="ingredients"
                   placeholder={
                     isHeader
                       ? "Ingredient Header placeholder"
@@ -446,8 +435,8 @@ const CookingMethodsSection = ({
 }: {
   cookingMethods: CookingMethod[];
   cookingMethodsFormData: AddRecipeMutationWithId["cookingMethods"];
-  addToList: (type: DropdownListFields, objToAdd: DropdownListValues) => void;
-  deleteFromList: (type: DropdownListFields, id: string) => void;
+  addToList: (type: DropdownListNames, objToAdd: DropdownListValues) => void;
+  deleteFromList: (type: DropdownListNames, id: string) => void;
 }) => {
   return (
     <>
@@ -484,8 +473,8 @@ const MealTypeSection = ({
 }: {
   mealTypes: MealType[];
   mealTypesFormData: AddRecipeMutationWithId["mealTypes"];
-  addToList: (type: DropdownListFields, objToAdd: DropdownListValues) => void;
-  deleteFromList: (type: DropdownListFields, id: string) => void;
+  addToList: (type: DropdownListNames, objToAdd: DropdownListValues) => void;
+  deleteFromList: (type: DropdownListNames, id: string) => void;
 }) => {
   return (
     <>
@@ -524,8 +513,8 @@ const NationalitySection = ({
 }: {
   nationalities: Nationality[];
   nationalitiesFormData: AddRecipeMutationWithId["nationalities"];
-  addToList: (type: DropdownListFields, objToAdd: DropdownListValues) => void;
-  deleteFromList: (type: DropdownListFields, id: string) => void;
+  addToList: (type: DropdownListNames, objToAdd: DropdownListValues) => void;
+  deleteFromList: (type: DropdownListNames, id: string) => void;
 }) => {
   return (
     <>
@@ -697,15 +686,19 @@ const StepsSection = ({
   addItem,
   handleDragEnd,
 }: {
-  updateStepInput: (e: React.ChangeEvent<HTMLInputElement>, id: string) => void;
+  updateStepInput: (
+    e: React.ChangeEvent<HTMLInputElement>,
+    id: string,
+    type: ListInputFields
+  ) => void;
   removeStep: (id: string) => void;
   steps: AddRecipeMutationWithId["steps"];
   addItem: (
     e: React.MouseEvent<HTMLButtonElement>,
     isHeader: boolean,
-    type: ListFields
+    type: ListInputFields
   ) => void;
-  handleDragEnd: (e: DragEndEvent, type: ListFields) => void;
+  handleDragEnd: (e: DragEndEvent, type: ListInputFields) => void;
 }) => {
   const { canDrag, toggleCanDrag, sensors } = useListDnd();
   return (
@@ -733,6 +726,7 @@ const StepsSection = ({
               <SortableItem key={id} id={id} canDrag={canDrag}>
                 <DraggableInput
                   id={id}
+                  type="steps"
                   placeholder={
                     isHeader ? "Steps Header placeholder" : "e.g. Soup"
                   }
@@ -773,14 +767,20 @@ const DraggableInput = ({
   isHeader,
   canDrag,
   placeholder,
+  type,
 }: {
   id: string;
   remove: (id: string) => void;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>, id: string) => void;
+  onChange: (
+    e: React.ChangeEvent<HTMLInputElement>,
+    id: string,
+    type: ListInputFields
+  ) => void;
   value: string | number;
   isHeader: boolean;
   canDrag: boolean;
   placeholder: string;
+  type: ListInputFields;
 }) => {
   return (
     <div className="flex items-center gap-2">
@@ -790,7 +790,7 @@ const DraggableInput = ({
         data-no-dnd="true"
         placeholder={placeholder}
         disabled={canDrag}
-        onChange={(e) => onChange(e, id)}
+        onChange={(e) => onChange(e, id, type)}
         className={`${
           isHeader ? "font-extrabold" : ""
         } border-gray-500 border-2 flex-1 p-1 tracking-wide`}
