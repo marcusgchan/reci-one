@@ -1,5 +1,3 @@
-name: Prettier
-
 # This action works with pull requests and pushes
 on:
   pull_request:
@@ -15,14 +13,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-      - uses: actions/checkout@v3
+        uses: actions/checkout@v3
 
       - name: Setup node
-      - uses: actions/setup-node@v3
+        uses: actions/setup-node@v3
         with:
           node-version: 16.13.x
           cache: npm
 
       - name: Install
-      - run: npm install
-      - run: npx prettier --check '**/*.{ts,tsx,js,mjs,css,json}'
+        run: npm install
+        run: npx prettier --check '**/*.{ts,tsx,js,mjs,css,json}'
