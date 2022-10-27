@@ -60,7 +60,7 @@ const Index = () => {
 
   if (isMobile) {
     return (
-      <section className="grid grid-cols-1 gap-8 mx-auto w-full md:max-w-7xl max-w-lg pt-4 py-8 px-8">
+      <section className="grid grid-cols-1 gap-8 mx-auto w-full md:max-w-7xl max-w-lg p-2">
         <form
           className="flex flex-col gap-3 top-1"
           onSubmit={handleSubmit(onSubmit)}
@@ -91,7 +91,7 @@ const Index = () => {
     );
   }
   return (
-    <section className="flex flex-col h-full gap-4">
+    <section className="flex flex-col h-full gap-4 p-4">
       <form className="flex justify-between" onSubmit={handleSubmit(onSubmit)}>
         <div className="flex gap-3">
           <input

@@ -18,9 +18,10 @@
     "baseUrl": ".",
     "paths": {
       "@/components/*": ["src/components/*"],
-      "@/prisma/*": ["src/prisma/*"],
-      "@/router/*": ["src/server/router"],
-      "@/shared/components/*": ["src/shared/components"],
+      "@/prisma/*": ["prisma/*"],
+      "@/router/*": ["src/server/router/*"],
+      "@/shared/*": ["src/shared/*"],
+      "@/shared/components/*": ["src/shared/components/*"],
       "@/shared/hooks/*": ["src/shared/hooks/*"],
       "@/schemas/*": ["src/schemas/*"],
       "@/utils/*": ["src/utils/*"]
