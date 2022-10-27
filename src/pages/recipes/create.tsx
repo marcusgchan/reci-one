@@ -20,6 +20,7 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { useListDnd } from "@/components/recipes/useListDnd";
+import { MdCompareArrows } from "react-icons/md";
 
 type StringInputNames = "name" | "description";
 type NumberInputNames = "prepTime" | "cookTime";
@@ -193,8 +194,9 @@ const Create: CustomReactFC = () => {
     return <Loader />;
   }
   return (
-    <section>
-      <form className="w-full max-w-lg mx-auto text-gray-500 grid gap-5 pb-2">
+    <section className="p-4">
+      <form className="w-full max-w-lg m-auto text-gray-500 grid gap-5 pb-2">
+        <h2 className="text-2xl">Add Recipe</h2>
         <SectionWrapper>
           <NameDesImgSection
             name={formData.name}
@@ -274,14 +276,14 @@ const NameDesImgSection = ({
             type="text"
             value={name}
             onChange={(e) => handleStringInput(e, "name")}
-            className="border-gray-500 border-2 w-full inline-block"
+            className="border-gray-500 p-1 border-2 w-full inline-block"
           />
         </div>
         <div>
           <label className="block">Description</label>
           <textarea
             rows={5}
-            className="border-gray-500 border-2 w-full"
+            className="border-gray-500 p-1 border-2 w-full"
             onChange={(e) => handleStringInput(e, "description")}
           />
         </div>
@@ -313,7 +315,7 @@ const TimeSection = ({
           type="number"
           value={prepTime}
           onChange={(e) => handleBasicInput(e, "prepTime")}
-          className="border-gray-500 border-2 w-full inline-block"
+          className="border-gray-500 p-1 border-2 w-full inline-block"
         />
       </div>
       <div className="flex-1">
@@ -322,7 +324,7 @@ const TimeSection = ({
           type="number"
           value={cookTime}
           onChange={(e) => handleBasicInput(e, "cookTime")}
-          className="border-gray-500 border-2 w-full inline-block"
+          className="border-gray-500 p-1 border-2 w-full inline-block"
         />
       </div>
     </div>
@@ -357,8 +359,12 @@ const IngredientsSection = ({
         Enter ingredients below. One ingredient per line and it should include
         the measurements. Add optional headers to group ingredients
       </p>
-      <button className="self-start" onClick={toggleCanDrag}>
-        Toggle drag
+      <button
+        className="self-start"
+        aria-label="Toggle rearrange"
+        onClick={toggleCanDrag}
+      >
+        <MdCompareArrows className="rotate-90" size={20} />
       </button>
       <DndContext
         sensors={sensors}
@@ -709,9 +715,12 @@ const StepsSection = ({
         Enter Steps below. One Step per line. Add optional headers to group
         steps
       </p>
-
-      <button className="self-start" onClick={toggleCanDrag}>
-        Toggle drag
+      <button
+        className="self-start"
+        aria-label="Toggle rearrange"
+        onClick={toggleCanDrag}
+      >
+        <MdCompareArrows className="rotate-90" size={20} />
       </button>
       <DndContext
         sensors={sensors}
