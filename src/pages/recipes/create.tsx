@@ -122,7 +122,6 @@ const Create: CustomReactFC = () => {
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
     name: StringInputNames | NumberInputNames
   ) => {
-    e.stopPropagation();
     setFormData((fd) => {
       return {
         ...fd,
@@ -151,7 +150,6 @@ const Create: CustomReactFC = () => {
   };
   const handleDragEnd = (event: DragEndEvent, type: ListInputFields) => {
     const { active, over } = event;
-    console.log(active, over);
     if (active && over && active.id !== over!.id) {
       setFormData((fd) => {
         const oldIndex = fd[type]
@@ -160,7 +158,6 @@ const Create: CustomReactFC = () => {
         const newIndex = fd[type]
           .map(({ id }) => id)
           .indexOf(over.id as string);
-        console.log({ oldIndex, newIndex });
         return {
           ...fd,
           [type]: arrayMove(fd[type], oldIndex, newIndex),
@@ -779,7 +776,6 @@ const DraggableInput = ({
       {canDrag && <GrDrag size={20} className="cursor-grab" />}
       <input
         value={value}
-        data-no-dnd="true"
         placeholder={placeholder}
         disabled={canDrag}
         onChange={(e) => onChange(e, id, type)}
