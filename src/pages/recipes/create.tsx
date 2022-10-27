@@ -21,22 +21,15 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import { useListDnd } from "@/components/recipes/useListDnd";
 import { MdCompareArrows } from "react-icons/md";
-
-type StringInputNames = "name" | "description";
-type NumberInputNames = "prepTime" | "cookTime";
-type DropdownListNames = "mealTypes" | "nationalities" | "cookingMethods";
-type DropdownListValues = MealType | CookingMethod | Nationality;
-type ListInputFields = keyof Pick<
+import { useFormMutations } from "@/components/useFormMutations";
+import {
+  StringInputNames,
+  NumberInputNames,
+  DropdownListNames,
+  ListInputFields,
   AddRecipeMutationWithId,
-  "ingredients" | "steps"
->;
-interface AddRecipeMutationWithId extends AddRecipeMutation {
-  ingredients: { id: string; name: string; order: number; isHeader: boolean }[];
-  steps: { id: string; name: string; order: number; isHeader: boolean }[];
-  nationalities: { id: string; name: string }[];
-  mealTypes: { id: string; name: string }[];
-  cookingMethods: { id: string; name: string }[];
-}
+  DropdownListValues,
+} from "@/components/recipes/types";
 
 const Create: CustomReactFC = () => {
   const id = useId();
@@ -69,85 +62,16 @@ const Create: CustomReactFC = () => {
     mealTypes: [],
     nationalities: [],
   });
-  const updateListInput = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    id: string,
-    type: ListInputFields
-  ) => {
-    setFormData((fd) => {
-      return {
-        ...fd,
-        [type]: fd[type].map((item) => {
-          if (item.id === id) {
-            return {
-              ...item,
-              name: e.target.value,
-            };
-          }
-          return item;
-        }),
-      };
-    });
-  };
-  const removeListInput = (id: string, type: ListInputFields) => {
-    setFormData((fd) => {
-      return {
-        ...fd,
-        [type]: fd[type].filter((item) => item.id !== id),
-      };
-    });
-  };
-  const addItemToList = (
-    e: React.MouseEvent<HTMLButtonElement>,
-    isHeader: boolean,
-    type: ListInputFields
-  ) => {
-    e.preventDefault();
-    setFormData((fd) => {
-      return {
-        ...fd,
-        [type]: [
-          ...fd[type],
-          {
-            id: uuidv4(),
-            order: fd[type].length + 1,
-            name: "",
-            isHeader: isHeader,
-          },
-        ],
-      };
-    });
-  };
-  const handleBasicInput = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-    name: StringInputNames | NumberInputNames
-  ) => {
-    setFormData((fd) => {
-      return {
-        ...fd,
-        [name]: e.target.value,
-      };
-    });
-  };
-  const addToList = (
-    type: DropdownListNames,
-    objToAdd: MealType | Nationality | CookingMethod
-  ) => {
-    setFormData((fd) => {
-      return {
-        ...fd,
-        [type]: [...fd[type], { ...objToAdd }],
-      };
-    });
-  };
-  const deleteFromList = (type: DropdownListNames, id: string) => {
-    setFormData((fd) => {
-      return {
-        ...fd,
-        [type]: fd[type].filter((value) => value.id !== id),
-      };
-    });
-  };
+
+  const {
+    updateListInput,
+    removeListInput,
+    addItemToList,
+    handleBasicInput,
+    addToList,
+    deleteFromList,
+  } = useFormMutations(setFormData);
+
   const handleDragEnd = (event: DragEndEvent, type: ListInputFields) => {
     const { active, over } = event;
     if (active && over && active.id !== over!.id) {
