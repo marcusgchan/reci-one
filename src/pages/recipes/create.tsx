@@ -32,7 +32,6 @@ import {
 } from "@/components/recipes/types";
 
 const Create: CustomReactFC = () => {
-  const id = useId();
   const mutation = trpc.useMutation(["recipes.addRecipe"]);
 
   const {
@@ -167,12 +166,16 @@ const NameDesImgSection = ({
     name: StringInputNames
   ) => void;
 }) => {
+  const id = useId();
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2">
       <div className="flex shrink-0 flex-1 flex-col gap-4 min-w-[50%]">
         <div>
-          <label className="block">Name</label>
+          <label className="block" htmlFor={id + "-name"}>
+            Name
+          </label>
           <input
+            id={id + "-name"}
             type="text"
             value={name}
             onChange={(e) => handleStringInput(e, "name")}
@@ -180,8 +183,11 @@ const NameDesImgSection = ({
           />
         </div>
         <div>
-          <label className="block">Description</label>
+          <label className="block" htmlFor={id + "-description"}>
+            Description
+          </label>
           <textarea
+            id={id + "-description"}
             rows={5}
             className="border-gray-500 p-1 border-2 w-full"
             onChange={(e) => handleStringInput(e, "description")}
@@ -207,11 +213,13 @@ const TimeSection = ({
     type: NumberInputNames
   ) => void;
 }) => {
+  const id = useId();
   return (
     <div className="flex gap-4">
       <div className="flex-1">
-        <label htmlFor="">Prep Time</label>
+        <label htmlFor={id + "-prepTime"}>Prep Time</label>
         <input
+          id={id + "-prepTime"}
           type="number"
           value={prepTime}
           onChange={(e) => handleBasicInput(e, "prepTime")}
@@ -219,8 +227,9 @@ const TimeSection = ({
         />
       </div>
       <div className="flex-1">
-        <label htmlFor="">Cook Time</label>
+        <label htmlFor={id + "-cookTime"}>Cook Time</label>
         <input
+          id={id + "-cookTime"}
           type="number"
           value={cookTime}
           onChange={(e) => handleBasicInput(e, "cookTime")}
