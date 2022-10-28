@@ -11,7 +11,7 @@
     "start": "next start",
     "format:write": "npx prettier --write '**/*.{ts,tsx,js,mjs,css,json}'",
     "format:check": "npx prettier --check '**/*.{ts,tsx,js,mjs,css,json}'",
-    "lint": "next lint",
+    "lint": "npx eslint '**/*.{ts,tsx,js,mjs}'",
     "postinstall": "prisma generate"
   },
   "dependencies": {
@@ -42,6 +42,7 @@
   },
   "devDependencies": {
     "@faker-js/faker": "^7.3.0",
+    "@next/eslint-plugin-next": "^13.0.0",
     "@types/node": "^18.0.0",
     "@types/react": "18.0.14",
     "@types/react-dom": "18.0.5",

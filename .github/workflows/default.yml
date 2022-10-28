@@ -8,7 +8,7 @@ permissions:
   contents: read
 
 jobs:
-  format:
+  format_and_lint:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -25,3 +25,6 @@ jobs:
 
       - name: Prettier
         run: npm run format:check
+
+      - name: Lint
+        run: npm run lint
