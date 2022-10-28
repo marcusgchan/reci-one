@@ -10,7 +10,7 @@ permissions:
   contents: read
 
 jobs:
-  "Format and Lint":
+  format_and_lint:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
