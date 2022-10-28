@@ -1,4 +1,3 @@
-# This action works with pull requests and pushes
 on:
   pull_request:
   push:
@@ -9,7 +8,7 @@ permissions:
   contents: read
 
 jobs:
-  format:
+  format-and-lint:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -22,5 +21,7 @@ jobs:
           cache: npm
 
       - name: Install
-        run: npm install
-        run: npm run format:check'
+      - run: npm install
+
+      - name: Prettier
+      - run: npm run format:check
