@@ -23,4 +23,4 @@ jobs:
 
       - name: Install
         run: npm install
-        run: npx prettier --check '**/*.{ts,tsx,js,mjs,css,json}'
+        run: npm run format:check'
