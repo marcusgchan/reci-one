@@ -9,8 +9,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "format:write": "npx prettier --write '**/*.{ts,tsx,js,mjs,css,json}",
-    "format:check": "npx prettier --check '**/*.{ts,tsx,js,mjs,css,json}",
+    "format:write": "npx prettier --write '**/*.{ts,tsx,js,mjs,css,json}'",
+    "format:check": "npx prettier --check '**/*.{ts,tsx,js,mjs,css,json}'",
     "lint": "next lint",
     "postinstall": "prisma generate"
   },
