@@ -21,7 +21,7 @@ jobs:
           cache: npm
 
       - name: Install
-      - run: npm install
+        run: npm install
 
       - name: Prettier
-      - run: npm run format:check
+        run: npm run format:check
