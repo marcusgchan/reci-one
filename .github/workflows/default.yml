@@ -41,5 +41,8 @@ jobs:
           node-version: 16.13.x
           cache: npm
 
+      - name: Install
+        run: npm install
+
       - name: Build Nextjs App
         run: npm run build
