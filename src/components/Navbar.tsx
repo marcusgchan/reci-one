@@ -7,13 +7,13 @@ import { useRouter } from "next/router";
 export function DesktopNav() {
   const router = useRouter();
   return (
-    <nav className="flex justify-between px-3 text-2xl text-gray-500 border-gray-500 border-4 w-full p-2">
+    <nav className="flex w-full justify-between border-4 border-gray-500 p-2 px-3 text-2xl text-gray-500">
       <h1>
-        <a className="text-3xl tracking-wider cursor-pointer">
+        <a className="cursor-pointer text-3xl tracking-wider">
           Reci<span className="text-accent-500 ">One</span>
         </a>
       </h1>
-      <ul className="flex gap-4 text-xl min-w-0 text-accent-500">
+      <ul className="flex min-w-0 gap-4 text-xl text-accent-500">
         <li className="grid place-items-center">
           <button className="cursor-pointer">HOME</button>
         </li>
@@ -49,7 +49,7 @@ export function MobileNav() {
   const [isOpen, setIsOpen] = useState(false);
   const toggleMenu = () => setIsOpen((io) => !io);
   return (
-    <nav className="flex justify-between isolate md:max-w-7xl max-w-lg w-full mx-auto">
+    <nav className="isolate mx-auto flex w-full max-w-lg justify-between md:max-w-7xl">
       <h1>
         <a tabIndex={0} className="text-3xl tracking-wider">
           Reci<span className="text-accent-500 ">One</span>
@@ -61,7 +61,7 @@ export function MobileNav() {
       <ul
         className={`${
           isOpen ? "translate-x-0" : "translate-x-full"
-        } fixed inset-0 flex transition-transform flex-col justify-center items-center bg-secondary text-xl gap-2`}
+        } fixed inset-0 flex flex-col items-center justify-center gap-2 bg-secondary text-xl transition-transform`}
       >
         <li className="absolute top-[12px] right-[15px]">
           <button onClick={toggleMenu}>
@@ -109,11 +109,11 @@ function LoggedIn(
 
   // return <a {...props}>Login</a>;
   return (
-    <p className="flex gap-2 items-center ml-auto min-w-0 whitespace-nowrap overflow-hidden">
+    <p className="ml-auto flex min-w-0 items-center gap-2 overflow-hidden whitespace-nowrap">
       Logged in as
       <span
         style={{ maxWidth: "5rem" }}
-        className="inline-block w-full min-w-0 text-ellipsis whitespace-nowrap overflow-hidden"
+        className="inline-block w-full min-w-0 overflow-hidden text-ellipsis whitespace-nowrap"
       >
         very long name for testing purposes
       </span>

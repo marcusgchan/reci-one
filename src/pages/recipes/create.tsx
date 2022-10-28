@@ -94,7 +94,7 @@ const Create: CustomReactFC = () => {
   }
   return (
     <section className="p-4">
-      <form className="w-full max-w-lg m-auto text-gray-500 grid gap-5 pb-2">
+      <form className="m-auto grid w-full max-w-lg gap-5 pb-2 text-gray-500">
         <h2 className="text-2xl">Add Recipe</h2>
         <SectionWrapper>
           <NameDesImgSection
@@ -169,7 +169,7 @@ const NameDesImgSection = ({
   const id = useId();
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2">
-      <div className="flex shrink-0 flex-1 flex-col gap-4 min-w-[50%]">
+      <div className="flex min-w-[50%] flex-1 shrink-0 flex-col gap-4">
         <div>
           <label className="block" htmlFor={id + "-name"}>
             Name
@@ -179,7 +179,7 @@ const NameDesImgSection = ({
             type="text"
             value={name}
             onChange={(e) => handleStringInput(e, "name")}
-            className="border-gray-500 p-1 border-2 w-full inline-block"
+            className="inline-block w-full border-2 border-gray-500 p-1"
           />
         </div>
         <div>
@@ -189,7 +189,7 @@ const NameDesImgSection = ({
           <textarea
             id={id + "-description"}
             rows={5}
-            className="border-gray-500 p-1 border-2 w-full"
+            className="w-full border-2 border-gray-500 p-1"
             onChange={(e) => handleStringInput(e, "description")}
           />
         </div>
@@ -223,7 +223,7 @@ const TimeSection = ({
           type="number"
           value={prepTime}
           onChange={(e) => handleBasicInput(e, "prepTime")}
-          className="border-gray-500 p-1 border-2 w-full inline-block"
+          className="inline-block w-full border-2 border-gray-500 p-1"
         />
       </div>
       <div className="flex-1">
@@ -233,7 +233,7 @@ const TimeSection = ({
           type="number"
           value={cookTime}
           onChange={(e) => handleBasicInput(e, "cookTime")}
-          className="border-gray-500 p-1 border-2 w-full inline-block"
+          className="inline-block w-full border-2 border-gray-500 p-1"
         />
       </div>
     </div>
@@ -311,13 +311,13 @@ const IngredientsSection = ({
       <div className="flex gap-2">
         <button
           onClick={(e) => addItemToList(e, false, "ingredients")}
-          className="border-gray-500 border-2 p-1"
+          className="border-2 border-gray-500 p-1"
         >
           ADD INGREDIENT
         </button>
         <button
           onClick={(e) => addItemToList(e, true, "ingredients")}
-          className="border-gray-500 border-2 p-1"
+          className="border-2 border-gray-500 p-1"
         >
           ADD HEADER
         </button>
@@ -364,7 +364,7 @@ const CookingMethodsSection = ({
     <>
       <h2>Add Cooking methods</h2>
       <p>Add optional cooking methods to filter meals easier in the future</p>
-      <div className="flex gap-2 items-stretch">
+      <div className="flex items-stretch gap-2">
         <SearchableSelect
           data={cookingMethods}
           handleAdd={(objToAdd: DropdownListValues) =>
@@ -404,7 +404,7 @@ const MealTypeSection = ({
       <p>
         Add optional meal types to make filter by meals easier in the future
       </p>
-      <div className="flex gap-2 items-stretch">
+      <div className="flex items-stretch gap-2">
         <SearchableSelect
           data={mealTypes}
           handleAdd={(objToAdd: DropdownListValues) =>
@@ -442,7 +442,7 @@ const NationalitySection = ({
     <>
       <h2>Add Nationalities</h2>
       <p>Add optional nationalities to filter by meals easier in the future</p>
-      <div className="flex gap-2 items-stretch">
+      <div className="flex items-stretch gap-2">
         <SearchableSelect
           data={nationalities}
           handleAdd={(objToAdd: DropdownListValues) =>
@@ -666,13 +666,13 @@ const StepsSection = ({
       <div className="flex gap-2">
         <button
           onClick={(e) => addItemToList(e, false, "steps")}
-          className="border-gray-500 border-2 p-1"
+          className="border-2 border-gray-500 p-1"
         >
           ADD STEP
         </button>
         <button
           onClick={(e) => addItemToList(e, true, "steps")}
-          className="border-gray-500 border-2 p-1"
+          className="border-2 border-gray-500 p-1"
         >
           ADD HEADER
         </button>
@@ -714,7 +714,7 @@ const DraggableInput = ({
         onChange={(e) => onChange(e, id, type)}
         className={`${
           isHeader ? "font-extrabold" : ""
-        } border-gray-500 border-2 flex-1 p-1 tracking-wide`}
+        } flex-1 border-2 border-gray-500 p-1 tracking-wide`}
       />
       {!canDrag && (
         <button onClick={() => remove(id, type)}>
