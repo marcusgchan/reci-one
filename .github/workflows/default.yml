@@ -8,7 +8,7 @@ permissions:
   contents: read
 
 jobs:
-  format-and-lint:
+  format:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
