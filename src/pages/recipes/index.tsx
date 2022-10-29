@@ -58,7 +58,7 @@ const Index = () => {
   return (
     <>
       {/* Mobile */}
-      <section className="mx-auto grid w-full grid-cols-1 gap-8 p-2 md:hidden">
+      <section className="mx-auto grid h-full w-full grid-cols-1 gap-8 p-2 md:hidden">
         <form
           className="top-1 flex flex-col gap-3"
           onSubmit={handleSubmit(onSubmit)}
@@ -87,9 +87,9 @@ const Index = () => {
         </button>
       </section>
       {/* Desktop */}
-      <section className="hidden h-full flex-col gap-4 p-4 md:flex">
+      <section className="hidden h-full w-full flex-col p-2 md:flex">
         <form
-          className="flex justify-between"
+          className="mx-auto flex w-full max-w-7xl justify-between"
           onSubmit={handleSubmit(onSubmit)}
         >
           <div className="flex gap-3">
@@ -112,7 +112,7 @@ const Index = () => {
         </form>
         <section
           ref={parent}
-          className="mx-auto grid h-full w-full auto-rows-min grid-cols-1 gap-10 overflow-auto md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+          className="mx-auto grid h-full w-full max-w-7xl auto-rows-min grid-cols-1 gap-10 overflow-auto md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
         >
           {isLoading ? <Loader /> : <Recipes data={data} />}
         </section>

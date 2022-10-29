@@ -45,9 +45,9 @@ const Create: CustomReactFC = () => {
     name: "",
     description: "",
     ingredients: [
-      { id: uuidv4(), order: 0, name: "a", isHeader: false },
-      { id: uuidv4(), order: 1, name: "b", isHeader: false },
-      { id: uuidv4(), order: 2, name: "c", isHeader: false },
+      { id: uuidv4(), order: 0, name: "", isHeader: false },
+      { id: uuidv4(), order: 1, name: "", isHeader: false },
+      { id: uuidv4(), order: 2, name: "", isHeader: false },
     ],
     steps: [
       { id: uuidv4(), order: 0, name: "", isHeader: false },
