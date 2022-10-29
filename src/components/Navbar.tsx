@@ -4,10 +4,19 @@ import { FaBars } from "react-icons/fa";
 import { GrFormClose } from "react-icons/gr";
 import { useRouter } from "next/router";
 
-export function DesktopNav() {
+export function NavBar() {
+  return (
+    <>
+      <MobileNav />
+      <DesktopNav />
+    </>
+  );
+}
+
+function DesktopNav() {
   const router = useRouter();
   return (
-    <nav className="flex w-full justify-between border-4 border-gray-500 p-2 px-3 text-2xl text-gray-500">
+    <nav className="hidden w-full justify-between border-4 border-gray-500 p-2 px-3 text-2xl text-gray-500 md:flex">
       <h1>
         <a className="cursor-pointer text-3xl tracking-wider">
           Reci<span className="text-accent-500 ">One</span>
@@ -44,12 +53,12 @@ export function DesktopNav() {
   );
 }
 
-export function MobileNav() {
+function MobileNav() {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const toggleMenu = () => setIsOpen((io) => !io);
   return (
-    <nav className="isolate mx-auto flex w-full max-w-lg justify-between md:max-w-7xl">
+    <nav className="isolate mx-auto flex w-full justify-between text-gray-500 md:hidden">
       <h1>
         <a tabIndex={0} className="text-3xl tracking-wider">
           Reci<span className="text-accent-500 ">One</span>
@@ -65,7 +74,7 @@ export function MobileNav() {
       >
         <li className="absolute top-[12px] right-[15px]">
           <button onClick={toggleMenu}>
-            <GrFormClose size={35} />
+            <GrFormClose size={35} className="text-gray-500" />
           </button>
         </li>
         <li>

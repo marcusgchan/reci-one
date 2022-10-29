@@ -1,6 +1,5 @@
 import React, { useMemo, useState } from "react";
 import { trpc } from "../../utils/trpc";
-import useIsMobile from "../../shared/hooks/useIsMobile";
 import Image from "next/image";
 import { inferQueryOutput } from "../../utils/trpc";
 import { AiOutlineArrowUp, AiOutlineFilter } from "react-icons/ai";
@@ -50,17 +49,16 @@ const Index = () => {
   } = useForm<GetRecipesQuery>({ resolver: zodResolver(getRecipesSchema) });
 
   const [parent] = useAutoAnimate<HTMLElement>(/* optional config */);
-  const isMobile = useIsMobile();
 
   const onSubmit = (GetAllRecipesQuery: GetRecipesQuery) => {};
 
   if (isError) {
     return <h2>something went wrong</h2>;
   }
-
-  if (isMobile) {
-    return (
-      <section className="mx-auto grid w-full max-w-lg grid-cols-1 gap-8 p-2 md:max-w-7xl">
+  return (
+    <>
+      {/* Mobile */}
+      <section className="mx-auto grid w-full grid-cols-1 gap-8 p-2 md:hidden">
         <form
           className="top-1 flex flex-col gap-3"
           onSubmit={handleSubmit(onSubmit)}
@@ -88,36 +86,38 @@ const Index = () => {
           <AiOutlineFilter size={30} color="white" />
         </button>
       </section>
-    );
-  }
-  return (
-    <section className="flex h-full flex-col gap-4 p-4">
-      <form className="flex justify-between" onSubmit={handleSubmit(onSubmit)}>
-        <div className="flex gap-3">
-          <input
-            type="text"
-            {...register("search")}
-            className="w-72 border-3 border-primary p-1 tracking-wide"
-          />
-          <button className="border-3 border-primary p-2">SEARCH</button>
-        </div>
-        <div className="flex gap-2">
-          <button
-            onClick={toggleSharingScope}
-            className="border-3 border-primary p-2"
-          >
-            {scopes[sharingScopeIndex]}
-          </button>
-          <button className="border-3 border-primary p-2">FILTER</button>
-        </div>
-      </form>
-      <section
-        ref={parent}
-        className="mx-auto grid h-full w-full auto-rows-min grid-cols-1 gap-10 overflow-auto md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
-      >
-        {isLoading ? <Loader /> : <Recipes data={data} />}
+      {/* Desktop */}
+      <section className="hidden h-full flex-col gap-4 p-4 md:flex">
+        <form
+          className="flex justify-between"
+          onSubmit={handleSubmit(onSubmit)}
+        >
+          <div className="flex gap-3">
+            <input
+              type="text"
+              {...register("search")}
+              className="w-72 border-3 border-primary p-1 tracking-wide"
+            />
+            <button className="border-3 border-primary p-2">SEARCH</button>
+          </div>
+          <div className="flex gap-2">
+            <button
+              onClick={toggleSharingScope}
+              className="border-3 border-primary p-2"
+            >
+              {scopes[sharingScopeIndex]}
+            </button>
+            <button className="border-3 border-primary p-2">FILTER</button>
+          </div>
+        </form>
+        <section
+          ref={parent}
+          className="mx-auto grid h-full w-full auto-rows-min grid-cols-1 gap-10 overflow-auto md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+        >
+          {isLoading ? <Loader /> : <Recipes data={data} />}
+        </section>
       </section>
-    </section>
+    </>
   );
 };
 
