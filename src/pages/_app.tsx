@@ -8,7 +8,7 @@ import "../styles/globals.css";
 import { AppProps } from "next/app";
 import React from "react";
 import useIsMobile from "../shared/hooks/useIsMobile";
-import { DesktopNav, MobileNav } from "../components/Navbar";
+import { NavBar } from "@/components/Navbar";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Loader } from "@/shared/components/Loader";
@@ -65,28 +65,14 @@ const Layout = ({
   children: React.ReactNode;
   hideNav: boolean | undefined;
 }) => {
-  if (useIsMobile()) {
-    return (
-      <section className="flex h-screen max-w-7xl flex-col gap-4">
-        {!hideNav && (
-          <header className="relative z-20 p-2">
-            <MobileNav />
-          </header>
-        )}
-        <main className="isolate z-10 h-full min-h-0 flex-1 flex-col overflow-scroll">
-          {children}
-        </main>
-      </section>
-    );
-  }
   return (
     <section className="mx-auto flex h-screen max-w-7xl flex-col gap-4">
       {!hideNav && (
-        <header className="p-4">
-          <DesktopNav />
+        <header className="relative z-20 p-2">
+          <NavBar />
         </header>
       )}
-      <main className="h-full min-h-0 w-full flex-1 overflow-scroll">
+      <main className="isolate z-10 h-full min-h-0 flex-1 flex-col overflow-scroll">
         {children}
       </main>
     </section>
