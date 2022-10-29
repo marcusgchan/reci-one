@@ -7,7 +7,6 @@ import { SessionProvider, signIn, useSession } from "next-auth/react";
 import "../styles/globals.css";
 import { AppProps } from "next/app";
 import React from "react";
-import useIsMobile from "../shared/hooks/useIsMobile";
 import { NavBar } from "@/components/Navbar";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
