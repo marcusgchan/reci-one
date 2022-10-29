@@ -65,13 +65,13 @@ const Layout = ({
   hideNav: boolean | undefined;
 }) => {
   return (
-    <section className="mx-auto flex h-screen max-w-7xl flex-col gap-4">
+    <section className="mx-auto flex h-screen w-screen flex-col gap-2">
       {!hideNav && (
-        <header className="relative z-20 p-2">
+        <header className="relative z-20 grid place-items-center p-2">
           <NavBar />
         </header>
       )}
-      <main className="isolate z-10 h-full min-h-0 flex-1 flex-col overflow-scroll">
+      <main className="isolate z-10 grid h-full min-h-0 flex-1 flex-col place-items-center overflow-scroll">
         {children}
       </main>
     </section>

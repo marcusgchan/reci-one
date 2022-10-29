@@ -16,7 +16,7 @@ export function NavBar() {
 function DesktopNav() {
   const router = useRouter();
   return (
-    <nav className="hidden w-full justify-between border-4 border-gray-500 p-2 px-3 text-2xl text-gray-500 md:flex">
+    <nav className="hidden w-full max-w-7xl justify-between border-4 border-gray-500 p-2 px-3 text-2xl text-gray-500 md:flex">
       <h1>
         <a className="cursor-pointer text-3xl tracking-wider">
           Reci<span className="text-accent-500 ">One</span>
@@ -58,7 +58,7 @@ function MobileNav() {
   const [isOpen, setIsOpen] = useState(false);
   const toggleMenu = () => setIsOpen((io) => !io);
   return (
-    <nav className="isolate mx-auto flex w-full justify-between text-gray-500 md:hidden">
+    <nav className="isolate mx-auto flex h-full w-full justify-between text-gray-500 md:hidden">
       <h1>
         <a tabIndex={0} className="text-3xl tracking-wider">
           Reci<span className="text-accent-500 ">One</span>
