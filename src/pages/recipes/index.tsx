@@ -60,9 +60,9 @@ const Index = () => {
 
   if (isMobile) {
     return (
-      <section className="grid grid-cols-1 gap-8 mx-auto w-full md:max-w-7xl max-w-lg p-2">
+      <section className="mx-auto grid w-full max-w-lg grid-cols-1 gap-8 p-2 md:max-w-7xl">
         <form
-          className="flex flex-col gap-3 top-1"
+          className="top-1 flex flex-col gap-3"
           onSubmit={handleSubmit(onSubmit)}
         >
           <input
@@ -70,10 +70,10 @@ const Index = () => {
             {...register("search")}
             className="border-3 border-primary p-1 tracking-wide"
           />
-          <button className="border-primary border-3 p-2">SEARCH</button>
+          <button className="border-3 border-primary p-2">SEARCH</button>
           <button
             onClick={toggleSharingScope}
-            className="border-primary border-3 p-2 self-end"
+            className="self-end border-3 border-primary p-2"
           >
             {scopes[sharingScopeIndex]}
           </button>
@@ -81,39 +81,39 @@ const Index = () => {
         <section className="grid grid-cols-1 gap-10">
           {isLoading ? <Loader /> : <Recipes data={data} />}
         </section>
-        <button className="fixed bottom-3 left-1 rounded-full p-2 bg-accent-300">
+        <button className="fixed bottom-3 left-1 rounded-full bg-accent-300 p-2">
           <AiOutlineArrowUp size={30} color="white" />
         </button>
-        <button className="fixed bottom-3 right-1 bg-accent-300 rounded-full p-2">
+        <button className="fixed bottom-3 right-1 rounded-full bg-accent-300 p-2">
           <AiOutlineFilter size={30} color="white" />
         </button>
       </section>
     );
   }
   return (
-    <section className="flex flex-col h-full gap-4 p-4">
+    <section className="flex h-full flex-col gap-4 p-4">
       <form className="flex justify-between" onSubmit={handleSubmit(onSubmit)}>
         <div className="flex gap-3">
           <input
             type="text"
             {...register("search")}
-            className="border-3 border-primary p-1 w-72 tracking-wide"
+            className="w-72 border-3 border-primary p-1 tracking-wide"
           />
-          <button className="border-primary border-3 p-2">SEARCH</button>
+          <button className="border-3 border-primary p-2">SEARCH</button>
         </div>
         <div className="flex gap-2">
           <button
             onClick={toggleSharingScope}
-            className="border-primary border-3 p-2"
+            className="border-3 border-primary p-2"
           >
             {scopes[sharingScopeIndex]}
           </button>
-          <button className="border-primary border-3 p-2">FILTER</button>
+          <button className="border-3 border-primary p-2">FILTER</button>
         </div>
       </form>
       <section
         ref={parent}
-        className="h-full overflow-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-10 mx-auto w-full auto-rows-min"
+        className="mx-auto grid h-full w-full auto-rows-min grid-cols-1 gap-10 overflow-auto md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
       >
         {isLoading ? <Loader /> : <Recipes data={data} />}
       </section>
@@ -138,9 +138,9 @@ const RecipeCard = ({ id, name }: { id: string; name: string }) => {
     <article
       tabIndex={0}
       role="button"
-      className="flex flex-col gap-4 w-full h-full mx-auto animate-fade-in-down aspect-[1/1.3]"
+      className="mx-auto flex aspect-[1/1.3] h-full w-full animate-fade-in-down flex-col gap-4"
     >
-      <div className="w-full flex basis-3/5 relative">
+      <div className="relative flex w-full basis-3/5">
         <Image
           priority={true}
           layout="fill"
@@ -149,8 +149,8 @@ const RecipeCard = ({ id, name }: { id: string; name: string }) => {
           src="https://storage.googleapis.com/recipe-website-bucket/test-images/apple-550x396.jpeg"
         />
       </div>
-      <div className="flex flex-1 justify-center items-center bg-accent-400">
-        <h2 className="text-secondary font-medium tracking-wide">{name}</h2>
+      <div className="flex flex-1 items-center justify-center bg-accent-400">
+        <h2 className="font-medium tracking-wide text-secondary">{name}</h2>
       </div>
     </article>
   );

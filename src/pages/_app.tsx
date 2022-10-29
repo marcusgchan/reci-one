@@ -67,26 +67,26 @@ const Layout = ({
 }) => {
   if (useIsMobile()) {
     return (
-      <section className="h-screen flex flex-col gap-4">
+      <section className="flex h-screen flex-col gap-4">
         {!hideNav && (
           <header className="relative z-20 p-2">
             <MobileNav />
           </header>
         )}
-        <main className="flex-1 flex-col min-h-0 isolate z-10 h-full overflow-scroll">
+        <main className="isolate z-10 h-full min-h-0 flex-1 flex-col overflow-scroll">
           {children}
         </main>
       </section>
     );
   }
   return (
-    <section className="h-screen flex flex-col gap-4">
+    <section className="flex h-screen flex-col gap-4">
       {!hideNav && (
         <header className="p-4">
           <DesktopNav />
         </header>
       )}
-      <main className="flex-1 min-h-0 w-full h-full overflow-scroll">
+      <main className="h-full min-h-0 w-full flex-1 overflow-scroll">
         {children}
       </main>
     </section>
