@@ -11,6 +11,7 @@ permissions:
 
 jobs:
   format_and_lint:
+    name: Check Format and Lint
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
