@@ -57,6 +57,7 @@ const Index = () => {
   }
   return (
     <>
+      {/* Mobile */}
       <section className="mx-auto grid w-full grid-cols-1 gap-8 p-2 md:hidden">
         <form
           className="top-1 flex flex-col gap-3"
@@ -85,6 +86,7 @@ const Index = () => {
           <AiOutlineFilter size={30} color="white" />
         </button>
       </section>
+      {/* Desktop */}
       <section className="hidden h-full flex-col gap-4 p-4 md:flex">
         <form
           className="flex justify-between"
