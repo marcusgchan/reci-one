@@ -11,8 +11,8 @@ export const envSchema = z.object({
     // VERCEL_URL doesnt include `https` so it cant be validated as a URL
     process.env.VERCEL ? z.string() : z.string().url()
   ),
-  DISCORD_CLIENT_ID: z.string(),
-  DISCORD_CLIENT_SECRET: z.string(),
+  GITHUB_CLIENT_ID: z.string(),
+  GITHUB_CLIENT_SECRET: z.string(),
   PATH_TO_KEYFILE: z.string(),
   MY_SQL_ROOT_PASSWORD: z.string().optional(),
   BUCKET_NAME: z.string(),
