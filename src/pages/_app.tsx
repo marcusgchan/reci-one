@@ -67,7 +67,7 @@ const Layout = ({
 }) => {
   if (useIsMobile()) {
     return (
-      <section className="flex h-screen flex-col gap-4">
+      <section className="flex h-screen max-w-7xl flex-col gap-4">
         {!hideNav && (
           <header className="relative z-20 p-2">
             <MobileNav />
@@ -80,7 +80,7 @@ const Layout = ({
     );
   }
   return (
-    <section className="flex h-screen flex-col gap-4">
+    <section className="mx-auto flex h-screen max-w-7xl flex-col gap-4">
       {!hideNav && (
         <header className="p-4">
           <DesktopNav />
