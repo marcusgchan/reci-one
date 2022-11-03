@@ -4,7 +4,7 @@ import {
   DropdownListNames,
   ListInputFields,
   AddRecipeMutationWithId,
-} from "./recipes/types";
+} from "./types";
 import { v4 as uuidv4 } from "uuid";
 import { CookingMethod, MealType, Nationality } from "@prisma/client";
 

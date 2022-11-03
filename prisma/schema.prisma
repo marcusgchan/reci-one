@@ -71,7 +71,6 @@ model Recipe {
   description String
   prepTime    Decimal
   cookTime    Decimal
-  mainImage   String  @db.VarChar(255)
   isPublic    Boolean @default(false)
 
   ingredients    Ingredient[]

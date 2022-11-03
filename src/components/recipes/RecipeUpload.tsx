@@ -27,7 +27,7 @@ export function RecipeUpload({ multiple = false }: { multiple?: boolean }) {
     }
   };
   return (
-    <form>
+    <form className="flex gap-4">
       <input type="file" onChange={handleFilesSelect} multiple={multiple} />
       <button
         disabled={files.length === 0}

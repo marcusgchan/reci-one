@@ -1,6 +1,6 @@
 import { CustomReactFC } from "@/shared/types";
 import { RecipeUpload } from "../../components/recipes/RecipeUpload";
-import React, { useId, useRef, useState } from "react";
+import React, { useId, useState } from "react";
 import { BiMinus } from "react-icons/bi";
 import { GrDrag } from "react-icons/gr";
 import { CheckIcon, ChevronUpDownIcon } from "@heroicons/react/20/solid";
@@ -21,7 +21,7 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import { useListDnd } from "@/components/recipes/useListDnd";
 import { MdCompareArrows } from "react-icons/md";
-import { useFormMutations } from "@/components/useFormMutations";
+import { useFormMutations } from "@/components/recipes/useFormMutations";
 import {
   StringInputNames,
   NumberInputNames,
@@ -32,7 +32,12 @@ import {
 } from "@/components/recipes/types";
 
 const Create: CustomReactFC = () => {
-  const mutation = trpc.useMutation(["recipes.addRecipe"]);
+  const mutation = trpc.useMutation(["recipes.addRecipe"], {
+    onSuccess(data, variables, context) {
+      // create presigned url using recipe id
+      // upload img
+    },
+  });
 
   const {
     mealTypesData,
@@ -89,12 +94,22 @@ const Create: CustomReactFC = () => {
     }
   };
 
+  const createRecipe = (e: React.FormEvent) => {
+    e.preventDefault();
+    // create recipe and get recipeId
+    mutation.mutate(formData);
+    // mutation.mutate()
+  };
+
   if (isLoading) {
     return <Loader />;
   }
   return (
     <section className="p-4">
-      <form className="m-auto grid w-full max-w-lg gap-5 pb-2 text-gray-500">
+      <form
+        className="m-auto grid w-full max-w-lg gap-5 pb-2 text-gray-500"
+        onSubmit={createRecipe}
+      >
         <h2 className="text-2xl">Add Recipe</h2>
         <SectionWrapper>
           <NameDesImgSection
@@ -151,6 +166,7 @@ const Create: CustomReactFC = () => {
             deleteFromList={deleteFromList}
           />
         </SectionWrapper>
+        <button className="border-2 border-gray-500 p-1">CREATE</button>
       </form>
     </section>
   );
