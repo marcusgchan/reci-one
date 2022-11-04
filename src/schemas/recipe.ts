@@ -39,8 +39,8 @@ export const addRecipeSchema = z.object({
       isHeader: z.boolean(),
     })
     .array(),
-  prepTime: z.number(),
-  cookTime: z.number(),
+  prepTime: z.string(),
+  cookTime: z.string(),
   isPublic: z.boolean(),
   mealTypes: z
     .object({
@@ -50,8 +50,8 @@ export const addRecipeSchema = z.object({
     .refine((mealTypes) => {
       const set = new Set();
       for (const { id } of mealTypes) {
-        if (set.has(name) || !DEFAULT_MEAL_TYPES.includes(id)) return false;
-        set.add(name);
+        if (set.has(id) || !DEFAULT_MEAL_TYPES.includes(id)) return false;
+        set.add(id);
       }
       return true;
     }),
@@ -71,12 +71,14 @@ export const addRecipeSchema = z.object({
   cookingMethods: z
     .object({
       id: z.string(),
+      name: z.string(),
     })
     .array()
     .refine((cookingMethods) => {
       const set = new Set();
-      for (const { id } of cookingMethods) {
-        if (set.has(id) || !DEFAULT_COOKING_METHODS.includes(id)) return false;
+      for (const { id, name } of cookingMethods) {
+        if (set.has(id) || !DEFAULT_COOKING_METHODS.includes(name))
+          return false;
         set.add(id);
       }
       return true;

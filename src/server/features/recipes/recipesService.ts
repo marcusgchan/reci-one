@@ -1,12 +1,51 @@
 import { Recipe } from "@prisma/client";
-import { GetRecipesQuery } from "../../schemas/recipe";
-import { Context } from "../router/context";
+import { GetRecipesQuery, AddRecipeMutation } from "../../../schemas/recipe";
+import { Context } from "../../router/context";
 
-export const recipeService = {
-  getRecipes: getRecipes,
-};
+export async function createRecipe(
+  ctx: Context,
+  userId: string,
+  input: AddRecipeMutation
+) {
+  return await ctx.prisma.recipe.create({
+    data: {
+      name: input.name,
+      description: input.description,
+      prepTime: input.prepTime,
+      cookTime: input.cookTime,
+      authorId: userId,
+      ingredients: {
+        createMany: { data: input.ingredients.map((ingredient) => ingredient) },
+      },
+      steps: {
+        createMany: { data: input.steps.map((step) => step) },
+      },
+      nationalities: {
+        createMany: {
+          data: input.nationalities.map((nationality) => ({
+            nationalityId: nationality.id,
+          })),
+        },
+      },
+      cookingMethods: {
+        createMany: {
+          data: input.cookingMethods.map((cookingMethod) => ({
+            cookingMethodId: cookingMethod.id,
+          })),
+        },
+      },
+      mealTypes: {
+        createMany: {
+          data: input.mealTypes.map((mealType) => ({
+            mealTypeId: mealType.id,
+          })),
+        },
+      },
+    },
+  });
+}
 
-async function getRecipes(
+export async function getRecipes(
   ctx: Context,
   userId: string,
   input: GetRecipesQuery

@@ -5,7 +5,7 @@ import { env } from "src/server/env.mjs";
 import { config } from "src/server/config";
 import { TRPCError } from "@trpc/server";
 
-export const upload = async (
+export const uploadSignedUrl = async (
   userId: string,
   recipeId: string,
   fileName: string
