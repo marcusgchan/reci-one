@@ -65,8 +65,6 @@ async function createDefaultRecipies() {
           description: faker.commerce.productDescription(),
           cookTime: faker.datatype.float(),
           prepTime: faker.datatype.float(),
-          mainImage:
-            "https://storage.googleapis.com/recipe-website-bucket/test-images/apple-550x396.jpeg",
           isPublic: false,
           mealTypes: {
             create: [
