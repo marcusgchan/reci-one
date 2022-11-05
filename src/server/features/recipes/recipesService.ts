@@ -8,7 +8,7 @@ export async function createRecipe(
   input: AddRecipeMutation
 ) {
   // Unable to connect multiple on create b/c it requires recipeId
-  const recipeWithoutConnect = await ctx.prisma.recipe.create({
+  const recipe = await ctx.prisma.recipe.create({
     data: {
       name: input.name,
       description: input.description,
@@ -24,13 +24,29 @@ export async function createRecipe(
     },
   });
   return await ctx.prisma.recipe.update({
-    where: { id: recipeWithoutConnect.id },
+    where: { id: recipe.id },
     data: {
       cookingMethods: {
         connect: input.cookingMethods.map((cookingMethod) => ({
           cookingMethodId_recipeId: {
             cookingMethodId: cookingMethod.id,
-            recipeId: recipeWithoutConnect.id,
+            recipeId: recipe.id,
+          },
+        })),
+      },
+      nationalities: {
+        connect: input.nationalities.map((nationality) => ({
+          nationalityId_recipeId: {
+            nationalityId: nationality.id,
+            recipeId: recipe.id,
+          },
+        })),
+      },
+      mealTypes: {
+        connect: input.mealTypes.map((mealType) => ({
+          mealTypeId_recipeId: {
+            mealTypeId: mealType.id,
+            recipeId: recipe.id,
           },
         })),
       },
