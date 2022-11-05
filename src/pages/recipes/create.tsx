@@ -30,8 +30,10 @@ import {
   AddRecipeMutationWithId,
   DropdownListValues,
 } from "@/components/recipes/types";
+import { useRouter } from "next/router";
 
 const Create: CustomReactFC = () => {
+  const router = useRouter();
   const mutation = trpc.useMutation(["recipes.addRecipe"], {
     onSuccess(data, variables, context) {
       // create presigned url using recipe id
@@ -96,9 +98,7 @@ const Create: CustomReactFC = () => {
 
   const createRecipe = (e: React.FormEvent) => {
     e.preventDefault();
-    // create recipe and get recipeId
     mutation.mutate(formData);
-    // mutation.mutate()
   };
 
   if (isLoading) {
@@ -110,7 +110,12 @@ const Create: CustomReactFC = () => {
         className="m-auto grid w-full max-w-lg gap-5 pb-2 text-gray-500"
         onSubmit={createRecipe}
       >
-        <h2 className="text-2xl">Add Recipe</h2>
+        <div>
+          <button onClick={() => router.back()} className="p-1">
+            Back
+          </button>
+          <h2 className="text-2xl">Add Recipe</h2>
+        </div>
         <SectionWrapper>
           <NameDesImgSection
             name={formData.name}
@@ -166,7 +171,7 @@ const Create: CustomReactFC = () => {
             deleteFromList={deleteFromList}
           />
         </SectionWrapper>
-        <button className="border-2 border-gray-500 p-1">CREATE</button>
+        <button className="border-2 border-gray-500 p-1">Create</button>
       </form>
     </section>
   );
@@ -331,13 +336,13 @@ const IngredientsSection = ({
           onClick={(e) => addItemToList(e, false, "ingredients")}
           className="border-2 border-gray-500 p-1"
         >
-          ADD INGREDIENT
+          Add Ingredient
         </button>
         <button
           onClick={(e) => addItemToList(e, true, "ingredients")}
           className="border-2 border-gray-500 p-1"
         >
-          ADD HEADER
+          Add Header
         </button>
       </div>
     </>
@@ -686,13 +691,13 @@ const StepsSection = ({
           onClick={(e) => addItemToList(e, false, "steps")}
           className="border-2 border-gray-500 p-1"
         >
-          ADD STEP
+          Add Step
         </button>
         <button
           onClick={(e) => addItemToList(e, true, "steps")}
           className="border-2 border-gray-500 p-1"
         >
-          ADD HEADER
+          Add Header
         </button>
       </div>
     </>
