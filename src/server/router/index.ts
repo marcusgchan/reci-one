@@ -2,7 +2,6 @@
 import { createRouter } from "./context";
 import superjson from "superjson";
 
-import { exampleRouter } from "./example";
 import { authRouter } from "./auth";
 import { recipesRouter } from "./recipes";
 import { mealTypesRouter } from "./mealTypes";
@@ -11,7 +10,6 @@ import { cookingMethodsRouter } from "./cookingMethods";
 
 export const appRouter = createRouter()
   .transformer(superjson)
-  .merge("example.", exampleRouter)
   .merge("auth.", authRouter)
   .merge("recipes.", recipesRouter)
   .merge("mealTypes.", mealTypesRouter)
