@@ -46,42 +46,17 @@ export const addRecipeSchema = z.object({
     .object({
       id: z.string(),
     })
-    .array()
-    .refine((mealTypes) => {
-      const set = new Set();
-      for (const { id } of mealTypes) {
-        if (set.has(id) || !DEFAULT_MEAL_TYPES.includes(id)) return false;
-        set.add(id);
-      }
-      return true;
-    }),
+    .array(),
   nationalities: z
     .object({
       id: z.string(),
     })
-    .array()
-    .refine((nationalities) => {
-      const set = new Set();
-      for (const { id } of nationalities) {
-        if (set.has(id) || !DEFAULT_NATIONALITIES.includes(id)) return false;
-        set.add(id);
-      }
-      return true;
-    }),
+    .array(),
   cookingMethods: z
     .object({
       id: z.string(),
       name: z.string(),
     })
-    .array()
-    .refine((cookingMethods) => {
-      const set = new Set();
-      for (const { id, name } of cookingMethods) {
-        if (set.has(id) || !DEFAULT_COOKING_METHODS.includes(name))
-          return false;
-        set.add(id);
-      }
-      return true;
-    }),
+    .array(),
 });
 export type AddRecipeMutation = z.infer<typeof addRecipeSchema>;
