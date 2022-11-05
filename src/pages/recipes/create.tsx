@@ -251,7 +251,7 @@ const TimeSection = ({
         <label htmlFor={id + "-cookTime"}>Cook Time</label>
         <input
           id={id + "-cookTime"}
-          type="number"
+          type="text"
           value={cookTime}
           onChange={(e) => handleBasicInput(e, "number", "cookTime")}
           className="inline-block w-full border-2 border-gray-500 p-1"
@@ -562,7 +562,7 @@ const SearchableSelect = ({
       <div className="relative">
         <Combobox.Input
           autoComplete="off"
-          className="w-full border-2 border-gray-500 bg-white py-2 pl-3 pr-10 shadow-sm sm:text-sm"
+          className="w-full border-2 border-gray-500 py-2 pl-3 pr-10 shadow-sm sm:text-sm"
           onChange={(e) => setQuery(e.target.value)}
           displayValue={(mealType: MealType) => mealType?.name}
         />
@@ -574,7 +574,7 @@ const SearchableSelect = ({
         </Combobox.Button>
 
         {filteredData.length > 0 && (
-          <Combobox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 sm:text-sm">
+          <Combobox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 sm:text-sm">
             {filteredData.map((data) => (
               <Combobox.Option
                 key={data.id}
