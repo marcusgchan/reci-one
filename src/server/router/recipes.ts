@@ -9,18 +9,6 @@ import {
 import { uploadSignedUrl } from "../features/recipes/s3Services";
 
 export const recipesRouter = createRouter()
-  .query("hello", {
-    input: z
-      .object({
-        text: z.string().nullish(),
-      })
-      .nullish(),
-    resolve({ input }) {
-      return {
-        greeting: `Hello ${input?.text ?? "world"}`,
-      };
-    },
-  })
   .query("getRecipes", {
     input: getRecipesSchema,
     async resolve({ ctx, input }) {
