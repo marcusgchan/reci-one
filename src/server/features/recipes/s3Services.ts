@@ -50,15 +50,3 @@ export const remove = async (
     throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
   }
 };
-
-// console.log(
-//   `\nPutting "${bucketParams.Key}" using signedUrl with body "${bucketParams.Body}" in v3`
-// );
-// console.log(signedUrl);
-// const response = await fetch(signedUrl, {
-//   method: "PUT",
-//   body: bucketParams.Body,
-// });
-// console.log(
-//   `\nResponse returned by signed URL: ${await response.text()}\n`
-// );
