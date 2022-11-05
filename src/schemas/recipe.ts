@@ -1,9 +1,4 @@
 import { z } from "zod";
-import {
-  DEFAULT_MEAL_TYPES,
-  DEFAULT_NATIONALITIES,
-  DEFAULT_COOKING_METHODS,
-} from "@/prisma/data";
 
 export const getRecipesSchema = z.object({
   search: z.string(),
