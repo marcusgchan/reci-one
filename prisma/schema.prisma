@@ -69,8 +69,8 @@ model Recipe {
   id          String  @id @default(cuid())
   name        String
   description String
-  prepTime    Decimal
-  cookTime    Decimal
+  prepTime    Decimal?
+  cookTime    Decimal?
   isPublic    Boolean @default(false)
 
   ingredients    Ingredient[]
