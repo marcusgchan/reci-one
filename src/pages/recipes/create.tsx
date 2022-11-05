@@ -179,6 +179,7 @@ const NameDesImgSection = ({
   name: AddRecipeMutation["name"];
   handleStringInput: (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+    type: "string" | "number",
     name: StringInputNames
   ) => void;
 }) => {
@@ -194,7 +195,7 @@ const NameDesImgSection = ({
             id={id + "-name"}
             type="text"
             value={name}
-            onChange={(e) => handleStringInput(e, "name")}
+            onChange={(e) => handleStringInput(e, "string", "name")}
             className="inline-block w-full border-2 border-gray-500 p-1"
           />
         </div>
@@ -206,7 +207,7 @@ const NameDesImgSection = ({
             id={id + "-description"}
             rows={5}
             className="w-full border-2 border-gray-500 p-1"
-            onChange={(e) => handleStringInput(e, "description")}
+            onChange={(e) => handleStringInput(e, "string", "description")}
           />
         </div>
       </div>
@@ -226,7 +227,8 @@ const TimeSection = ({
   prepTime: AddRecipeMutation["prepTime"];
   handleBasicInput: (
     e: React.ChangeEvent<HTMLInputElement>,
-    type: NumberInputNames
+    type: "string" | "number",
+    name: NumberInputNames
   ) => void;
 }) => {
   const id = useId();
@@ -236,9 +238,12 @@ const TimeSection = ({
         <label htmlFor={id + "-prepTime"}>Prep Time</label>
         <input
           id={id + "-prepTime"}
-          type="number"
+          type="text"
           value={prepTime}
-          onChange={(e) => handleBasicInput(e, "prepTime")}
+          onChange={(e) => {
+            console.log("hahaha");
+            handleBasicInput(e, "number", "prepTime");
+          }}
           className="inline-block w-full border-2 border-gray-500 p-1"
         />
       </div>
@@ -248,7 +253,7 @@ const TimeSection = ({
           id={id + "-cookTime"}
           type="number"
           value={cookTime}
-          onChange={(e) => handleBasicInput(e, "cookTime")}
+          onChange={(e) => handleBasicInput(e, "number", "cookTime")}
           className="inline-block w-full border-2 border-gray-500 p-1"
         />
       </div>
