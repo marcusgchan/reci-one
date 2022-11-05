@@ -12,8 +12,8 @@ export async function createRecipe(
     data: {
       name: input.name,
       description: input.description,
-      prepTime: input.prepTime,
-      cookTime: input.cookTime,
+      prepTime: input.prepTime || undefined,
+      cookTime: input.cookTime || undefined,
       authorId: userId,
       ingredients: {
         createMany: { data: input.ingredients.map((ingredient) => ingredient) },

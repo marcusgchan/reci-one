@@ -240,10 +240,7 @@ const TimeSection = ({
           id={id + "-prepTime"}
           type="text"
           value={prepTime}
-          onChange={(e) => {
-            console.log("hahaha");
-            handleBasicInput(e, "number", "prepTime");
-          }}
+          onChange={(e) => handleBasicInput(e, "number", "prepTime")}
           className="inline-block w-full border-2 border-gray-500 p-1"
         />
       </div>

@@ -34,8 +34,8 @@ export const addRecipeSchema = z.object({
       isHeader: z.boolean(),
     })
     .array(),
-  prepTime: z.string(),
-  cookTime: z.string(),
+  prepTime: z.string().length(0).or(z.number()),
+  cookTime: z.string().length(0).or(z.number()),
   isPublic: z.boolean(),
   mealTypes: z
     .object({
