@@ -5,14 +5,15 @@ import { env } from "src/server/env.mjs";
 import { config } from "src/server/config";
 import { TRPCError } from "@trpc/server";
 
-export const uploadSignedUrl = async (
+export const getUploadSignedUrl = async (
   userId: string,
   recipeId: string,
-  fileName: string
+  fileNames: string[]
 ) => {
+  if (fileNames.length === 0) throw new TRPCError({ code: "BAD_REQUEST" });
   const bucketParams = {
     Bucket: `${env.BUCKET_NAME}`,
-    Key: `${userId}/${recipeId}/${fileName}`,
+    Key: `${userId}/${recipeId}/${fileNames[0]}`,
   };
   try {
     const command = new PutObjectCommand(bucketParams);

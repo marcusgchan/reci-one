@@ -1,5 +1,4 @@
 import { CustomReactFC } from "@/shared/types";
-import { RecipeUpload } from "../../components/recipes/RecipeUpload";
 import React, { useId, useState } from "react";
 import { BiMinus } from "react-icons/bi";
 import { GrDrag } from "react-icons/gr";
@@ -31,13 +30,24 @@ import {
   DropdownListValues,
 } from "@/components/recipes/types";
 import { useRouter } from "next/router";
+import { useImageUpload } from "@/components/recipes/useImageUpload";
 
 const Create: CustomReactFC = () => {
   const router = useRouter();
+  const {
+    files,
+    handleFilesSelect,
+    formData: imageFormData,
+  } = useImageUpload();
   const mutation = trpc.useMutation(["recipes.addRecipe"], {
-    onSuccess(data, variables, context) {
-      // create presigned url using recipe id
-      // upload img
+    async onSuccess(signedUrl) {
+      if (!signedUrl) return;
+      const response = await fetch(signedUrl, {
+        method: "PUT",
+        body: imageFormData,
+      });
+      console.log(response);
+      router.push("/recipes");
     },
   });
 
@@ -98,7 +108,11 @@ const Create: CustomReactFC = () => {
 
   const createRecipe = (e: React.FormEvent) => {
     e.preventDefault();
-    mutation.mutate(formData);
+    mutation.mutate(
+      files.length > 0
+        ? { ...formData, imageNames: files.map((file) => file.name) }
+        : formData
+    );
   };
 
   if (isLoading) {
@@ -120,6 +134,7 @@ const Create: CustomReactFC = () => {
           <NameDesImgSection
             name={formData.name}
             handleStringInput={handleBasicInput}
+            handleFilesSelect={handleFilesSelect}
           />
         </SectionWrapper>
         <SectionWrapper>
@@ -180,6 +195,7 @@ const Create: CustomReactFC = () => {
 const NameDesImgSection = ({
   name,
   handleStringInput,
+  handleFilesSelect,
 }: {
   name: AddRecipeMutation["name"];
   handleStringInput: (
@@ -187,6 +203,7 @@ const NameDesImgSection = ({
     type: "string" | "number",
     name: StringInputNames
   ) => void;
+  handleFilesSelect: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }) => {
   const id = useId();
   return (
@@ -217,7 +234,7 @@ const NameDesImgSection = ({
         </div>
       </div>
       <div className="flex-1 shrink-0 bg-red-300">
-        <UploadImages />
+        <UploadImages handleFilesSelect={handleFilesSelect} />
       </div>
     </div>
   );
@@ -748,7 +765,11 @@ const DraggableInput = ({
   );
 };
 
-const UploadImages = () => {
+const UploadImages = ({
+  handleFilesSelect,
+}: {
+  handleFilesSelect: (e: React.ChangeEvent<HTMLInputElement>) => void;
+}) => {
   return (
     <div>
       <label htmlFor="cover-photo">Upload Recipe Image</label>
@@ -778,6 +799,8 @@ const UploadImages = () => {
                 id="file-upload"
                 name="file-upload"
                 type="file"
+                multiple={false}
+                onChange={handleFilesSelect}
                 className="sr-only"
               />
             </label>

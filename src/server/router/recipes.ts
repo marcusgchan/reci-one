@@ -6,7 +6,7 @@ import {
   createRecipe,
   getRecipes,
 } from "src/server/features/recipes/recipesService";
-import { uploadSignedUrl } from "../features/recipes/s3Services";
+import { getUploadSignedUrl } from "../features/recipes/s3Services";
 
 export const recipesRouter = createRouter()
   .query("getRecipes", {
@@ -23,7 +23,14 @@ export const recipesRouter = createRouter()
       const userId = ctx.session?.user?.id;
       if (!userId) throw new TRPCError({ code: "UNAUTHORIZED" });
       const recipe = await createRecipe(ctx, userId, input);
-      const signedUrl = uploadSignedUrl(userId, recipe.id, "randomnamefornow");
-      return signedUrl;
+      if (input.imageNames) {
+        const signedUrl = await getUploadSignedUrl(
+          userId,
+          recipe.id,
+          input.imageNames
+        );
+        return signedUrl;
+      }
+      return "";
     },
   });
