@@ -115,6 +115,8 @@ const Create: CustomReactFC = () => {
     );
   };
 
+  const navigateBack = () => router.back();
+
   if (isLoading) {
     return <Loader />;
   }
@@ -125,7 +127,7 @@ const Create: CustomReactFC = () => {
         onSubmit={createRecipe}
       >
         <div>
-          <button onClick={() => router.back()} className="p-1">
+          <button type="button" onClick={navigateBack} className="p-1">
             Back
           </button>
           <h2 className="text-2xl">Add Recipe</h2>
@@ -311,6 +313,7 @@ const IngredientsSection = ({
       </p>
       <button
         className="self-start"
+        type="button"
         aria-label="Toggle rearrange"
         onClick={toggleCanDrag}
       >
@@ -350,12 +353,14 @@ const IngredientsSection = ({
 
       <div className="flex gap-2">
         <button
+          type="button"
           onClick={(e) => addItemToList(e, false, "ingredients")}
           className="border-2 border-gray-500 p-1"
         >
           Add Ingredient
         </button>
         <button
+          type="button"
           onClick={(e) => addItemToList(e, true, "ingredients")}
           className="border-2 border-gray-500 p-1"
         >
@@ -672,6 +677,7 @@ const StepsSection = ({
       </p>
       <button
         className="self-start"
+        type="button"
         aria-label="Toggle rearrange"
         onClick={toggleCanDrag}
       >
@@ -705,12 +711,14 @@ const StepsSection = ({
       </DndContext>
       <div className="flex gap-2">
         <button
+          type="button"
           onClick={(e) => addItemToList(e, false, "steps")}
           className="border-2 border-gray-500 p-1"
         >
           Add Step
         </button>
         <button
+          type="button"
           onClick={(e) => addItemToList(e, true, "steps")}
           className="border-2 border-gray-500 p-1"
         >
@@ -757,7 +765,7 @@ const DraggableInput = ({
         } flex-1 border-2 border-gray-500 p-1 tracking-wide`}
       />
       {!canDrag && (
-        <button onClick={() => remove(id, type)}>
+        <button type="button" onClick={() => remove(id, type)}>
           <BiMinus size={30} />
         </button>
       )}
