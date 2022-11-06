@@ -144,9 +144,10 @@ const RecipeCard = ({ id, name }: { id: string; name: string }) => {
         <Image
           priority={true}
           layout="fill"
+          loading="eager"
           objectFit="cover"
           alt={name}
-          src="https://storage.googleapis.com/recipe-website-bucket/test-images/apple-550x396.jpeg"
+          src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Google_%22G%22_Logo.svg/2048px-Google_%22G%22_Logo.svg.png"
         />
       </div>
       <div className="flex flex-1 items-center justify-center bg-accent-400">
