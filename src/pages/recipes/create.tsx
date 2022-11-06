@@ -1,6 +1,5 @@
 import { CustomReactFC } from "@/shared/types";
-import { RecipeUpload } from "../../components/recipes/RecipeUpload";
-import React, { useId, useRef, useState } from "react";
+import React, { useId, useState } from "react";
 import { BiMinus } from "react-icons/bi";
 import { GrDrag } from "react-icons/gr";
 import { CheckIcon, ChevronUpDownIcon } from "@heroicons/react/20/solid";
@@ -21,7 +20,7 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import { useListDnd } from "@/components/recipes/useListDnd";
 import { MdCompareArrows } from "react-icons/md";
-import { useFormMutations } from "@/components/useFormMutations";
+import { useFormMutations } from "@/components/recipes/useFormMutations";
 import {
   StringInputNames,
   NumberInputNames,
@@ -30,9 +29,27 @@ import {
   AddRecipeMutationWithId,
   DropdownListValues,
 } from "@/components/recipes/types";
+import { useRouter } from "next/router";
+import { useImageUpload } from "@/components/recipes/useImageUpload";
 
 const Create: CustomReactFC = () => {
-  const mutation = trpc.useMutation(["recipes.addRecipe"]);
+  const router = useRouter();
+  const {
+    files,
+    handleFilesSelect,
+    formData: imageFormData,
+  } = useImageUpload();
+  const mutation = trpc.useMutation(["recipes.addRecipe"], {
+    async onSuccess(signedUrl) {
+      if (!signedUrl) return;
+      const response = await fetch(signedUrl, {
+        method: "PUT",
+        body: imageFormData,
+      });
+      console.log(response);
+      router.push("/recipes");
+    },
+  });
 
   const {
     mealTypesData,
@@ -54,8 +71,8 @@ const Create: CustomReactFC = () => {
       { id: uuidv4(), order: 1, name: "", isHeader: false },
       { id: uuidv4(), order: 2, name: "", isHeader: false },
     ],
-    prepTime: 0,
-    cookTime: 0,
+    prepTime: "",
+    cookTime: "",
     isPublic: false,
     cookingMethods: [],
     mealTypes: [],
@@ -89,17 +106,35 @@ const Create: CustomReactFC = () => {
     }
   };
 
+  const createRecipe = (e: React.FormEvent) => {
+    e.preventDefault();
+    mutation.mutate(
+      files.length > 0
+        ? { ...formData, imageNames: files.map((file) => file.name) }
+        : formData
+    );
+  };
+
   if (isLoading) {
     return <Loader />;
   }
   return (
     <section className="p-4">
-      <form className="m-auto grid w-full max-w-lg gap-5 pb-2 text-gray-500">
-        <h2 className="text-2xl">Add Recipe</h2>
+      <form
+        className="m-auto grid w-full max-w-lg gap-5 pb-2 text-gray-500"
+        onSubmit={createRecipe}
+      >
+        <div>
+          <button onClick={() => router.back()} className="p-1">
+            Back
+          </button>
+          <h2 className="text-2xl">Add Recipe</h2>
+        </div>
         <SectionWrapper>
           <NameDesImgSection
             name={formData.name}
             handleStringInput={handleBasicInput}
+            handleFilesSelect={handleFilesSelect}
           />
         </SectionWrapper>
         <SectionWrapper>
@@ -151,6 +186,7 @@ const Create: CustomReactFC = () => {
             deleteFromList={deleteFromList}
           />
         </SectionWrapper>
+        <button className="border-2 border-gray-500 p-1">Create</button>
       </form>
     </section>
   );
@@ -159,12 +195,15 @@ const Create: CustomReactFC = () => {
 const NameDesImgSection = ({
   name,
   handleStringInput,
+  handleFilesSelect,
 }: {
   name: AddRecipeMutation["name"];
   handleStringInput: (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+    type: "string" | "number",
     name: StringInputNames
   ) => void;
+  handleFilesSelect: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }) => {
   const id = useId();
   return (
@@ -178,7 +217,7 @@ const NameDesImgSection = ({
             id={id + "-name"}
             type="text"
             value={name}
-            onChange={(e) => handleStringInput(e, "name")}
+            onChange={(e) => handleStringInput(e, "string", "name")}
             className="inline-block w-full border-2 border-gray-500 p-1"
           />
         </div>
@@ -190,12 +229,12 @@ const NameDesImgSection = ({
             id={id + "-description"}
             rows={5}
             className="w-full border-2 border-gray-500 p-1"
-            onChange={(e) => handleStringInput(e, "description")}
+            onChange={(e) => handleStringInput(e, "string", "description")}
           />
         </div>
       </div>
       <div className="flex-1 shrink-0 bg-red-300">
-        <UploadImages />
+        <UploadImages handleFilesSelect={handleFilesSelect} />
       </div>
     </div>
   );
@@ -210,7 +249,8 @@ const TimeSection = ({
   prepTime: AddRecipeMutation["prepTime"];
   handleBasicInput: (
     e: React.ChangeEvent<HTMLInputElement>,
-    type: NumberInputNames
+    type: "string" | "number",
+    name: NumberInputNames
   ) => void;
 }) => {
   const id = useId();
@@ -220,9 +260,9 @@ const TimeSection = ({
         <label htmlFor={id + "-prepTime"}>Prep Time</label>
         <input
           id={id + "-prepTime"}
-          type="number"
+          type="text"
           value={prepTime}
-          onChange={(e) => handleBasicInput(e, "prepTime")}
+          onChange={(e) => handleBasicInput(e, "number", "prepTime")}
           className="inline-block w-full border-2 border-gray-500 p-1"
         />
       </div>
@@ -230,9 +270,9 @@ const TimeSection = ({
         <label htmlFor={id + "-cookTime"}>Cook Time</label>
         <input
           id={id + "-cookTime"}
-          type="number"
+          type="text"
           value={cookTime}
-          onChange={(e) => handleBasicInput(e, "cookTime")}
+          onChange={(e) => handleBasicInput(e, "number", "cookTime")}
           className="inline-block w-full border-2 border-gray-500 p-1"
         />
       </div>
@@ -313,13 +353,13 @@ const IngredientsSection = ({
           onClick={(e) => addItemToList(e, false, "ingredients")}
           className="border-2 border-gray-500 p-1"
         >
-          ADD INGREDIENT
+          Add Ingredient
         </button>
         <button
           onClick={(e) => addItemToList(e, true, "ingredients")}
           className="border-2 border-gray-500 p-1"
         >
-          ADD HEADER
+          Add Header
         </button>
       </div>
     </>
@@ -541,7 +581,7 @@ const SearchableSelect = ({
       <div className="relative">
         <Combobox.Input
           autoComplete="off"
-          className="w-full border-2 border-gray-500 bg-white py-2 pl-3 pr-10 shadow-sm sm:text-sm"
+          className="w-full border-2 border-gray-500 py-2 pl-3 pr-10 shadow-sm sm:text-sm"
           onChange={(e) => setQuery(e.target.value)}
           displayValue={(mealType: MealType) => mealType?.name}
         />
@@ -553,7 +593,7 @@ const SearchableSelect = ({
         </Combobox.Button>
 
         {filteredData.length > 0 && (
-          <Combobox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 sm:text-sm">
+          <Combobox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 sm:text-sm">
             {filteredData.map((data) => (
               <Combobox.Option
                 key={data.id}
@@ -668,13 +708,13 @@ const StepsSection = ({
           onClick={(e) => addItemToList(e, false, "steps")}
           className="border-2 border-gray-500 p-1"
         >
-          ADD STEP
+          Add Step
         </button>
         <button
           onClick={(e) => addItemToList(e, true, "steps")}
           className="border-2 border-gray-500 p-1"
         >
-          ADD HEADER
+          Add Header
         </button>
       </div>
     </>
@@ -725,7 +765,11 @@ const DraggableInput = ({
   );
 };
 
-const UploadImages = () => {
+const UploadImages = ({
+  handleFilesSelect,
+}: {
+  handleFilesSelect: (e: React.ChangeEvent<HTMLInputElement>) => void;
+}) => {
   return (
     <div>
       <label htmlFor="cover-photo">Upload Recipe Image</label>
@@ -755,6 +799,8 @@ const UploadImages = () => {
                 id="file-upload"
                 name="file-upload"
                 type="file"
+                multiple={false}
+                onChange={handleFilesSelect}
                 className="sr-only"
               />
             </label>

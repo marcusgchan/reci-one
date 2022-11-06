@@ -1,12 +1,60 @@
 import { Recipe } from "@prisma/client";
-import { GetRecipesQuery } from "../../schemas/recipe";
-import { Context } from "../router/context";
+import { GetRecipesQuery, AddRecipeMutation } from "../../../schemas/recipe";
+import { Context } from "../../router/context";
 
-export const recipeService = {
-  getRecipes: getRecipes,
-};
+export async function createRecipe(
+  ctx: Context,
+  userId: string,
+  input: AddRecipeMutation
+) {
+  // Unable to connect multiple on create b/c it requires recipeId
+  const recipe = await ctx.prisma.recipe.create({
+    data: {
+      name: input.name,
+      description: input.description,
+      prepTime: input.prepTime || undefined,
+      cookTime: input.cookTime || undefined,
+      authorId: userId,
+      ingredients: {
+        createMany: { data: input.ingredients.map((ingredient) => ingredient) },
+      },
+      steps: {
+        createMany: { data: input.steps.map((step) => step) },
+      },
+    },
+  });
+  return await ctx.prisma.recipe.update({
+    where: { id: recipe.id },
+    data: {
+      cookingMethods: {
+        connect: input.cookingMethods.map((cookingMethod) => ({
+          cookingMethodId_recipeId: {
+            cookingMethodId: cookingMethod.id,
+            recipeId: recipe.id,
+          },
+        })),
+      },
+      nationalities: {
+        connect: input.nationalities.map((nationality) => ({
+          nationalityId_recipeId: {
+            nationalityId: nationality.id,
+            recipeId: recipe.id,
+          },
+        })),
+      },
+      mealTypes: {
+        connect: input.mealTypes.map((mealType) => ({
+          mealTypeId_recipeId: {
+            mealTypeId: mealType.id,
+            recipeId: recipe.id,
+          },
+        })),
+      },
+    },
+  });
+}
 
-async function getRecipes(
+export async function getRecipes(
   ctx: Context,
   userId: string,
   input: GetRecipesQuery

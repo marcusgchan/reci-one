@@ -69,9 +69,8 @@ model Recipe {
   id          String  @id @default(cuid())
   name        String
   description String
-  prepTime    Decimal
-  cookTime    Decimal
-  mainImage   String  @db.VarChar(255)
+  prepTime    Decimal?
+  cookTime    Decimal?
   isPublic    Boolean @default(false)
 
   ingredients    Ingredient[]

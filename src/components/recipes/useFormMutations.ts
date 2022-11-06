@@ -4,7 +4,7 @@ import {
   DropdownListNames,
   ListInputFields,
   AddRecipeMutationWithId,
-} from "./recipes/types";
+} from "./types";
 import { v4 as uuidv4 } from "uuid";
 import { CookingMethod, MealType, Nationality } from "@prisma/client";
 
@@ -62,14 +62,33 @@ export function useFormMutations(
   };
   const handleBasicInput = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+    type: "string" | "number",
     name: StringInputNames | NumberInputNames
   ) => {
-    setFormData((fd) => {
-      return {
-        ...fd,
-        [name]: e.target.value,
-      };
-    });
+    if (type === "string") {
+      setFormData((fd) => {
+        return {
+          ...fd,
+          [name]: e.target.value,
+        };
+      });
+    } else if (type === "number") {
+      setFormData((fd) => {
+        const updatedValue = e.target.value;
+        let computedUpdatedValue: number | "";
+        // Number('') returns 0
+        // Set to '' value of not a number
+        if (updatedValue === "" || Number.isNaN(Number(updatedValue))) {
+          computedUpdatedValue = "";
+        } else {
+          computedUpdatedValue = Number(updatedValue);
+        }
+        return {
+          ...fd,
+          [name]: computedUpdatedValue,
+        };
+      });
+    }
   };
   const addToList = (
     type: DropdownListNames,

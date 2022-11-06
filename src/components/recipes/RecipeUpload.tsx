@@ -1,7 +1,7 @@
 import { ChangeEvent, useState } from "react";
 import { useMutation } from "react-query";
 
-export function RecipeUpload({ multiple = false }: { multiple?: boolean }) {
+export function RecipeUpload(multiple = false) {
   const [files, setFiles] = useState<File[]>([]);
   const uploadFilesMutation = useMutation(
     () => {
@@ -23,11 +23,15 @@ export function RecipeUpload({ multiple = false }: { multiple?: boolean }) {
   const handleFilesSelect = (e: ChangeEvent<HTMLInputElement>) => {
     const fileList = e.target.files;
     if (fileList) {
-      setFiles([...files, ...Array.from(fileList)]);
+      if (multiple) {
+        setFiles([...files, ...Array.from(fileList)]);
+      } else {
+        setFiles([...Array.from(fileList)]);
+      }
     }
   };
   return (
-    <form>
+    <form className="flex gap-4">
       <input type="file" onChange={handleFilesSelect} multiple={multiple} />
       <button
         disabled={files.length === 0}
