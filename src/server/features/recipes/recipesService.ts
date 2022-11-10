@@ -67,12 +67,27 @@ export async function getRecipes(
         name: {
           contains: input.search,
         },
-        ingredients: getIncludeExcludeItems(
-          "name",
-          "ingredientsInclude",
-          "ingredientsExclude",
-          input
-        ),
+        ingredients: {
+          none: {
+            OR: input.filters.ingredientsExclude.map((ingredient) => ({
+              name: { contains: ingredient },
+            })),
+          },
+        },
+        nationalities: {
+          none: {
+            nationalityId: { notIn: input.filters.nationalitiesExclude },
+          },
+        },
+        AND: input.filters.ingredientsInclude
+          .map((ingredient) => ({
+            ingredients: { some: { name: { contains: ingredient } } },
+          }))
+          .concat(
+            input.filters.nationalitiesInclude.map((nationality) => ({
+              ingredients: { some: { name: { contains: nationality } } },
+            }))
+          ),
         // prepTime: {
         //   gt: input.filters.prepTimeMin,
         //   lt: input.filters.prepTimeMax,
@@ -82,10 +97,8 @@ export async function getRecipes(
         //   lt: input.filters.cookTimeMax,
         // },
       },
-      include: { ingredients: true },
     });
     myRecipes.push(...recipes);
-    console.log(recipes);
   }
   const publicRecipes = [] as Recipe[];
   if (input.viewScope === "PUBLIC") {
@@ -102,53 +115,6 @@ export async function getRecipes(
       }))
     );
   }
+  console.log(publicRecipes);
   return [...myRecipes, ...publicRecipes];
 }
-
-// function filterByIncludeExcludeList(
-//   recipes: (Recipe & { ingredients: Ingredient })[],
-//   input: GetRecipesQuery
-// ) {
-//   const ingredientsSet = new Set(recipes.map((recipe) => recipe.ingredients));
-//   const satisfiesIncludeList = input.filters.ingredientsInclude.every(
-//     (ingredient) => ingredientsSet.has()
-//   );
-// }
-
-function getIncludeExcludeItems(
-  columnName: string,
-  includeFilterField: FilterFields,
-  excludeFilterField: FilterFields,
-  input: GetRecipesQuery
-) {
-  const {
-    [includeFilterField]: includeList,
-    [excludeFilterField]: excludeList,
-  } = input.filters;
-  return {
-    none: {
-      OR: [{ name: { contains: "oranges" } }],
-    },
-  };
-  // return {
-  //   every:
-  //     includeList.length > 0
-  //       ? {
-  //           AND: includeList.map((ingredient) => ({
-  //             [columnName]: { contains: ingredient },
-  //           })),
-  //         }
-  //       : undefined,
-  //   none: {
-  //     OR: excludeList.map((ingredient) => ({
-  //       [columnName]: { contains: ingredient },
-  //     })),
-  //   },
-  // };
-}
-
-type FilterFields =
-  | "ingredientsInclude"
-  | "ingredientsExclude"
-  | "nationalitiesInclude"
-  | "nationalitiesExclude";
