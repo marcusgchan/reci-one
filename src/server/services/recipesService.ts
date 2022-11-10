@@ -1,6 +1,6 @@
 import { Ingredient, Recipe } from "@prisma/client";
-import { GetRecipesQuery, AddRecipeMutation } from "../../../schemas/recipe";
-import { Context } from "../../router/context";
+import { GetRecipesQuery, AddRecipeMutation } from "../../schemas/recipe";
+import { Context } from "../router/context";
 
 export async function createRecipe(
   ctx: Context,
