@@ -1,12 +1,8 @@
 import { createRouter } from "./context";
-import { z } from "zod";
 import { addRecipeSchema, getRecipesSchema } from "@/schemas/recipe";
 import { TRPCError } from "@trpc/server";
-import {
-  createRecipe,
-  getRecipes,
-} from "src/server/features/recipes/recipesService";
-import { getUploadSignedUrl } from "../features/recipes/s3Services";
+import { createRecipe, getRecipes } from "@/services/recipesService";
+import { getUploadSignedUrl } from "@/services/s3Services";
 
 export const recipesRouter = createRouter()
   .query("getRecipes", {

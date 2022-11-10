@@ -1,6 +1,6 @@
 import { Recipe } from "@prisma/client";
-import { GetRecipesQuery, AddRecipeMutation } from "../../../schemas/recipe";
-import { Context } from "../../router/context";
+import { GetRecipesQuery, AddRecipeMutation } from "@/schemas/recipe";
+import { Context } from "@/router/context";
 
 export async function createRecipe(
   ctx: Context,
@@ -61,36 +61,44 @@ export async function getRecipes(
 ) {
   const myRecipes = [] as Recipe[];
   if (input.viewScope !== "PUBLIC") {
-    myRecipes.push(
-      ...(await ctx.prisma.recipe.findMany({
-        where: {
-          authorId: userId, // Replace with "id of test user" if want seeded recipes
-          name: {
-            contains: input.search,
-          },
-          ingredients: getIncludeExcludeItems(
-            "name",
-            "ingredientsInclude",
-            "ingredientsExclude",
-            input
-          ),
-          nationalities: getIncludeExcludeItems(
-            "name",
-            "nationalitiesInclude",
-            "nationalitiesExclude",
-            input
-          ),
-          prepTime: {
-            gt: input.filters.prepTimeMin,
-            lt: input.filters.prepTimeMax,
-          },
-          cookTime: {
-            gt: input.filters.cookTimeMin,
-            lt: input.filters.cookTimeMax,
+    const recipes = await ctx.prisma.recipe.findMany({
+      where: {
+        authorId: userId, // Replace with "id of test user" if want seeded recipes
+        name: {
+          contains: input.search,
+        },
+        ingredients: {
+          none: {
+            OR: input.filters.ingredientsExclude.map((ingredient) => ({
+              name: { contains: ingredient },
+            })),
           },
         },
-      }))
-    );
+        nationalities: {
+          none: {
+            nationalityId: { notIn: input.filters.nationalitiesExclude },
+          },
+        },
+        AND: input.filters.ingredientsInclude
+          .map((ingredient) => ({
+            ingredients: { some: { name: { contains: ingredient } } },
+          }))
+          .concat(
+            input.filters.nationalitiesInclude.map((nationality) => ({
+              ingredients: { some: { name: { contains: nationality } } },
+            }))
+          ),
+        // prepTime: {
+        //   gt: input.filters.prepTimeMin,
+        //   lt: input.filters.prepTimeMax,
+        // },
+        // cookTime: {
+        //   gt: input.filters.cookTimeMin,
+        //   lt: input.filters.cookTimeMax,
+        // },
+      },
+    });
+    myRecipes.push(...recipes);
   }
   const publicRecipes = [] as Recipe[];
   if (input.viewScope === "PUBLIC") {
@@ -107,38 +115,6 @@ export async function getRecipes(
       }))
     );
   }
+  console.log(publicRecipes);
   return [...myRecipes, ...publicRecipes];
 }
-
-function getIncludeExcludeItems(
-  columnName: string,
-  includeFilterField: FilterFields,
-  excludeFilterField: FilterFields,
-  input: GetRecipesQuery
-) {
-  const {
-    [includeFilterField]: includeList,
-    [excludeFilterField]: excludeList,
-  } = input.filters;
-  return {
-    some:
-      includeList.length > 0
-        ? {
-            OR: includeList.map((ingredient) => ({
-              [columnName]: { contains: ingredient },
-            })),
-          }
-        : {},
-    none: {
-      OR: excludeList.map((ingredient) => ({
-        [columnName]: { contains: ingredient },
-      })),
-    },
-  };
-}
-
-type FilterFields =
-  | "ingredientsInclude"
-  | "ingredientsExclude"
-  | "nationalitiesInclude"
-  | "nationalitiesExclude";

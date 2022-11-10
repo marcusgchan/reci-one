@@ -15,6 +15,6 @@ function defineNextConfig(config) {
 export default defineNextConfig({
   reactStrictMode: true,
   images: {
-    domains: [env.BUCKET_DOMAIN],
+    domains: [env.BUCKET_DOMAIN, "upload.wikimedia.org"],
   },
 });

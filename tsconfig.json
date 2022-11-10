@@ -24,7 +24,8 @@
       "@/shared/components/*": ["src/shared/components/*"],
       "@/shared/hooks/*": ["src/shared/hooks/*"],
       "@/schemas/*": ["src/schemas/*"],
-      "@/utils/*": ["src/utils/*"]
+      "@/utils/*": ["src/utils/*"],
+      "@/services/*": ["src/server/services/*"]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "**/*.js"],

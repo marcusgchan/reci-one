@@ -1,6 +1,6 @@
 export const config = {
   seed: {
-    withTestRecipesAndUser: true,
+    withTestRecipesAndUser: false,
   },
   s3: {
     presignedUrlDuration: 60 * 60 * 24, // 24h
