@@ -18,8 +18,7 @@ export const recipesRouter = createRouter()
     async resolve({ctx, input}) {
       const userId = ctx.session?.user?.id;
       if (!userId) throw new TRPCError({ code: "UNAUTHORIZED" });
-      console.log(await getRecipe(ctx, userId));
-      return await getRecipe(ctx, userId);
+      return await getRecipe(ctx, input.recipeId);
     }
   })
   .mutation("addRecipe", {
