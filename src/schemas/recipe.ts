@@ -17,6 +17,10 @@ export const getRecipesSchema = z.object({
 });
 export type GetRecipesQuery = z.infer<typeof getRecipesSchema>;
 
+export const getRecipeSchema = z.object({
+  recipeId: z.string(),
+});
+
 export const addRecipeSchema = z.object({
   name: z.string().min(1),
   description: z.string(),

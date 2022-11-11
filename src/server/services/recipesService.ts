@@ -118,3 +118,16 @@ export async function getRecipes(
   console.log(publicRecipes);
   return [...myRecipes, ...publicRecipes];
 }
+
+export async function getRecipe(ctx: Context, recipeId: string) {
+  return await ctx.prisma.recipe.findUnique({
+    where: { id: recipeId },
+    include: {
+      ingredients: true,
+      cookingMethods: true,
+      nationalities: true,
+      mealTypes: true,
+      steps: true,
+    },
+  });
+}
