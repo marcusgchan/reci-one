@@ -1,7 +1,7 @@
 import { createRouter } from "./context";
-import { addRecipeSchema, getRecipesSchema } from "@/schemas/recipe";
+import { addRecipeSchema, getRecipeSchema, getRecipesSchema } from "@/schemas/recipe";
 import { TRPCError } from "@trpc/server";
-import { createRecipe, getRecipes } from "@/services/recipesService";
+import { createRecipe, getRecipe, getRecipes } from "@/services/recipesService";
 import { getUploadSignedUrl } from "@/services/s3Services";
 
 export const recipesRouter = createRouter()
@@ -12,6 +12,15 @@ export const recipesRouter = createRouter()
       if (!userId) throw new TRPCError({ code: "UNAUTHORIZED" });
       return await getRecipes(ctx, userId, input);
     },
+  })
+  .query("getRecipe", {
+    input: getRecipeSchema,
+    async resolve({ctx, input}) {
+      const userId = ctx.session?.user?.id;
+      if (!userId) throw new TRPCError({ code: "UNAUTHORIZED" });
+      console.log(await getRecipe(ctx, userId));
+      return await getRecipe(ctx, userId);
+    }
   })
   .mutation("addRecipe", {
     input: addRecipeSchema,

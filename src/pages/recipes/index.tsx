@@ -8,6 +8,7 @@ import { Loader } from "../../shared/components/Loader";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { GetRecipesQuery, getRecipesSchema } from "@/schemas/recipe";
+import { useRouter } from "next/router";
 
 type Recipes = inferQueryOutput<"recipes.getRecipes">;
 const scopes = ["PRIVATE", "PUBLIC", "ALL"] as const;
@@ -134,11 +135,13 @@ const Recipes = ({ data }: { data: Recipes | undefined }) => {
 };
 
 const RecipeCard = ({ id, name }: { id: string; name: string }) => {
+  const router = useRouter();
   return (
     <article
       tabIndex={0}
       role="button"
       className="mx-auto flex aspect-[1/1.3] h-full w-full animate-fade-in-down flex-col gap-4"
+      onClick={() => router.push(`/recipes/${id}`)}
     >
       <div className="relative flex w-full basis-3/5">
         <Image
