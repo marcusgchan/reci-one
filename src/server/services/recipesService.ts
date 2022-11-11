@@ -115,7 +115,6 @@ export async function getRecipes(
       }))
     );
   }
-  console.log(publicRecipes);
   return [...myRecipes, ...publicRecipes];
 }
 
