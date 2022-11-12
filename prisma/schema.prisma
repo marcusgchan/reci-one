@@ -66,12 +66,13 @@ model VerificationToken {
 }
 
 model Recipe {
-  id          String  @id @default(cuid())
+  id          String   @id @default(cuid())
   name        String
   description String
   prepTime    Decimal?
   cookTime    Decimal?
-  isPublic    Boolean @default(false)
+  isPublic    Boolean  @default(false)
+  mainImage   String   @db.VarChar(127)
 
   ingredients    Ingredient[]
   steps          Step[]
@@ -164,7 +165,7 @@ model MealType {
 
 model Image {
   id   String @id @default(cuid())
-  link String @db.VarChar(255)
+  name String @db.VarChar(127)
 
   recipeId String @db.VarChar(255)
   recipe   Recipe @relation(fields: [recipeId], references: [id])
