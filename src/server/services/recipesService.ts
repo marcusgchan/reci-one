@@ -11,6 +11,7 @@ export async function createRecipe(
   const recipe = await ctx.prisma.recipe.create({
     data: {
       name: input.name,
+      mainImage: "as;kdjf;sadkfj;da",
       description: input.description,
       prepTime: input.prepTime || undefined,
       cookTime: input.cookTime || undefined,
@@ -56,11 +57,11 @@ export async function createRecipe(
 
 export async function getRecipes(
   ctx: Context,
-  userId: string,
+  userId: string | undefined,
   input: GetRecipesQuery
 ) {
   const myRecipes = [] as Recipe[];
-  if (input.viewScope !== "PUBLIC") {
+  if (input.viewScope !== "PUBLIC" && userId) {
     const recipes = await ctx.prisma.recipe.findMany({
       where: {
         authorId: userId, // Replace with "id of test user" if want seeded recipes
@@ -130,3 +131,15 @@ export async function getRecipe(ctx: Context, recipeId: string) {
     },
   });
 }
+
+export const saveMainImageNameToDatabase = async (
+  ctx: Context,
+  userId: string,
+  recipeId: string,
+  imageName: string
+) => {
+  await ctx.prisma.recipe.update({
+    data: { mainImage: imageName },
+    where: { id: recipeId, authorId: userId },
+  });
+};

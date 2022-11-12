@@ -24,7 +24,7 @@ export const getRecipeSchema = z.object({
 export const addRecipeSchema = z.object({
   name: z.string().min(1),
   description: z.string(),
-  imageNames: z.string().array().optional(),
+  mainImage: z.string(),
   ingredients: z
     .object({
       order: z.number().int(),

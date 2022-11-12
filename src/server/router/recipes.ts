@@ -13,7 +13,10 @@ export const recipesRouter = createRouter()
     input: getRecipesSchema,
     async resolve({ ctx, input }) {
       const userId = ctx.session?.user?.id;
-      if (!userId) throw new TRPCError({ code: "UNAUTHORIZED" });
+      const recipes = await getRecipes(ctx, userId, input);
+      const urlPaths = [] as string[];
+      recipes.forEach(({ authorId, id }) => urlPaths.push(`${authorId}/${id}`));
+      Promise.allSettled(urlPaths.map((path) => {}));
       return await getRecipes(ctx, userId, input);
     },
   })
