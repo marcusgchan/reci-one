@@ -1,4 +1,8 @@
-import { DeleteObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
+import {
+  DeleteObjectCommand,
+  GetObjectCommand,
+  PutObjectCommand,
+} from "@aws-sdk/client-s3";
 import { s3Client } from "@/utils/s3Client";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { env } from "src/server/env.mjs";
@@ -26,9 +30,19 @@ export const getUploadSignedUrl = async (
   }
 };
 
-// export const getSignedUrl = async (userId: string, recipeId: string) => {
-
-// }
+export const getImageSignedUrl = async (
+  userId: string,
+  recipeId: string,
+  imageName: string
+) => {
+  const command = new GetObjectCommand({
+    Bucket: `${env.BUCKET_NAME}`,
+    Key: `${userId}/${recipeId}/${imageName}`,
+  });
+  const signedUrl = await getSignedUrl(s3Client, command, {
+    expiresIn: config.s3.presignedUrlDuration,
+  });
+};
 
 export const remove = async (
   userId: string,
