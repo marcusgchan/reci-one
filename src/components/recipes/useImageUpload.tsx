@@ -1,16 +1,16 @@
 import { useState } from "react";
 
-export function useImageUpload(multiple = false) {
-  const [files, setFiles] = useState<File[]>([]);
+export function useImageUpload() {
+  const [file, setFile] = useState<File>();
   const formData = new FormData();
-  files.forEach((file) => {
-    formData.append(`files`, file, file.name);
-  });
+  if (file) {
+    formData.append(`file`, file, file.name);
+  }
   const handleFilesSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const fileList = e.target.files;
-    if (fileList) {
-      setFiles([...files, ...Array.from(fileList)]);
+    if (fileList && fileList[0]) {
+      setFile(fileList[0]);
     }
   };
-  return { files, handleFilesSelect, formData };
+  return { file, handleFilesSelect, formData };
 }

@@ -1,6 +1,6 @@
 import { createRouter } from "./context";
 import {
-  addRecipeSchema,
+  addRecipeWithImagesSchema,
   getRecipeSchema,
   getRecipesSchema,
 } from "@/schemas/recipe";
@@ -29,19 +29,16 @@ export const recipesRouter = createRouter()
     },
   })
   .mutation("addRecipe", {
-    input: addRecipeSchema,
+    input: addRecipeWithImagesSchema,
     async resolve({ ctx, input }) {
       const userId = ctx.session?.user?.id;
       if (!userId) throw new TRPCError({ code: "UNAUTHORIZED" });
       const recipe = await createRecipe(ctx, userId, input);
-      if (input.imageNames) {
-        const signedUrl = await getUploadSignedUrl(
-          userId,
-          recipe.id,
-          input.imageNames
-        );
-        return signedUrl;
-      }
-      return "";
+      const signedUrl = await getUploadSignedUrl(
+        userId,
+        recipe.id,
+        input.mainImage
+      );
+      return signedUrl;
     },
   });

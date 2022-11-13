@@ -5,7 +5,10 @@ import { GrDrag } from "react-icons/gr";
 import { CheckIcon, ChevronUpDownIcon } from "@heroicons/react/20/solid";
 import { Combobox } from "@headlessui/react";
 import { useDropdownQuery } from "@/components/recipes/useDropdownQuery";
-import { AddRecipeMutation } from "@/schemas/recipe";
+import {
+  addRecipeWithImagesSchema,
+  addRecipeWithoutMainImage,
+} from "@/schemas/recipe";
 import { v4 as uuidv4 } from "uuid";
 import type { MealType, Nationality, CookingMethod } from "@prisma/client";
 import { Loader } from "@/shared/components/Loader";
@@ -26,7 +29,6 @@ import {
   NumberInputNames,
   DropdownListNames,
   ListInputFields,
-  AddRecipeMutationWithId,
   DropdownListValues,
 } from "@/components/recipes/types";
 import { useRouter } from "next/router";
@@ -34,11 +36,7 @@ import { useImageUpload } from "@/components/recipes/useImageUpload";
 
 const Create: CustomReactFC = () => {
   const router = useRouter();
-  const {
-    files,
-    handleFilesSelect,
-    formData: imageFormData,
-  } = useImageUpload();
+  const { file, handleFilesSelect, formData: imageFormData } = useImageUpload();
   const mutation = trpc.useMutation(["recipes.addRecipe"], {
     async onSuccess(signedUrl) {
       if (!signedUrl) return;
@@ -58,7 +56,7 @@ const Create: CustomReactFC = () => {
     isError,
     isLoading,
   } = useDropdownQuery();
-  const [formData, setFormData] = useState<AddRecipeMutationWithId>({
+  const [formData, setFormData] = useState<addRecipeWithoutMainImage>({
     name: "",
     description: "",
     ingredients: [
@@ -108,11 +106,15 @@ const Create: CustomReactFC = () => {
 
   const createRecipe = (e: React.FormEvent) => {
     e.preventDefault();
-    mutation.mutate(
-      files.length > 0
-        ? { ...formData, imageNames: files.map((file) => file.name) }
-        : formData
-    );
+    const data = {
+      ...formData,
+      mainImage: file?.name,
+    };
+    const result = addRecipeWithImagesSchema.safeParse(data);
+    if (result.success) {
+      mutation.mutate(result.data);
+    }
+    // Todo: handle errors
   };
 
   const navigateBack = () => router.back();
@@ -199,7 +201,7 @@ const NameDesImgSection = ({
   handleStringInput,
   handleFilesSelect,
 }: {
-  name: AddRecipeMutation["name"];
+  name: addRecipeWithoutMainImage["name"];
   handleStringInput: (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
     type: "string" | "number",
@@ -247,8 +249,8 @@ const TimeSection = ({
   prepTime,
   handleBasicInput,
 }: {
-  cookTime: AddRecipeMutation["cookTime"];
-  prepTime: AddRecipeMutation["prepTime"];
+  cookTime: addRecipeWithoutMainImage["cookTime"];
+  prepTime: addRecipeWithoutMainImage["prepTime"];
   handleBasicInput: (
     e: React.ChangeEvent<HTMLInputElement>,
     type: "string" | "number",
@@ -295,7 +297,7 @@ const IngredientsSection = ({
     type: ListInputFields
   ) => void;
   removeListInput: (id: string, type: ListInputFields) => void;
-  ingredients: AddRecipeMutationWithId["ingredients"];
+  ingredients: addRecipeWithoutMainImage["ingredients"];
   addItemToList: (
     e: React.MouseEvent<HTMLButtonElement>,
     isHeader: boolean,
@@ -401,7 +403,7 @@ const CookingMethodsSection = ({
   deleteFromList,
 }: {
   cookingMethods: CookingMethod[];
-  cookingMethodsFormData: AddRecipeMutationWithId["cookingMethods"];
+  cookingMethodsFormData: addRecipeWithoutMainImage["cookingMethods"];
   addToList: (type: DropdownListNames, objToAdd: DropdownListValues) => void;
   deleteFromList: (type: DropdownListNames, id: string) => void;
 }) => {
@@ -439,7 +441,7 @@ const MealTypeSection = ({
   deleteFromList,
 }: {
   mealTypes: MealType[];
-  mealTypesFormData: AddRecipeMutationWithId["mealTypes"];
+  mealTypesFormData: addRecipeWithoutMainImage["mealTypes"];
   addToList: (type: DropdownListNames, objToAdd: DropdownListValues) => void;
   deleteFromList: (type: DropdownListNames, id: string) => void;
 }) => {
@@ -479,7 +481,7 @@ const NationalitySection = ({
   deleteFromList,
 }: {
   nationalities: Nationality[];
-  nationalitiesFormData: AddRecipeMutationWithId["nationalities"];
+  nationalitiesFormData: addRecipeWithoutMainImage["nationalities"];
   addToList: (type: DropdownListNames, objToAdd: DropdownListValues) => void;
   deleteFromList: (type: DropdownListNames, id: string) => void;
 }) => {
@@ -659,7 +661,7 @@ const StepsSection = ({
     type: ListInputFields
   ) => void;
   removeListInput: (id: string, type: ListInputFields) => void;
-  steps: AddRecipeMutationWithId["steps"];
+  steps: addRecipeWithoutMainImage["steps"];
   addItemToList: (
     e: React.MouseEvent<HTMLButtonElement>,
     isHeader: boolean,

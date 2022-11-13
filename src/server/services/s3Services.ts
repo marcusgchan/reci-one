@@ -8,12 +8,11 @@ import { TRPCError } from "@trpc/server";
 export const getUploadSignedUrl = async (
   userId: string,
   recipeId: string,
-  fileNames: string[]
+  imageName: string
 ) => {
-  if (fileNames.length === 0) throw new TRPCError({ code: "BAD_REQUEST" });
   const bucketParams = {
     Bucket: `${env.BUCKET_NAME}`,
-    Key: `${userId}/${recipeId}/${fileNames[0]}`,
+    Key: `${userId}/${recipeId}/${imageName}`,
   };
   try {
     const command = new PutObjectCommand(bucketParams);
