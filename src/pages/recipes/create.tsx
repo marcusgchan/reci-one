@@ -113,11 +113,12 @@ const Create: CustomReactFC = () => {
     const result = addRecipeWithImagesSchema.safeParse(data);
     if (result.success) {
       mutation.mutate(result.data);
+      router.push("/recipes");
     }
     // Todo: handle errors
   };
 
-  const navigateBack = () => router.back();
+  const navigateToRecipes = () => router.push("/recipes");
 
   if (isLoading) {
     return <Loader />;
@@ -129,7 +130,7 @@ const Create: CustomReactFC = () => {
         onSubmit={createRecipe}
       >
         <div>
-          <button type="button" onClick={navigateBack} className="p-1">
+          <button type="button" onClick={navigateToRecipes} className="p-1">
             Back
           </button>
           <h2 className="text-2xl">Add Recipe</h2>
