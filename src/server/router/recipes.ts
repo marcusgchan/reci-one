@@ -49,9 +49,3 @@ export const recipesRouter = createRouter()
       return signedUrl;
     },
   });
-
-// getImageSignedUrl(
-//   "clahpc6yj0000qgg9j432zgvd",
-//   "clahphgj20004qgg9rzw81voq",
-//   "Honeycrisp-Apple.jpg"
-// ).catch(() => "sad;kfj");

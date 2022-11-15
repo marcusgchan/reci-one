@@ -40,7 +40,7 @@ const Create: CustomReactFC = () => {
   const mutation = trpc.useMutation(["recipes.addRecipe"], {
     async onSuccess(signedUrl) {
       if (!signedUrl) return;
-      const response = await fetch(signedUrl, {
+      await fetch(signedUrl, {
         method: "PUT",
         body: formDataValue,
       });
@@ -112,7 +112,6 @@ const Create: CustomReactFC = () => {
     const result = addRecipeWithImagesSchema.safeParse(data);
     if (result.success) {
       mutation.mutate(result.data);
-      router.push("/recipes");
     }
     // Todo: handle errors
   };
