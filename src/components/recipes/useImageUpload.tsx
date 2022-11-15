@@ -12,5 +12,5 @@ export function useImageUpload() {
       setFile(fileList[0]);
     }
   };
-  return { file, handleFilesSelect, formData };
+  return { file, handleFilesSelect, formDataValue: formData.get("file") };
 }

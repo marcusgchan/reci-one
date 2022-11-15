@@ -14,12 +14,17 @@ export const recipesRouter = createRouter()
     async resolve({ ctx, input }) {
       const userId = ctx.session?.user?.id;
       const recipes = await getRecipes(ctx, userId, input);
-      Promise.allSettled(
-        recipes.map(({ id, mainImage, authorId }) =>
-          getImageSignedUrl(authorId, id, mainImage)
+      const signedUrls = await Promise.all(
+        recipes.map((recipe) =>
+          getImageSignedUrl(recipe.authorId, recipe.id, recipe.mainImage).catch(
+            () => "sad;kfj"
+          )
         )
       );
-      return await getRecipes(ctx, userId, input);
+      recipes.forEach(
+        (recipe, i) => (recipe.mainImage = signedUrls[i] as string)
+      );
+      return recipes;
     },
   })
   .query("getRecipe", {
@@ -44,3 +49,9 @@ export const recipesRouter = createRouter()
       return signedUrl;
     },
   });
+
+// getImageSignedUrl(
+//   "clahpc6yj0000qgg9j432zgvd",
+//   "clahphgj20004qgg9rzw81voq",
+//   "Honeycrisp-Apple.jpg"
+// ).catch(() => "sad;kfj");

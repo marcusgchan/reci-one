@@ -36,15 +36,14 @@ import { useImageUpload } from "@/components/recipes/useImageUpload";
 
 const Create: CustomReactFC = () => {
   const router = useRouter();
-  const { file, handleFilesSelect, formData: imageFormData } = useImageUpload();
+  const { file, handleFilesSelect, formDataValue } = useImageUpload();
   const mutation = trpc.useMutation(["recipes.addRecipe"], {
     async onSuccess(signedUrl) {
       if (!signedUrl) return;
       const response = await fetch(signedUrl, {
         method: "PUT",
-        body: imageFormData,
+        body: formDataValue,
       });
-      console.log(response);
       router.push("/recipes");
     },
   });

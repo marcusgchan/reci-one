@@ -63,7 +63,7 @@ export const addRecipeWithImagesSchema = z.object({
     })
     .array(),
 });
-export type AddRecipe = z.infer<typeof addRecipeWithImagesSchema>;
+export type addRecipeWithImages = z.infer<typeof addRecipeWithImagesSchema>;
 
 const addRecipeWithoutImageSchema = addRecipeWithImagesSchema.omit({
   mainImage: true,
