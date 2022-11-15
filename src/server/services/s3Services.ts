@@ -42,6 +42,7 @@ export const getImageSignedUrl = async (
   const signedUrl = await getSignedUrl(s3Client, command, {
     expiresIn: config.s3.presignedUrlDuration,
   });
+  return signedUrl;
 };
 
 export const remove = async (

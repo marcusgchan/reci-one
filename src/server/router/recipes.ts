@@ -6,7 +6,7 @@ import {
 } from "@/schemas/recipe";
 import { TRPCError } from "@trpc/server";
 import { createRecipe, getRecipe, getRecipes } from "@/services/recipesService";
-import { getUploadSignedUrl } from "@/services/s3Services";
+import { getImageSignedUrl, getUploadSignedUrl } from "@/services/s3Services";
 
 export const recipesRouter = createRouter()
   .query("getRecipes", {
@@ -14,9 +14,11 @@ export const recipesRouter = createRouter()
     async resolve({ ctx, input }) {
       const userId = ctx.session?.user?.id;
       const recipes = await getRecipes(ctx, userId, input);
-      const urlPaths = [] as string[];
-      recipes.forEach(({ authorId, id }) => urlPaths.push(`${authorId}/${id}`));
-      Promise.allSettled(urlPaths.map((path) => {}));
+      Promise.allSettled(
+        recipes.map(({ id, mainImage, authorId }) =>
+          getImageSignedUrl(authorId, id, mainImage)
+        )
+      );
       return await getRecipes(ctx, userId, input);
     },
   })
