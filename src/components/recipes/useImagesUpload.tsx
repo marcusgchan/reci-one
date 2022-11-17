@@ -12,5 +12,23 @@ export function useImagesUpload() {
       setFiles([...files, ...Array.from(fileList)]);
     }
   };
-  return { files, handleFilesSelect, formData };
+  const handleFileDrop = (e: React.DragEvent) => {
+    // Prevent file from opening
+    e.preventDefault();
+
+    const items = e.dataTransfer.items;
+    const filesFromDrop = [] as File[];
+    if (items) {
+      [...items].forEach((item) => {
+        if (item.kind === "file") {
+          const file = item.getAsFile();
+          if (file) {
+            filesFromDrop.push(file);
+          }
+        }
+      });
+      setFiles(filesFromDrop);
+    }
+  };
+  return { files, handleFilesSelect, handleFileDrop, formData };
 }

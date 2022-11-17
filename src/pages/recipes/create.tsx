@@ -36,7 +36,8 @@ import { useImageUpload } from "@/components/recipes/useImageUpload";
 
 const Create: CustomReactFC = () => {
   const router = useRouter();
-  const { file, handleFilesSelect, formDataValue } = useImageUpload();
+  const { file, handleFileSelect, handleFileDrop, formDataValue } =
+    useImageUpload();
   const mutation = trpc.useMutation(["recipes.addRecipe"], {
     async onSuccess(signedUrl) {
       if (!signedUrl) return;
@@ -137,7 +138,8 @@ const Create: CustomReactFC = () => {
           <NameDesImgSection
             name={formData.name}
             handleStringInput={handleBasicInput}
-            handleFilesSelect={handleFilesSelect}
+            handleFileSelect={handleFileSelect}
+            handleFileDrop={handleFileDrop}
           />
         </SectionWrapper>
         <SectionWrapper>
@@ -198,7 +200,8 @@ const Create: CustomReactFC = () => {
 const NameDesImgSection = ({
   name,
   handleStringInput,
-  handleFilesSelect,
+  handleFileSelect,
+  handleFileDrop,
 }: {
   name: addRecipeWithoutMainImage["name"];
   handleStringInput: (
@@ -206,7 +209,8 @@ const NameDesImgSection = ({
     type: "string" | "number",
     name: StringInputNames
   ) => void;
-  handleFilesSelect: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleFileSelect: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleFileDrop: (e: React.DragEvent) => void;
 }) => {
   const id = useId();
   return (
@@ -237,7 +241,10 @@ const NameDesImgSection = ({
         </div>
       </div>
       <div className="flex-1 shrink-0 bg-red-300">
-        <UploadImages handleFilesSelect={handleFilesSelect} />
+        <UploadImages
+          handleFilesSelect={handleFileSelect}
+          handleFileDrop={handleFileDrop}
+        />
       </div>
     </div>
   );
@@ -776,13 +783,18 @@ const DraggableInput = ({
 
 const UploadImages = ({
   handleFilesSelect,
+  handleFileDrop,
 }: {
   handleFilesSelect: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleFileDrop: (e: React.DragEvent) => void;
 }) => {
   return (
     <div>
       <label htmlFor="cover-photo">Upload Recipe Image</label>
-      <div className="flex justify-center rounded-md border-2 border-dashed border-gray-300 px-6 py-8">
+      <div
+        className="flex justify-center rounded-md border-2 border-dashed border-gray-300 px-6 py-8"
+        onDrop={handleFileDrop}
+      >
         <div className="space-y-1 text-center">
           <svg
             className="mx-auto h-12 w-12 text-gray-400"
