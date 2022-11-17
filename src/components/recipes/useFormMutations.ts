@@ -3,13 +3,13 @@ import {
   NumberInputNames,
   DropdownListNames,
   ListInputFields,
-  AddRecipeMutationWithId,
 } from "./types";
 import { v4 as uuidv4 } from "uuid";
 import { CookingMethod, MealType, Nationality } from "@prisma/client";
+import { addRecipeWithoutMainImage } from "@/schemas/recipe";
 
 export function useFormMutations(
-  setFormData: (value: React.SetStateAction<AddRecipeMutationWithId>) => void
+  setFormData: (value: React.SetStateAction<addRecipeWithoutMainImage>) => void
 ) {
   const updateListInput = (
     e: React.ChangeEvent<HTMLInputElement>,

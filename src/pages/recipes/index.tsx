@@ -126,15 +126,23 @@ const Recipes = ({ data }: { data: Recipes | undefined }) => {
   return (
     <>
       {data
-        ? data.map(({ id, name }: { id: string; name: string }) => (
-            <RecipeCard key={id} id={id} name={name} />
+        ? data.map(({ id, name, mainImage }) => (
+            <RecipeCard key={id} id={id} name={name} src={mainImage} />
           ))
         : []}
     </>
   );
 };
 
-const RecipeCard = ({ id, name }: { id: string; name: string }) => {
+const RecipeCard = ({
+  id,
+  name,
+  src,
+}: {
+  id: string;
+  name: string;
+  src: string;
+}) => {
   const router = useRouter();
   return (
     <article
@@ -150,7 +158,7 @@ const RecipeCard = ({ id, name }: { id: string; name: string }) => {
           loading="eager"
           objectFit="cover"
           alt={name}
-          src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Google_%22G%22_Logo.svg/2048px-Google_%22G%22_Logo.svg.png"
+          src={src + "#123"}
         />
       </div>
       <div className="flex flex-1 items-center justify-center bg-accent-400">

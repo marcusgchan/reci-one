@@ -5,7 +5,10 @@ import { GrDrag } from "react-icons/gr";
 import { CheckIcon, ChevronUpDownIcon } from "@heroicons/react/20/solid";
 import { Combobox } from "@headlessui/react";
 import { useDropdownQuery } from "@/components/recipes/useDropdownQuery";
-import { AddRecipeMutation } from "@/schemas/recipe";
+import {
+  addRecipeWithImagesSchema,
+  addRecipeWithoutMainImage,
+} from "@/schemas/recipe";
 import { v4 as uuidv4 } from "uuid";
 import type { MealType, Nationality, CookingMethod } from "@prisma/client";
 import { Loader } from "@/shared/components/Loader";
@@ -26,7 +29,6 @@ import {
   NumberInputNames,
   DropdownListNames,
   ListInputFields,
-  AddRecipeMutationWithId,
   DropdownListValues,
 } from "@/components/recipes/types";
 import { useRouter } from "next/router";
@@ -34,19 +36,14 @@ import { useImageUpload } from "@/components/recipes/useImageUpload";
 
 const Create: CustomReactFC = () => {
   const router = useRouter();
-  const {
-    files,
-    handleFilesSelect,
-    formData: imageFormData,
-  } = useImageUpload();
+  const { file, handleFilesSelect, formDataValue } = useImageUpload();
   const mutation = trpc.useMutation(["recipes.addRecipe"], {
     async onSuccess(signedUrl) {
       if (!signedUrl) return;
-      const response = await fetch(signedUrl, {
+      await fetch(signedUrl, {
         method: "PUT",
-        body: imageFormData,
+        body: formDataValue,
       });
-      console.log(response);
       router.push("/recipes");
     },
   });
@@ -58,7 +55,7 @@ const Create: CustomReactFC = () => {
     isError,
     isLoading,
   } = useDropdownQuery();
-  const [formData, setFormData] = useState<AddRecipeMutationWithId>({
+  const [formData, setFormData] = useState<addRecipeWithoutMainImage>({
     name: "",
     description: "",
     ingredients: [
@@ -108,14 +105,18 @@ const Create: CustomReactFC = () => {
 
   const createRecipe = (e: React.FormEvent) => {
     e.preventDefault();
-    mutation.mutate(
-      files.length > 0
-        ? { ...formData, imageNames: files.map((file) => file.name) }
-        : formData
-    );
+    const data = {
+      ...formData,
+      mainImage: file?.name,
+    };
+    const result = addRecipeWithImagesSchema.safeParse(data);
+    if (result.success) {
+      mutation.mutate(result.data);
+    }
+    // Todo: handle errors
   };
 
-  const navigateBack = () => router.back();
+  const navigateToRecipes = () => router.push("/recipes");
 
   if (isLoading) {
     return <Loader />;
@@ -127,7 +128,7 @@ const Create: CustomReactFC = () => {
         onSubmit={createRecipe}
       >
         <div>
-          <button type="button" onClick={navigateBack} className="p-1">
+          <button type="button" onClick={navigateToRecipes} className="p-1">
             Back
           </button>
           <h2 className="text-2xl">Add Recipe</h2>
@@ -199,7 +200,7 @@ const NameDesImgSection = ({
   handleStringInput,
   handleFilesSelect,
 }: {
-  name: AddRecipeMutation["name"];
+  name: addRecipeWithoutMainImage["name"];
   handleStringInput: (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
     type: "string" | "number",
@@ -247,8 +248,8 @@ const TimeSection = ({
   prepTime,
   handleBasicInput,
 }: {
-  cookTime: AddRecipeMutation["cookTime"];
-  prepTime: AddRecipeMutation["prepTime"];
+  cookTime: addRecipeWithoutMainImage["cookTime"];
+  prepTime: addRecipeWithoutMainImage["prepTime"];
   handleBasicInput: (
     e: React.ChangeEvent<HTMLInputElement>,
     type: "string" | "number",
@@ -295,7 +296,7 @@ const IngredientsSection = ({
     type: ListInputFields
   ) => void;
   removeListInput: (id: string, type: ListInputFields) => void;
-  ingredients: AddRecipeMutationWithId["ingredients"];
+  ingredients: addRecipeWithoutMainImage["ingredients"];
   addItemToList: (
     e: React.MouseEvent<HTMLButtonElement>,
     isHeader: boolean,
@@ -401,7 +402,7 @@ const CookingMethodsSection = ({
   deleteFromList,
 }: {
   cookingMethods: CookingMethod[];
-  cookingMethodsFormData: AddRecipeMutationWithId["cookingMethods"];
+  cookingMethodsFormData: addRecipeWithoutMainImage["cookingMethods"];
   addToList: (type: DropdownListNames, objToAdd: DropdownListValues) => void;
   deleteFromList: (type: DropdownListNames, id: string) => void;
 }) => {
@@ -439,7 +440,7 @@ const MealTypeSection = ({
   deleteFromList,
 }: {
   mealTypes: MealType[];
-  mealTypesFormData: AddRecipeMutationWithId["mealTypes"];
+  mealTypesFormData: addRecipeWithoutMainImage["mealTypes"];
   addToList: (type: DropdownListNames, objToAdd: DropdownListValues) => void;
   deleteFromList: (type: DropdownListNames, id: string) => void;
 }) => {
@@ -479,7 +480,7 @@ const NationalitySection = ({
   deleteFromList,
 }: {
   nationalities: Nationality[];
-  nationalitiesFormData: AddRecipeMutationWithId["nationalities"];
+  nationalitiesFormData: addRecipeWithoutMainImage["nationalities"];
   addToList: (type: DropdownListNames, objToAdd: DropdownListValues) => void;
   deleteFromList: (type: DropdownListNames, id: string) => void;
 }) => {
@@ -598,7 +599,7 @@ const SearchableSelect = ({
         </Combobox.Button>
 
         {filteredData.length > 0 && (
-          <Combobox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 sm:text-sm">
+          <Combobox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 sm:text-sm">
             {filteredData.map((data) => (
               <Combobox.Option
                 key={data.id}
@@ -659,7 +660,7 @@ const StepsSection = ({
     type: ListInputFields
   ) => void;
   removeListInput: (id: string, type: ListInputFields) => void;
-  steps: AddRecipeMutationWithId["steps"];
+  steps: addRecipeWithoutMainImage["steps"];
   addItemToList: (
     e: React.MouseEvent<HTMLButtonElement>,
     isHeader: boolean,

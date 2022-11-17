@@ -65,6 +65,7 @@ async function createDefaultRecipies() {
           description: faker.commerce.productDescription(),
           cookTime: faker.datatype.float(),
           prepTime: faker.datatype.float(),
+          mainImage: "",
           isPublic: false,
           mealTypes: {
             create: [
