@@ -22,6 +22,7 @@ export const getUploadSignedUrl = async (
     const command = new PutObjectCommand(bucketParams);
     const signedUrl = await getSignedUrl(s3Client, command, {
       expiresIn: config.s3.presignedUrlDuration,
+      signingDate: new Date(),
     });
     return signedUrl;
   } catch (err) {
@@ -39,8 +40,14 @@ export const getImageSignedUrl = async (
     Bucket: `${env.BUCKET_NAME}`,
     Key: `${userId}/${recipeId}/${imageName}`,
   });
+  const date = new Date();
+  date.setHours(9);
+  date.setMinutes(0);
+  date.setSeconds(0);
+  date.setMilliseconds(0);
   const signedUrl = await getSignedUrl(s3Client, command, {
     expiresIn: config.s3.presignedUrlDuration,
+    signingDate: date,
   });
   return signedUrl;
 };

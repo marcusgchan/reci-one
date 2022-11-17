@@ -24,24 +24,27 @@ const Index = () => {
       setSharingScopeIndex(sharingScopeIndex + 1);
     }
   };
-  const { data, isLoading, isError, refetch } = trpc.useQuery([
-    "recipes.getRecipes",
-    {
-      search: "",
-      viewScope: scopes[sharingScopeIndex] || "PRIVATE",
-      filters: {
-        ingredientsInclude: [],
-        ingredientsExclude: [],
-        nationalitiesInclude: [],
-        nationalitiesExclude: [],
-        prepTimeMin: Number.MIN_VALUE,
-        prepTimeMax: Number.MAX_VALUE,
-        cookTimeMin: Number.MIN_VALUE,
-        cookTimeMax: Number.MAX_VALUE,
-        rating: 5,
+  const { data, isLoading, isError, refetch } = trpc.useQuery(
+    [
+      "recipes.getRecipes",
+      {
+        search: "",
+        viewScope: scopes[sharingScopeIndex] || "PRIVATE",
+        filters: {
+          ingredientsInclude: [],
+          ingredientsExclude: [],
+          nationalitiesInclude: [],
+          nationalitiesExclude: [],
+          prepTimeMin: Number.MIN_VALUE,
+          prepTimeMax: Number.MAX_VALUE,
+          cookTimeMin: Number.MIN_VALUE,
+          cookTimeMax: Number.MAX_VALUE,
+          rating: 5,
+        },
       },
-    },
-  ]);
+    ],
+    { cacheTime: 60 * 60 }
+  );
 
   const {
     register,
@@ -158,7 +161,7 @@ const RecipeCard = ({
           loading="eager"
           objectFit="cover"
           alt={name}
-          src={src}
+          src={src + "#123"}
         />
       </div>
       <div className="flex flex-1 items-center justify-center bg-accent-400">
