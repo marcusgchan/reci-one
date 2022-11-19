@@ -819,7 +819,7 @@ const UploadImages = ({
       <label htmlFor="cover-photo">Upload Recipe Image</label>
       {!imgObjUrl ? (
         <div
-          className="flex h-full justify-center rounded-md border-2 border-dashed border-gray-400 px-6 py-8"
+          className="cursor-drop flex h-full justify-center rounded-md border-2 border-dashed border-gray-400 px-6 py-8"
           onDrop={handleFileDrop}
           onDragOver={(e) => e.preventDefault()}
         >
@@ -838,10 +838,10 @@ const UploadImages = ({
                 strokeLinejoin="round"
               />
             </svg>
-            <div className="flex text-sm text-gray-600">
+            <div className="flex items-center text-sm text-gray-600">
               <label
                 htmlFor="file-upload"
-                className="relative cursor-pointer rounded-md bg-white font-medium text-gray-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2"
+                className="border-gray relative cursor-pointer rounded-md border-2 bg-white p-[0.5px] font-medium text-gray-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2"
               >
                 <span>Upload a file</span>
                 <input
