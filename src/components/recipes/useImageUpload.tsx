@@ -1,8 +1,24 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 export function useImageUpload() {
   const [file, setFile] = useState<File>();
   const formData = new FormData();
+
+  // For displaying imgs
+  const [imgObjUrl, setImgObjUrl] = useState<string>();
+  useEffect(() => {
+    let objUrl: string;
+    if (file) {
+      objUrl = URL.createObjectURL(file);
+      setImgObjUrl(objUrl);
+    }
+    return () => {
+      if (file) {
+        URL.revokeObjectURL(objUrl);
+      }
+    };
+  }, [file]);
+
   if (file) {
     formData.append(`file`, file, file.name);
   }
@@ -30,5 +46,6 @@ export function useImageUpload() {
     handleFileSelect,
     handleFileDrop,
     formDataValue: formData.get("file"),
+    imgObjUrl,
   };
 }
