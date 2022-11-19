@@ -38,8 +38,15 @@ import Image from "next/image";
 
 const Create: CustomReactFC = () => {
   const router = useRouter();
-  const { file, handleFileSelect, handleFileDrop, formDataValue, imgObjUrl } =
-    useImageUpload();
+  const {
+    file,
+    handleFileSelect,
+    handleFileDrop,
+    formDataValue,
+    imgObjUrlRef,
+    handleFileLoad,
+    removeFile,
+  } = useImageUpload();
   const mutation = trpc.useMutation(["recipes.addRecipe"], {
     async onSuccess(signedUrl) {
       if (!signedUrl) return;
@@ -142,7 +149,9 @@ const Create: CustomReactFC = () => {
             handleStringInput={handleBasicInput}
             handleFileSelect={handleFileSelect}
             handleFileDrop={handleFileDrop}
-            imgObjUrl={imgObjUrl}
+            handleFileLoad={handleFileLoad}
+            removeFile={removeFile}
+            imgObjUrl={imgObjUrlRef.current}
           />
         </SectionWrapper>
         <SectionWrapper>
@@ -206,6 +215,8 @@ const NameDesImgSection = ({
   handleFileSelect,
   handleFileDrop,
   imgObjUrl,
+  handleFileLoad,
+  removeFile,
 }: {
   name: addRecipeWithoutMainImage["name"];
   handleStringInput: (
@@ -216,6 +227,8 @@ const NameDesImgSection = ({
   handleFileSelect: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleFileDrop: (e: React.DragEvent) => void;
   imgObjUrl: undefined | string;
+  handleFileLoad: (src: string) => void;
+  removeFile: (src: string) => void;
 }) => {
   const id = useId();
   return (
@@ -246,6 +259,8 @@ const NameDesImgSection = ({
       </div>
       <div className="flex-1 shrink-0">
         <UploadImages
+          handleFileLoad={handleFileLoad}
+          removeFile={removeFile}
           handleFilesSelect={handleFileSelect}
           handleFileDrop={handleFileDrop}
           imgObjUrl={imgObjUrl}
@@ -790,10 +805,14 @@ const UploadImages = ({
   handleFilesSelect,
   handleFileDrop,
   imgObjUrl,
+  handleFileLoad,
+  removeFile,
 }: {
   handleFilesSelect: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleFileDrop: (e: React.DragEvent) => void;
   imgObjUrl: string | undefined;
+  handleFileLoad: (src: string) => void;
+  removeFile: (src: string) => void;
 }) => {
   return (
     <div className="flex h-full flex-col">
@@ -802,6 +821,7 @@ const UploadImages = ({
         <div
           className="flex h-full justify-center rounded-md border-2 border-dashed border-gray-400 px-6 py-8"
           onDrop={handleFileDrop}
+          onDragOver={(e) => e.preventDefault()}
         >
           <div className="space-y-1 text-center">
             <svg
@@ -840,11 +860,15 @@ const UploadImages = ({
         </div>
       ) : (
         <div className="relative h-full">
-          <button className="absolute right-0 top-0 z-10 translate-x-1/2 -translate-y-1/2 rounded-full bg-white text-gray-400 outline-offset-2 transition-transform hover:scale-110 focus:scale-110">
+          <button
+            onClick={() => removeFile(imgObjUrl)}
+            className="absolute right-0 top-0 z-10 translate-x-1/2 -translate-y-1/2 rounded-full bg-white text-gray-400 outline-offset-2 transition-transform hover:scale-110 focus:scale-110"
+          >
             <CgCloseO size={25} />
           </button>
           <Image
             src={imgObjUrl}
+            onLoad={() => handleFileLoad(imgObjUrl)}
             objectFit="cover"
             layout="fill"
             alt="uploaded image"
