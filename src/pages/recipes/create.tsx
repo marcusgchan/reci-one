@@ -132,7 +132,7 @@ const Create: CustomReactFC = () => {
     return <Loader />;
   }
   return (
-    <section className="p-5">
+    <section className="p-5 pb-10">
       <form
         className="m-auto grid w-full max-w-xl grid-cols-1 gap-5 pb-2 text-gray-500"
         onSubmit={createRecipe}
