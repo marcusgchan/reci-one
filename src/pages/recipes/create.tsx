@@ -2,6 +2,7 @@ import { CustomReactFC } from "@/shared/types";
 import React, { useId, useState } from "react";
 import { BiMinus } from "react-icons/bi";
 import { GrDrag } from "react-icons/gr";
+import { CgCloseO } from "react-icons/cg";
 import { CheckIcon, ChevronUpDownIcon } from "@heroicons/react/20/solid";
 import { Combobox } from "@headlessui/react";
 import { useDropdownQuery } from "@/components/recipes/useDropdownQuery";
@@ -33,10 +34,19 @@ import {
 } from "@/components/recipes/types";
 import { useRouter } from "next/router";
 import { useImageUpload } from "@/components/recipes/useImageUpload";
+import Image from "next/image";
 
 const Create: CustomReactFC = () => {
   const router = useRouter();
-  const { file, handleFilesSelect, formDataValue } = useImageUpload();
+  const {
+    file,
+    handleFileSelect,
+    handleFileDrop,
+    formDataValue,
+    imgObjUrlRef,
+    handleFileLoad,
+    removeFile,
+  } = useImageUpload();
   const mutation = trpc.useMutation(["recipes.addRecipe"], {
     async onSuccess(signedUrl) {
       if (!signedUrl) return;
@@ -124,7 +134,7 @@ const Create: CustomReactFC = () => {
   return (
     <section className="p-4">
       <form
-        className="m-auto grid w-full max-w-lg gap-5 pb-2 text-gray-500"
+        className="m-auto grid w-full max-w-xl gap-5 pb-2 text-gray-500"
         onSubmit={createRecipe}
       >
         <div>
@@ -137,7 +147,11 @@ const Create: CustomReactFC = () => {
           <NameDesImgSection
             name={formData.name}
             handleStringInput={handleBasicInput}
-            handleFilesSelect={handleFilesSelect}
+            handleFileSelect={handleFileSelect}
+            handleFileDrop={handleFileDrop}
+            handleFileLoad={handleFileLoad}
+            removeFile={removeFile}
+            imgObjUrl={imgObjUrlRef.current}
           />
         </SectionWrapper>
         <SectionWrapper>
@@ -198,7 +212,11 @@ const Create: CustomReactFC = () => {
 const NameDesImgSection = ({
   name,
   handleStringInput,
-  handleFilesSelect,
+  handleFileSelect,
+  handleFileDrop,
+  imgObjUrl,
+  handleFileLoad,
+  removeFile,
 }: {
   name: addRecipeWithoutMainImage["name"];
   handleStringInput: (
@@ -206,11 +224,15 @@ const NameDesImgSection = ({
     type: "string" | "number",
     name: StringInputNames
   ) => void;
-  handleFilesSelect: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleFileSelect: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleFileDrop: (e: React.DragEvent) => void;
+  imgObjUrl: undefined | string;
+  handleFileLoad: (src: string) => void;
+  removeFile: (src: string) => void;
 }) => {
   const id = useId();
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2">
+    <div className="grid h-56 grid-cols-1 gap-2 sm:grid-cols-2">
       <div className="flex min-w-[50%] flex-1 shrink-0 flex-col gap-4">
         <div>
           <label className="block" htmlFor={id + "-name"}>
@@ -224,20 +246,25 @@ const NameDesImgSection = ({
             className="inline-block w-full border-2 border-gray-500 p-1"
           />
         </div>
-        <div>
+        <div className="flex h-full flex-col">
           <label className="block" htmlFor={id + "-description"}>
             Description
           </label>
           <textarea
             id={id + "-description"}
-            rows={5}
-            className="w-full border-2 border-gray-500 p-1"
+            className="w-full flex-1 basis-full resize-none border-2 border-gray-500 p-1"
             onChange={(e) => handleStringInput(e, "string", "description")}
           />
         </div>
       </div>
-      <div className="flex-1 shrink-0 bg-red-300">
-        <UploadImages handleFilesSelect={handleFilesSelect} />
+      <div className="flex-1 shrink-0">
+        <UploadImages
+          handleFileLoad={handleFileLoad}
+          removeFile={removeFile}
+          handleFilesSelect={handleFileSelect}
+          handleFileDrop={handleFileDrop}
+          imgObjUrl={imgObjUrl}
+        />
       </div>
     </div>
   );
@@ -776,48 +803,78 @@ const DraggableInput = ({
 
 const UploadImages = ({
   handleFilesSelect,
+  handleFileDrop,
+  imgObjUrl,
+  handleFileLoad,
+  removeFile,
 }: {
   handleFilesSelect: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleFileDrop: (e: React.DragEvent) => void;
+  imgObjUrl: string | undefined;
+  handleFileLoad: (src: string) => void;
+  removeFile: (src: string) => void;
 }) => {
   return (
-    <div>
+    <div className="flex h-full flex-col">
       <label htmlFor="cover-photo">Upload Recipe Image</label>
-      <div className="flex justify-center rounded-md border-2 border-dashed border-gray-300 px-6 py-8">
-        <div className="space-y-1 text-center">
-          <svg
-            className="mx-auto h-12 w-12 text-gray-400"
-            stroke="currentColor"
-            fill="none"
-            viewBox="0 0 48 48"
-            aria-hidden="true"
-          >
-            <path
-              d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
-              strokeWidth={2}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-          <div className="flex text-sm text-gray-600">
-            <label
-              htmlFor="file-upload"
-              className="relative cursor-pointer rounded-md bg-white font-medium text-gray-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2"
+      {!imgObjUrl ? (
+        <div
+          className="cursor-drop flex h-full justify-center rounded-md border-2 border-dashed border-gray-400 px-6 py-8"
+          onDrop={handleFileDrop}
+          onDragOver={(e) => e.preventDefault()}
+        >
+          <div className="space-y-1 text-center">
+            <svg
+              className="mx-auto h-12 w-12 text-gray-400"
+              stroke="currentColor"
+              fill="none"
+              viewBox="0 0 48 48"
+              aria-hidden="true"
             >
-              <span>Upload a file</span>
-              <input
-                id="file-upload"
-                name="file-upload"
-                type="file"
-                multiple={false}
-                onChange={handleFilesSelect}
-                className="sr-only"
+              <path
+                d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
+                strokeWidth={2}
+                strokeLinecap="round"
+                strokeLinejoin="round"
               />
-            </label>
-            <p className="pl-1">or drag and drop</p>
+            </svg>
+            <div className="flex items-center text-sm text-gray-600">
+              <label
+                htmlFor="file-upload"
+                className="border-gray relative cursor-pointer rounded-md border-2 bg-white p-[0.5px] font-medium text-gray-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2"
+              >
+                <span>Upload a file</span>
+                <input
+                  id="file-upload"
+                  name="file-upload"
+                  type="file"
+                  multiple={false}
+                  onChange={handleFilesSelect}
+                  className="sr-only"
+                />
+              </label>
+              <p className="pl-1">or drag and drop</p>
+            </div>
+            <p className="text-xs text-gray-500">PNG, JPG, GIF up to 10MB</p>
           </div>
-          <p className="text-xs text-gray-500">PNG, JPG, GIF up to 10MB</p>
         </div>
-      </div>
+      ) : (
+        <div className="relative h-full">
+          <button
+            onClick={() => removeFile(imgObjUrl)}
+            className="absolute right-0 top-0 z-10 translate-x-1/2 -translate-y-1/2 rounded-full bg-white text-gray-400 outline-offset-2 transition-transform hover:scale-110 focus:scale-110"
+          >
+            <CgCloseO size={25} />
+          </button>
+          <Image
+            src={imgObjUrl}
+            onLoad={() => handleFileLoad(imgObjUrl)}
+            objectFit="cover"
+            layout="fill"
+            alt="uploaded image"
+          />
+        </div>
+      )}
     </div>
   );
 };
