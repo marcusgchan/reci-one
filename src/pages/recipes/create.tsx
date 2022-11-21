@@ -132,9 +132,9 @@ const Create: CustomReactFC = () => {
     return <Loader />;
   }
   return (
-    <section className="p-4">
+    <section className="p-5 pb-10">
       <form
-        className="m-auto grid w-full max-w-xl gap-5 pb-2 text-gray-500"
+        className="m-auto grid w-full max-w-xl grid-cols-1 gap-5 pb-2 text-gray-500"
         onSubmit={createRecipe}
       >
         <div>
@@ -232,7 +232,7 @@ const NameDesImgSection = ({
 }) => {
   const id = useId();
   return (
-    <div className="grid h-56 grid-cols-1 gap-2 sm:grid-cols-2">
+    <div className="grid grid-cols-1 gap-2 sm:h-56 sm:grid-cols-2">
       <div className="flex min-w-[50%] flex-1 shrink-0 flex-col gap-4">
         <div>
           <label className="block" htmlFor={id + "-name"}>
@@ -257,7 +257,7 @@ const NameDesImgSection = ({
           />
         </div>
       </div>
-      <div className="flex-1 shrink-0">
+      <div className="h-60 sm:h-full">
         <UploadImages
           handleFileLoad={handleFileLoad}
           removeFile={removeFile}
@@ -819,7 +819,7 @@ const UploadImages = ({
       <label htmlFor="cover-photo">Upload Recipe Image</label>
       {!imgObjUrl ? (
         <div
-          className="cursor-drop flex h-full justify-center rounded-md border-2 border-dashed border-gray-400 px-6 py-8"
+          className="cursor-drop flex h-full items-center justify-center rounded-md border-2 border-dashed border-gray-400 px-6 py-8"
           onDrop={handleFileDrop}
           onDragOver={(e) => e.preventDefault()}
         >

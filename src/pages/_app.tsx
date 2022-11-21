@@ -71,7 +71,7 @@ const Layout = ({
           <NavBar />
         </header>
       )}
-      <main className="isolate z-10 grid h-full min-h-0 flex-1 flex-col place-items-center">
+      <main className="isolate z-10 grid min-h-0 flex-1 flex-col place-items-center overflow-auto">
         {children}
       </main>
     </section>
