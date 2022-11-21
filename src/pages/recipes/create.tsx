@@ -134,7 +134,7 @@ const Create: CustomReactFC = () => {
   return (
     <section className="p-4">
       <form
-        className="m-auto grid w-full max-w-xl gap-5 pb-2 text-gray-500"
+        className="m-auto grid w-full max-w-xl grid-cols-1 gap-5 pb-2 text-gray-500"
         onSubmit={createRecipe}
       >
         <div>
@@ -232,7 +232,7 @@ const NameDesImgSection = ({
 }) => {
   const id = useId();
   return (
-    <div className="grid h-56 grid-cols-1 gap-2 sm:grid-cols-2">
+    <div className="grid grid-cols-1 gap-2 sm:h-56 sm:grid-cols-2">
       <div className="flex min-w-[50%] flex-1 shrink-0 flex-col gap-4">
         <div>
           <label className="block" htmlFor={id + "-name"}>
@@ -257,15 +257,15 @@ const NameDesImgSection = ({
           />
         </div>
       </div>
-      <div className="flex-1 shrink-0">
-        <UploadImages
-          handleFileLoad={handleFileLoad}
-          removeFile={removeFile}
-          handleFilesSelect={handleFileSelect}
-          handleFileDrop={handleFileDrop}
-          imgObjUrl={imgObjUrl}
-        />
-      </div>
+      {/* <div className="flex-1 shrink-0"> */}
+      <UploadImages
+        handleFileLoad={handleFileLoad}
+        removeFile={removeFile}
+        handleFilesSelect={handleFileSelect}
+        handleFileDrop={handleFileDrop}
+        imgObjUrl={imgObjUrl}
+      />
+      {/* </div> */}
     </div>
   );
 };
