@@ -25,28 +25,32 @@ const MyApp = ({
   return (
     <QueryClientProvider client={queryClient}>
       <SessionProvider session={session}>
-        {Component.auth ? (
-          <Auth>
-            <Layout hideNav={Component.hideNav}>
-              <Component {...pageProps} />
-            </Layout>
-          </Auth>
-        ) : (
+        <Auth componentAuth={Component.auth}>
           <Layout hideNav={Component.hideNav}>
             <Component {...pageProps} />
           </Layout>
-        )}
+        </Auth>
       </SessionProvider>
       <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>
   );
 };
 
-const Auth = ({ children }: { children: React.ReactNode }) => {
+const Auth = ({
+  children,
+  componentAuth,
+}: {
+  children: React.ReactNode;
+  componentAuth?: boolean;
+}) => {
   const { status } = useSession();
   if (status === "loading") {
-    return <Loader />;
-  } else if (status === "unauthenticated") {
+    return (
+      <>
+        <Loader />;
+      </>
+    );
+  } else if (componentAuth && status === "unauthenticated") {
     return (
       <div>
         <h1>You are not logged in</h1>
