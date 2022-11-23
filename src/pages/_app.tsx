@@ -47,7 +47,7 @@ const Auth = ({
   if (status === "loading") {
     return (
       <div className="flex h-screen w-full items-center justify-center">
-        <Loader />;
+        <Loader />
       </div>
     );
   } else if (componentAuth && status === "unauthenticated") {

@@ -1,7 +1,7 @@
 import { useSession } from "next-auth/react";
 import React, { useState } from "react";
 import { FaBars } from "react-icons/fa";
-import { GrFormClose } from "react-icons/gr";
+import { CgClose } from "react-icons/cg";
 import { useRouter } from "next/router";
 
 export function NavBar() {
@@ -83,9 +83,9 @@ function MobileNav() {
           isOpen ? "translate-x-0" : "translate-x-full"
         } fixed inset-0 flex flex-col items-center justify-center gap-2 bg-secondary text-xl transition-transform`}
       >
-        <li className="absolute top-[12px] right-[15px]">
+        <li className="absolute top-[15px] right-[13px] text-gray-500">
           <button onClick={toggleMenu}>
-            <GrFormClose size={35} className="text-gray-500" />
+            <CgClose size={35} />
           </button>
         </li>
         <li>
