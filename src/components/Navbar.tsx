@@ -15,6 +15,11 @@ export function NavBar() {
 
 function DesktopNav() {
   const router = useRouter();
+  const navigate = (path: string) => {
+    if (router.pathname !== path) {
+      router.push(path);
+    }
+  };
   return (
     <nav className="hidden w-full max-w-7xl justify-between border-4 border-gray-500 p-2 px-3 text-2xl text-gray-500 md:flex">
       <h1>
@@ -32,7 +37,7 @@ function DesktopNav() {
         <li className="grid place-items-center">
           <button
             className="cursor-pointer"
-            onClick={() => router.push("/recipes")}
+            onClick={() => navigate("/recipes")}
           >
             RECIPES
           </button>
@@ -43,7 +48,7 @@ function DesktopNav() {
         <li className="grid place-items-center">
           <button
             className="cursor-pointer"
-            onClick={() => router.push("/recipes/create")}
+            onClick={() => navigate("/recipes/create")}
           >
             ADD RECIPE
           </button>
@@ -57,6 +62,12 @@ function MobileNav() {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const toggleMenu = () => setIsOpen((io) => !io);
+  const navigate = (path: string) => {
+    if (router.pathname !== path) {
+      router.push(path);
+    }
+    setIsOpen(false);
+  };
   return (
     <nav className="isolate mx-auto flex h-full w-full justify-between text-gray-500 md:hidden">
       <h1>
@@ -86,7 +97,7 @@ function MobileNav() {
         <li>
           <button
             className="cursor-pointer"
-            onClick={() => router.push("/recipes")}
+            onClick={() => navigate("/recipes")}
           >
             RECIPES
           </button>
@@ -97,7 +108,7 @@ function MobileNav() {
         <li>
           <button
             className="cursor-pointer"
-            onClick={() => router.push("/recipes/create")}
+            onClick={() => navigate("/recipes/create")}
           >
             ADD RECIPE
           </button>
