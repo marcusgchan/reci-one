@@ -59,7 +59,7 @@ const Index = () => {
   return (
     <>
       {/* Mobile */}
-      <section className="mx-auto grid h-full w-full grid-cols-1 gap-8 p-2 md:hidden">
+      <section className="mx-auto grid h-full w-full grid-cols-1 gap-8 md:hidden">
         <form
           className="top-1 flex flex-col gap-3"
           onSubmit={handleSubmit(onSubmit)}
@@ -88,7 +88,7 @@ const Index = () => {
         </button>
       </section>
       {/* Desktop */}
-      <section className="hidden h-full w-full flex-col p-2 md:flex">
+      <section className="hidden h-full w-full flex-col md:flex">
         <form
           className="mx-auto flex w-full max-w-7xl justify-between"
           onSubmit={handleSubmit(onSubmit)}
