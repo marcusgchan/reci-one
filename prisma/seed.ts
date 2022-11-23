@@ -12,6 +12,18 @@ const prisma = new PrismaClient();
 async function main() {
   const seedConfig = config.seed;
 
+  console.log("Deleting Meal Types...");
+  await prisma.mealType.deleteMany();
+  await prisma.$queryRaw`ALTER TABLE meal_types AUTO_INCREMENT = 1`;
+
+  console.log("Deleting Nationalities...");
+  await prisma.nationality.deleteMany();
+  await prisma.$queryRaw`ALTER TABLE nationalities AUTO_INCREMENT = 1`;
+
+  console.log("Deleting Cooking Methods...");
+  await prisma.cookingMethod.deleteMany();
+  await prisma.$queryRaw`ALTER TABLE cooking_methods AUTO_INCREMENT = 1`;
+
   await createDefaultMealTypes();
   await createDefaultNationalities();
   await createDefaultCookingMethods();

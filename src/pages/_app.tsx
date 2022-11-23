@@ -25,28 +25,32 @@ const MyApp = ({
   return (
     <QueryClientProvider client={queryClient}>
       <SessionProvider session={session}>
-        {Component.auth ? (
-          <Auth>
-            <Layout hideNav={Component.hideNav}>
-              <Component {...pageProps} />
-            </Layout>
-          </Auth>
-        ) : (
+        <Auth componentAuth={Component.auth}>
           <Layout hideNav={Component.hideNav}>
             <Component {...pageProps} />
           </Layout>
-        )}
+        </Auth>
       </SessionProvider>
       <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>
   );
 };
 
-const Auth = ({ children }: { children: React.ReactNode }) => {
+const Auth = ({
+  children,
+  componentAuth,
+}: {
+  children: React.ReactNode;
+  componentAuth?: boolean;
+}) => {
   const { status } = useSession();
   if (status === "loading") {
-    return <Loader />;
-  } else if (status === "unauthenticated") {
+    return (
+      <div className="flex h-screen w-full items-center justify-center">
+        <Loader />;
+      </div>
+    );
+  } else if (componentAuth && status === "unauthenticated") {
     return (
       <div>
         <h1>You are not logged in</h1>
@@ -65,13 +69,13 @@ const Layout = ({
   hideNav: boolean | undefined;
 }) => {
   return (
-    <section className="mx-auto flex h-screen w-screen flex-col gap-2">
+    <section className="mx-auto flex h-full w-screen flex-col gap-2">
       {!hideNav && (
-        <header className="relative z-20 grid place-items-center p-2">
+        <header className="relative z-20 grid place-items-center p-4">
           <NavBar />
         </header>
       )}
-      <main className="isolate z-10 grid min-h-0 flex-1 flex-col place-items-center overflow-auto">
+      <main className="isolate z-10 grid min-h-0 flex-1 flex-col place-items-center overflow-auto p-4">
         {children}
       </main>
     </section>
