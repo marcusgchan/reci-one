@@ -56,6 +56,9 @@ const Index = () => {
   if (isError) {
     return <h2>something went wrong</h2>;
   }
+  if (isLoading) {
+    return <Loader />;
+  }
   return (
     <>
       {/* Mobile */}
@@ -78,7 +81,7 @@ const Index = () => {
           </button>
         </form>
         <section className="grid grid-cols-1 gap-10">
-          {isLoading ? <Loader /> : <Recipes data={data} />}
+          <Recipes data={data} />
         </section>
         <button className="fixed bottom-3 left-1 rounded-full bg-accent-300 p-2">
           <AiOutlineArrowUp size={30} color="white" />
