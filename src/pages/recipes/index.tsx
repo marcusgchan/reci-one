@@ -155,13 +155,11 @@ const RecipeCard = ({
       onClick={() => router.push(`/recipes/${id}`)}
     >
       <div className="relative flex w-full basis-3/5">
-        <img src={src} alt={name} />
         <Image
           priority={true}
           layout="fill"
           loading="eager"
           objectFit="cover"
-          unoptimized
           alt={name}
           src={src}
         />
