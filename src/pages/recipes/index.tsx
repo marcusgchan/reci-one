@@ -24,24 +24,27 @@ const Index = () => {
       setSharingScopeIndex(sharingScopeIndex + 1);
     }
   };
-  const { data, isLoading, isError, refetch } = trpc.useQuery([
-    "recipes.getRecipes",
-    {
-      search: "",
-      viewScope: scopes[sharingScopeIndex] || "PRIVATE",
-      filters: {
-        ingredientsInclude: [],
-        ingredientsExclude: [],
-        nationalitiesInclude: [],
-        nationalitiesExclude: [],
-        prepTimeMin: Number.MIN_VALUE,
-        prepTimeMax: Number.MAX_VALUE,
-        cookTimeMin: Number.MIN_VALUE,
-        cookTimeMax: Number.MAX_VALUE,
-        rating: 5,
+  const { data, isLoading, isError, refetch, isFetching } = trpc.useQuery(
+    [
+      "recipes.getRecipes",
+      {
+        search: "",
+        viewScope: scopes[sharingScopeIndex] || "PRIVATE",
+        filters: {
+          ingredientsInclude: [],
+          ingredientsExclude: [],
+          nationalitiesInclude: [],
+          nationalitiesExclude: [],
+          prepTimeMin: Number.MIN_VALUE,
+          prepTimeMax: Number.MAX_VALUE,
+          cookTimeMin: Number.MIN_VALUE,
+          cookTimeMax: Number.MAX_VALUE,
+          rating: 5,
+        },
       },
-    },
-  ]);
+    ],
+    { refetchOnWindowFocus: false }
+  );
 
   const {
     register,
@@ -56,9 +59,11 @@ const Index = () => {
   if (isError) {
     return <h2>something went wrong</h2>;
   }
-  if (isLoading) {
+
+  if (isLoading || isFetching) {
     return <Loader />;
   }
+
   return (
     <>
       {/* Mobile */}
@@ -155,7 +160,6 @@ const RecipeCard = ({
       onClick={() => router.push(`/recipes/${id}`)}
     >
       <div className="relative flex w-full basis-3/5">
-        <img src={src} alt={name} />
         <Image
           priority={true}
           layout="fill"
