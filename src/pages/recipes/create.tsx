@@ -38,6 +38,7 @@ import Image from "next/image";
 
 const Create: CustomReactFC = () => {
   const router = useRouter();
+
   const {
     file,
     handleFileSelect,
@@ -47,6 +48,7 @@ const Create: CustomReactFC = () => {
     handleFileLoad,
     removeFile,
   } = useImageUpload();
+
   const mutation = trpc.useMutation(["recipes.addRecipe"], {
     async onSuccess(signedUrl) {
       if (!signedUrl) return;
@@ -54,7 +56,7 @@ const Create: CustomReactFC = () => {
         method: "PUT",
         body: formDataValue,
       });
-      router.push("/recipes");
+      navigateToRecipes();
     },
   });
 
@@ -65,6 +67,7 @@ const Create: CustomReactFC = () => {
     isError,
     isLoading,
   } = useDropdownQuery();
+
   const [formData, setFormData] = useState<addRecipeWithoutMainImage>({
     name: "",
     description: "",
@@ -122,7 +125,6 @@ const Create: CustomReactFC = () => {
     const result = addRecipeWithImagesSchema.safeParse(data);
     if (result.success) {
       mutation.mutate(result.data);
-      navigateToRecipes();
     }
     // Todo: handle errors
   };
