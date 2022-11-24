@@ -122,6 +122,7 @@ const Create: CustomReactFC = () => {
     const result = addRecipeWithImagesSchema.safeParse(data);
     if (result.success) {
       mutation.mutate(result.data);
+      navigateToRecipes();
     }
     // Todo: handle errors
   };
