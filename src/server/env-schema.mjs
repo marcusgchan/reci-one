@@ -13,8 +13,9 @@ export const envSchema = z.object({
   ),
   GITHUB_CLIENT_ID: z.string(),
   GITHUB_CLIENT_SECRET: z.string(),
-  PATH_TO_KEYFILE: z.string(),
   MY_SQL_ROOT_PASSWORD: z.string().optional(),
   BUCKET_NAME: z.string(),
   BUCKET_DOMAIN: z.string(),
+  ACCESS_KEY_ID: z.string(),
+  SECRET_ACCESS_KEY: z.string(),
 });
