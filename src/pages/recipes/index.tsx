@@ -118,7 +118,7 @@ const Index = () => {
           ref={parent}
           className="mx-auto grid h-full w-full max-w-7xl auto-rows-min grid-cols-1 gap-10 overflow-auto md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
         >
-          {isLoading ? <Loader /> : <Recipes data={data} />}
+          <Recipes data={data} />
         </section>
       </section>
     </>
@@ -161,7 +161,7 @@ const RecipeCard = ({
           loading="eager"
           objectFit="cover"
           alt={name}
-          src={src + "#123"}
+          src={src}
         />
       </div>
       <div className="flex flex-1 items-center justify-center bg-accent-400">
