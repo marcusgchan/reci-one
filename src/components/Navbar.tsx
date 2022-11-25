@@ -75,7 +75,7 @@ function MobileNav() {
           Reci<span className="text-accent-500 ">One</span>
         </a>
       </h1>
-      <button onFocus={toggleMenu} onClick={toggleMenu} className="">
+      <button onClick={toggleMenu}>
         <FaBars size="30" />
       </button>
       <ul

@@ -85,7 +85,7 @@ const Index = () => {
             {scopes[sharingScopeIndex]}
           </button>
         </form>
-        <section className="grid grid-cols-1 gap-10">
+        <section className="grid grid-cols-1 gap-10 sm:grid-cols-2">
           <Recipes data={data} />
         </section>
         <button className="fixed bottom-3 left-1 rounded-full bg-accent-300 p-2">
@@ -96,7 +96,7 @@ const Index = () => {
         </button>
       </section>
       {/* Desktop */}
-      <section className="hidden h-full w-full flex-col md:flex">
+      <section className="hidden h-full w-full flex-col gap-3 md:flex">
         <form
           className="mx-auto flex w-full max-w-7xl justify-between"
           onSubmit={handleSubmit(onSubmit)}
@@ -121,7 +121,7 @@ const Index = () => {
         </form>
         <section
           ref={parent}
-          className="mx-auto grid h-full w-full max-w-7xl auto-rows-min grid-cols-1 gap-10 overflow-auto md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+          className="mx-auto grid h-full w-full max-w-7xl auto-rows-min gap-10 overflow-auto md:grid-cols-3 lg:grid-cols-4"
         >
           <Recipes data={data} />
         </section>
