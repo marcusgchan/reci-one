@@ -75,7 +75,7 @@ const Layout = ({
           <NavBar />
         </header>
       )}
-      <main className="isolate z-10 mx-auto h-full min-h-0 w-full max-w-7xl">
+      <main className="isolate z-10 mx-auto min-h-0 w-full max-w-7xl">
         {children}
       </main>
     </section>
