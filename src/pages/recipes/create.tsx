@@ -35,6 +35,7 @@ import {
 import { useRouter } from "next/router";
 import { useImageUpload } from "@/components/recipes/useImageUpload";
 import Image from "next/image";
+import { LoaderSection } from "@/components/Center";
 
 const Create: CustomReactFC = () => {
   const router = useRouter();
@@ -131,9 +132,10 @@ const Create: CustomReactFC = () => {
 
   const navigateToRecipes = () => router.push("/recipes");
 
-  if (isLoading) {
-    return <Loader />;
+  if (isLoading || isError) {
+    return <LoaderSection centerFixed />;
   }
+
   return (
     <section className="p-5 pb-10">
       <form

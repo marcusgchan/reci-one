@@ -9,6 +9,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { GetRecipesQuery, getRecipesSchema } from "@/schemas/recipe";
 import { useRouter } from "next/router";
+import { LoaderSection } from "@/components/Center";
 
 type Recipes = inferQueryOutput<"recipes.getRecipes">;
 const scopes = ["PRIVATE", "PUBLIC", "ALL"] as const;
@@ -61,7 +62,7 @@ const Index = () => {
   }
 
   if (isLoading || isFetching) {
-    return <Loader />;
+    return <LoaderSection centerFixed />;
   }
 
   return (
