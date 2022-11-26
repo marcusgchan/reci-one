@@ -35,7 +35,7 @@ import {
 import { useRouter } from "next/router";
 import { useImageUpload } from "@/components/recipes/useImageUpload";
 import Image from "next/image";
-import { LoaderSection } from "@/components/Center";
+import { LoaderSection } from "@/components/LoaderSection";
 
 const Create: CustomReactFC = () => {
   const router = useRouter();
