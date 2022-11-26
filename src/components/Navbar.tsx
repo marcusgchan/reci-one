@@ -1,5 +1,5 @@
 import { useSession } from "next-auth/react";
-import React, { useState } from "react";
+import React, { useLayoutEffect, useState } from "react";
 import { FaBars } from "react-icons/fa";
 import { CgClose } from "react-icons/cg";
 import { useRouter } from "next/router";
@@ -68,6 +68,20 @@ function MobileNav() {
     }
     setIsOpen(false);
   };
+  // Remove scrollbar from mobile nav
+  // setInterval needs to match the transition time for the menu to full open b/c
+  // users will see content shift since hidden will remove the scrollbar which shifts content
+  useLayoutEffect(() => {
+    const body = document.querySelector("body");
+    if (!body) return;
+    let id: number;
+    if (isOpen) {
+      id = window.setTimeout(() => (body.style.overflow = "hidden"), 150);
+    } else {
+      body.style.overflow = "auto";
+    }
+    return () => clearTimeout(id);
+  });
   return (
     <nav className="isolate mx-auto flex h-full w-full justify-between text-gray-500 md:hidden">
       <h1>
