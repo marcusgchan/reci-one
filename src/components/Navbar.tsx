@@ -83,7 +83,7 @@ function MobileNav() {
     return () => clearTimeout(id);
   });
   return (
-    <nav className="isolate mx-auto flex h-full w-full justify-between text-gray-500 md:hidden">
+    <nav className="isolate mx-auto flex w-full justify-between text-gray-500 md:hidden">
       <h1>
         <a tabIndex={0} className="text-3xl tracking-wider">
           Reci<span className="text-accent-500 ">One</span>
