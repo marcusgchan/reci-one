@@ -5,7 +5,9 @@ import { env } from "src/server/env.mjs";
 const REGION = "us-west-1";
 // Create an Amazon S3 service client object.
 const s3Client = new S3Client({
+  endpoint: env.BUCKET_DOMAIN,
   region: REGION,
+  forcePathStyle: env.NODE_ENV === "development" || "test" ? true : false,
   credentials: {
     accessKeyId: env.ACCESS_KEY_ID,
     secretAccessKey: env.SECRET_ACCESS_KEY,
