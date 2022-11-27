@@ -4,7 +4,9 @@ import { env } from "src/server/env.mjs";
 
 // Set the AWS Region.
 const REGION = "us-west-1";
-const isDevelopmentMode = env.NODE_ENV === "development" || "test";
+const isDevelopmentMode =
+  env.NODE_ENV === "development" || env.NODE_ENV === "test" ? true : false;
+
 // Create an Amazon S3 service client object.
 const s3Client = new S3Client({
   endpoint: isDevelopmentMode ? env.BUCKET_DOMAIN : undefined,
