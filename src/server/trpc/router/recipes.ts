@@ -1,17 +1,16 @@
-import { createRouter } from "./context";
 import {
   addRecipeWithImagesSchema,
   getRecipeSchema,
   getRecipesSchema,
 } from "@/schemas/recipe";
-import { TRPCError } from "@trpc/server";
 import { createRecipe, getRecipe, getRecipes } from "@/services/recipesService";
 import { getImageSignedUrl, getUploadSignedUrl } from "@/services/s3Services";
+import { protectedProcedure, router } from "../trpc";
 
-export const recipesRouter = createRouter()
-  .query("getRecipes", {
-    input: getRecipesSchema,
-    async resolve({ ctx, input }) {
+export const recipesRouter = router({
+  getRecipes: protectedProcedure
+    .input(getRecipesSchema)
+    .query(async ({ ctx, input }) => {
       const userId = ctx.session?.user?.id;
       const recipes = await getRecipes(ctx, userId, input);
       const signedUrls = await Promise.all(
@@ -25,21 +24,16 @@ export const recipesRouter = createRouter()
         (recipe, i) => (recipe.mainImage = signedUrls[i] as string)
       );
       return recipes;
-    },
-  })
-  .query("getRecipe", {
-    input: getRecipeSchema,
-    async resolve({ ctx, input }) {
-      const userId = ctx.session?.user?.id;
-      if (!userId) throw new TRPCError({ code: "UNAUTHORIZED" });
+    }),
+  getRecipe: protectedProcedure
+    .input(getRecipeSchema)
+    .query(async ({ ctx, input }) => {
       return await getRecipe(ctx, input.recipeId);
-    },
-  })
-  .mutation("addRecipe", {
-    input: addRecipeWithImagesSchema,
-    async resolve({ ctx, input }) {
-      const userId = ctx.session?.user?.id;
-      if (!userId) throw new TRPCError({ code: "UNAUTHORIZED" });
+    }),
+  addRecipe: protectedProcedure
+    .input(addRecipeWithImagesSchema)
+    .mutation(async ({ ctx, input }) => {
+      const userId = ctx.session.user.id;
       const recipe = await createRecipe(ctx, userId, input);
       const signedUrl = await getUploadSignedUrl(
         userId,
@@ -47,5 +41,5 @@ export const recipesRouter = createRouter()
         input.mainImage
       );
       return signedUrl;
-    },
-  });
+    }),
+});

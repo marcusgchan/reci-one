@@ -11,17 +11,17 @@ export const useDropdownQuery = () => {
     data: mealTypesData,
     isError: mealTypeIsError,
     isLoading: mealTypeIsLoading,
-  } = trpc.useQuery(["mealTypes.getMealTypes"], QUERY_OPTIONS);
+  } = trpc.mealTypes.getMealTypes.useQuery(undefined, QUERY_OPTIONS);
   const {
     data: nationalitiesData,
     isError: nationalitiesIsError,
     isLoading: nationalitiesIsLoading,
-  } = trpc.useQuery(["nationalities.getNationalities"], QUERY_OPTIONS);
+  } = trpc.nationalities.getNationalities.useQuery(undefined, QUERY_OPTIONS);
   const {
     data: cookingMethodsData,
     isError: cookingMethodsIsError,
     isLoading: cookingMethodsIsLoading,
-  } = trpc.useQuery(["cookingMethods.getCookingMethods"], QUERY_OPTIONS);
+  } = trpc.cookingMethods.getCookingMethods.useQuery(undefined, QUERY_OPTIONS);
   if (mealTypeIsError || nationalitiesIsError || cookingMethodsIsError) {
     isError = true;
   } else if (

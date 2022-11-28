@@ -50,7 +50,7 @@ const Create: CustomReactFC = () => {
     removeFile,
   } = useImageUpload();
 
-  const mutation = trpc.useMutation(["recipes.addRecipe"], {
+  const mutation = trpc.recipes.addRecipe.useMutation({
     async onSuccess(signedUrl) {
       if (!signedUrl) return;
       await fetch(signedUrl, {

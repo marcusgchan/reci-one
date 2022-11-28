@@ -19,7 +19,7 @@
     "paths": {
       "@/components/*": ["src/components/*"],
       "@/prisma/*": ["prisma/*"],
-      "@/router/*": ["src/server/router/*"],
+      "@/router/*": ["src/server/trpc/router/*"],
       "@/shared/*": ["src/shared/*"],
       "@/shared/components/*": ["src/shared/components/*"],
       "@/shared/hooks/*": ["src/shared/hooks/*"],

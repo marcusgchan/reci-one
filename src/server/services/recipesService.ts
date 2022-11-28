@@ -1,6 +1,6 @@
 import { Recipe } from "@prisma/client";
 import { GetRecipesQuery, addRecipeWithImages } from "@/schemas/recipe";
-import { Context } from "@/router/context";
+import { Context } from "src/server/trpc/router/context";
 
 export async function createRecipe(
   ctx: Context,
