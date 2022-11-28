@@ -4,7 +4,9 @@ import { useRouter } from "next/router";
 
 export default function Recipe() {
   const router = useRouter();
-  const { data, isError, isLoading } = trpc.recipes.getRecipe.useQuery({ recipeId: String(router.query.recipeId) });
+  const { data, isError, isLoading } = trpc.recipes.getRecipe.useQuery({
+    recipeId: String(router.query.recipeId),
+  });
   if (isLoading) {
     return <Loader />;
   }

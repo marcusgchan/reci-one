@@ -25,24 +25,25 @@ const Index = () => {
       setSharingScopeIndex(sharingScopeIndex + 1);
     }
   };
-  const { data, isLoading, isError, refetch, isFetching } = trpc.recipes.getRecipes.useQuery(
-    {
-              search: "",
-              viewScope: scopes[sharingScopeIndex] || "PRIVATE",
-              filters: {
-                ingredientsInclude: [],
-                ingredientsExclude: [],
-                nationalitiesInclude: [],
-                nationalitiesExclude: [],
-                prepTimeMin: Number.MIN_VALUE,
-                prepTimeMax: Number.MAX_VALUE,
-                cookTimeMin: Number.MIN_VALUE,
-                cookTimeMax: Number.MAX_VALUE,
-                rating: 5,
-              },
-            },
+  const { data, isLoading, isError, refetch, isFetching } =
+    trpc.recipes.getRecipes.useQuery(
+      {
+        search: "",
+        viewScope: scopes[sharingScopeIndex] || "PRIVATE",
+        filters: {
+          ingredientsInclude: [],
+          ingredientsExclude: [],
+          nationalitiesInclude: [],
+          nationalitiesExclude: [],
+          prepTimeMin: Number.MIN_VALUE,
+          prepTimeMax: Number.MAX_VALUE,
+          cookTimeMin: Number.MIN_VALUE,
+          cookTimeMax: Number.MAX_VALUE,
+          rating: 5,
+        },
+      },
       { refetchOnWindowFocus: false }
-  );
+    );
 
   const {
     register,
