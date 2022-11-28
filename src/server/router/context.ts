@@ -24,5 +24,3 @@ export const createContext = async (
 };
 
 export type Context = trpc.inferAsyncReturnType<typeof createContext>;
-
-export const createRouter = () => trpc.router<Context>();

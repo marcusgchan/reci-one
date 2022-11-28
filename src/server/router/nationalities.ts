@@ -1,11 +1,7 @@
-import { createRouter } from "./context";
-import { z } from "zod";
-import { TRPCError } from "@trpc/server";
+import { protectedProcedure, router } from "./trpc";
 
-export const nationalitiesRouter = createRouter().query("getNationalities", {
-  async resolve({ ctx, input }) {
-    const userId = ctx.session?.user?.id;
-    if (!userId) throw new TRPCError({ code: "UNAUTHORIZED" });
+export const nationalitiesRouter = router({
+  getNationalities: protectedProcedure.query(async ({ ctx }) => {
     return await ctx.prisma.nationality.findMany();
-  },
+  }),
 });
