@@ -5,7 +5,7 @@ import {
 } from "@/schemas/recipe";
 import { createRecipe, getRecipe, getRecipes } from "@/services/recipesService";
 import { getImageSignedUrl, getUploadSignedUrl } from "@/services/s3Services";
-import { protectedProcedure, router } from "./trpc";
+import { protectedProcedure, router } from "../trpc";
 
 export const recipesRouter = router({
   getRecipes: protectedProcedure

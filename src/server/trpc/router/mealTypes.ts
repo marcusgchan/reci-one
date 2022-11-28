@@ -1,4 +1,4 @@
-import { protectedProcedure, router } from "./trpc";
+import { protectedProcedure, router } from "../trpc";
 
 export const mealTypesRouter = router({
   getMealTypes: protectedProcedure.query(async ({ ctx }) => {
