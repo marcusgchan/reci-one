@@ -1,17 +1,15 @@
-import React, { useMemo, useState } from "react";
-import { trpc } from "../../utils/trpc";
+import React, { useState } from "react";
+import { RouterOutputs, trpc } from "../../utils/trpc";
 import Image from "next/image";
-import { inferQueryOutput } from "../../utils/trpc";
 import { AiOutlineArrowUp, AiOutlineFilter } from "react-icons/ai";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
-import { Loader } from "../../shared/components/Loader";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { GetRecipesQuery, getRecipesSchema } from "@/schemas/recipe";
 import { useRouter } from "next/router";
 import { LoaderSection } from "@/components/LoaderSection";
 
-type Recipes = inferQueryOutput<"recipes.getRecipes">;
+type Recipes = RouterOutputs["recipes"]["getRecipes"];
 const scopes = ["PRIVATE", "PUBLIC", "ALL"] as const;
 
 const Index = () => {
