@@ -7,12 +7,11 @@ import { CheckIcon, ChevronUpDownIcon } from "@heroicons/react/20/solid";
 import { Combobox } from "@headlessui/react";
 import { useDropdownQuery } from "@/components/recipes/useDropdownQuery";
 import {
-  addRecipeWithImagesSchema,
+  addRecipeWithMainImagesSchema,
   addRecipeWithoutMainImage,
 } from "@/schemas/recipe";
 import { v4 as uuidv4 } from "uuid";
 import type { MealType, Nationality, CookingMethod } from "@prisma/client";
-import { Loader } from "@/shared/components/Loader";
 import { trpc } from "@/utils/trpc";
 import { DndContext, closestCenter, DragEndEvent } from "@dnd-kit/core";
 import {
@@ -44,20 +43,31 @@ const Create: CustomReactFC = () => {
     file,
     handleFileSelect,
     handleFileDrop,
-    formDataValue,
+    formData,
     imgObjUrlRef,
     handleFileLoad,
     removeFile,
   } = useImageUpload();
 
   const mutation = trpc.recipes.addRecipe.useMutation({
-    async onSuccess(signedUrl) {
-      if (!signedUrl) return;
-      await fetch(signedUrl, {
-        method: "PUT",
-        body: formDataValue,
+    async onSuccess(presignedPost) {
+      const file = formData.get("file");
+      if (!file) {
+        // error unable to upload file (show snackbar)
+        return;
+      }
+      // Add fields that are required for presigned post
+      const newFormData = new FormData();
+      Object.entries(presignedPost.fields).forEach(([field, value]) => {
+        newFormData.append(field, value);
       });
-      navigateToRecipes();
+      // File must be last item that is appended to form
+      newFormData.append("file", file);
+      await fetch(presignedPost.url, {
+        method: "POST",
+        body: newFormData,
+      });
+      // navigateToRecipes();
     },
   });
 
@@ -69,7 +79,7 @@ const Create: CustomReactFC = () => {
     isLoading,
   } = useDropdownQuery();
 
-  const [formData, setFormData] = useState<addRecipeWithoutMainImage>({
+  const [recipeData, setRecipeData] = useState<addRecipeWithoutMainImage>({
     name: "",
     description: "",
     ingredients: [
@@ -97,12 +107,12 @@ const Create: CustomReactFC = () => {
     handleBasicInput,
     addToList,
     deleteFromList,
-  } = useFormMutations(setFormData);
+  } = useFormMutations(setRecipeData);
 
   const handleDragEnd = (event: DragEndEvent, type: ListInputFields) => {
     const { active, over } = event;
     if (active && over && active.id !== over!.id) {
-      setFormData((fd) => {
+      setRecipeData((fd) => {
         const oldIndex = fd[type]
           .map(({ id }) => id)
           .indexOf(active.id as string);
@@ -120,10 +130,10 @@ const Create: CustomReactFC = () => {
   const createRecipe = (e: React.FormEvent) => {
     e.preventDefault();
     const data = {
-      ...formData,
-      mainImage: file?.name,
+      ...recipeData,
+      imageMetadata: { name: file?.name, type: file?.type, size: file?.size },
     };
-    const result = addRecipeWithImagesSchema.safeParse(data);
+    const result = addRecipeWithMainImagesSchema.safeParse(data);
     if (result.success) {
       mutation.mutate(result.data);
     }
@@ -150,7 +160,7 @@ const Create: CustomReactFC = () => {
         </div>
         <SectionWrapper>
           <NameDesImgSection
-            name={formData.name}
+            name={recipeData.name}
             handleStringInput={handleBasicInput}
             handleFileSelect={handleFileSelect}
             handleFileDrop={handleFileDrop}
@@ -163,7 +173,7 @@ const Create: CustomReactFC = () => {
           <IngredientsSection
             updateListInput={updateListInput}
             removeListInput={removeListInput}
-            ingredients={formData.ingredients}
+            ingredients={recipeData.ingredients}
             addItemToList={addItemToList}
             handleDragEnd={handleDragEnd}
           />
@@ -172,21 +182,21 @@ const Create: CustomReactFC = () => {
           <StepsSection
             updateListInput={updateListInput}
             removeListInput={removeListInput}
-            steps={formData.steps}
+            steps={recipeData.steps}
             addItemToList={addItemToList}
             handleDragEnd={handleDragEnd}
           />
         </SectionWrapper>
         <SectionWrapper>
           <TimeSection
-            cookTime={formData.cookTime}
-            prepTime={formData.prepTime}
+            cookTime={recipeData.cookTime}
+            prepTime={recipeData.prepTime}
             handleBasicInput={handleBasicInput}
           />
         </SectionWrapper>
         <SectionWrapper>
           <MealTypeSection
-            mealTypesFormData={formData.mealTypes}
+            mealTypesFormData={recipeData.mealTypes}
             mealTypes={mealTypesData || []}
             addToList={addToList}
             deleteFromList={deleteFromList}
@@ -194,7 +204,7 @@ const Create: CustomReactFC = () => {
         </SectionWrapper>
         <SectionWrapper>
           <NationalitySection
-            nationalitiesFormData={formData.nationalities}
+            nationalitiesFormData={recipeData.nationalities}
             nationalities={nationalitiesData || []}
             addToList={addToList}
             deleteFromList={deleteFromList}
@@ -202,7 +212,7 @@ const Create: CustomReactFC = () => {
         </SectionWrapper>
         <SectionWrapper>
           <CookingMethodsSection
-            cookingMethodsFormData={formData.cookingMethods}
+            cookingMethodsFormData={recipeData.cookingMethods}
             cookingMethods={cookingMethodsData || []}
             addToList={addToList}
             deleteFromList={deleteFromList}
@@ -422,8 +432,8 @@ const SortableItem = ({
   };
   return (
     <div
-      className="touch-none"
       ref={setNodeRef}
+      className="touch-none"
       style={style}
       {...attributes}
       {...listeners}
@@ -793,7 +803,7 @@ const DraggableInput = ({
 }) => {
   return (
     <div className="flex items-center gap-2">
-      {canDrag && <GrDrag size={20} className="cursor-grab" />}
+      {canDrag && <GrDrag size={25} className="cursor-grab " />}
       <input
         value={value}
         placeholder={placeholder}
@@ -890,7 +900,7 @@ const UploadImages = ({
   );
 };
 
-Create.auth = true;
+Create.auth = false;
 Create.hideNav = true;
 
 export default Create;

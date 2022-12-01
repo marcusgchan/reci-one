@@ -1,5 +1,5 @@
 import {
-  addRecipeWithImagesSchema,
+  addRecipeWithMainImagesSchema,
   getRecipeSchema,
   getRecipesSchema,
 } from "@/schemas/recipe";
@@ -16,7 +16,7 @@ export const recipesRouter = router({
       const signedUrls = await Promise.all(
         recipes.map((recipe) =>
           getImageSignedUrl(recipe.authorId, recipe.id, recipe.mainImage).catch(
-            () => "sad;kfj"
+            () => ""
           )
         )
       );
@@ -31,14 +31,14 @@ export const recipesRouter = router({
       return await getRecipe(ctx, input.recipeId);
     }),
   addRecipe: protectedProcedure
-    .input(addRecipeWithImagesSchema)
+    .input(addRecipeWithMainImagesSchema)
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.session.user.id;
       const recipe = await createRecipe(ctx, userId, input);
       const signedUrl = await getUploadSignedUrl(
         userId,
         recipe.id,
-        input.mainImage
+        input.imageMetadata
       );
       return signedUrl;
     }),

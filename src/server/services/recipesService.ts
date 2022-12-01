@@ -11,7 +11,7 @@ export async function createRecipe(
   const recipe = await ctx.prisma.recipe.create({
     data: {
       name: input.name,
-      mainImage: input.mainImage,
+      mainImage: input.imageMetadata.name,
       description: input.description,
       prepTime: input.prepTime || undefined,
       cookTime: input.cookTime || undefined,
