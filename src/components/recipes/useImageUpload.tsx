@@ -54,7 +54,7 @@ export function useImageUpload() {
     file,
     handleFileSelect,
     handleFileDrop,
-    formDataValue: formData.get("file"),
+    formData,
     handleFileLoad,
     removeFile,
     imgObjUrlRef,

@@ -21,10 +21,14 @@ export const getRecipeSchema = z.object({
   recipeId: z.string(),
 });
 
-export const addRecipeWithImagesSchema = z.object({
+export const addRecipeWithMainImagesSchema = z.object({
   name: z.string().min(1),
   description: z.string(),
-  mainImage: z.string().min(1),
+  imageMetadata: z.object({
+    name: z.string(),
+    type: z.string(),
+    size: z.number(),
+  }),
   ingredients: z
     .object({
       id: z.string(),
@@ -63,11 +67,13 @@ export const addRecipeWithImagesSchema = z.object({
     })
     .array(),
 });
-export type addRecipeWithImages = z.infer<typeof addRecipeWithImagesSchema>;
+export type addRecipeWithMainImage = z.infer<
+  typeof addRecipeWithMainImagesSchema
+>;
 
-const addRecipeWithoutImageSchema = addRecipeWithImagesSchema.omit({
-  mainImage: true,
+const addRecipeWithoutMainImageSchema = addRecipeWithMainImagesSchema.omit({
+  imageMetadata: true,
 });
 export type addRecipeWithoutMainImage = z.infer<
-  typeof addRecipeWithoutImageSchema
+  typeof addRecipeWithoutMainImageSchema
 >;

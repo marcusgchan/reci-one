@@ -1,17 +1,17 @@
 import { Recipe } from "@prisma/client";
-import { GetRecipesQuery, addRecipeWithImages } from "@/schemas/recipe";
+import { GetRecipesQuery, addRecipeWithMainImage } from "@/schemas/recipe";
 import { Context } from "src/server/trpc/router/context";
 
 export async function createRecipe(
   ctx: Context,
   userId: string,
-  input: addRecipeWithImages
+  input: addRecipeWithMainImage
 ) {
   // Unable to connect multiple on create b/c it requires recipeId
   const recipe = await ctx.prisma.recipe.create({
     data: {
       name: input.name,
-      mainImage: input.mainImage,
+      mainImage: input.imageMetadata.name,
       description: input.description,
       prepTime: input.prepTime || undefined,
       cookTime: input.cookTime || undefined,
