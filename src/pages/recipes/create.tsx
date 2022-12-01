@@ -838,7 +838,12 @@ const DraggableInput = ({
   return (
     <div className="flex items-center gap-2">
       {canDrag && (
-        <button className="touch-none" {...attributes} {...listeners} ref={ref}>
+        <button
+          className="touch-manipulation"
+          {...attributes}
+          {...listeners}
+          ref={ref}
+        >
           <GrDrag size={25} className="cursor-grab " />
         </button>
       )}
@@ -938,7 +943,7 @@ const UploadImages = ({
   );
 };
 
-Create.auth = false;
+Create.auth = true;
 Create.hideNav = true;
 
 export default Create;

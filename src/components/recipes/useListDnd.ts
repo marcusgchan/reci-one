@@ -2,14 +2,16 @@ import { sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 import {
   useSensor,
   useSensors,
-  PointerSensor,
+  MouseSensor,
+  TouchSensor,
   KeyboardSensor,
 } from "@dnd-kit/core";
 import { useState } from "react";
 
 export function useListDnd() {
   const sensors = useSensors(
-    useSensor(PointerSensor),
+    useSensor(MouseSensor),
+    useSensor(TouchSensor),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
     })
