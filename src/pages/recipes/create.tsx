@@ -938,7 +938,7 @@ const UploadImages = ({
   );
 };
 
-Create.auth = true;
+Create.auth = false;
 Create.hideNav = true;
 
 export default Create;
