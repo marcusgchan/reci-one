@@ -14,9 +14,10 @@ services:
 
   minio:
     image: minio/minio
-    command: minio server /data
+    command: minio server /data --console-address ":9001"
     ports:
       - "9000:9000"
+      - "9001:9001"
     environment:
       MINIO_ROOT_USER: ${ACCESS_KEY_ID}
       MINIO_ROOT_PASSWORD: ${SECRET_ACCESS_KEY}
