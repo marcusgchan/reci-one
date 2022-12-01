@@ -1,5 +1,11 @@
 import { CustomReactFC } from "@/shared/types";
-import React, { useId, useState } from "react";
+import React, {
+  useId,
+  useState,
+  createContext,
+  useMemo,
+  useContext,
+} from "react";
 import { BiMinus } from "react-icons/bi";
 import { GrDrag } from "react-icons/gr";
 import { CgCloseO } from "react-icons/cg";
@@ -13,7 +19,12 @@ import {
 import { v4 as uuidv4 } from "uuid";
 import type { MealType, Nationality, CookingMethod } from "@prisma/client";
 import { trpc } from "@/utils/trpc";
-import { DndContext, closestCenter, DragEndEvent } from "@dnd-kit/core";
+import {
+  DndContext,
+  closestCenter,
+  DragEndEvent,
+  DraggableSyntheticListeners,
+} from "@dnd-kit/core";
 import {
   SortableContext,
   useSortable,
@@ -413,6 +424,17 @@ const IngredientsSection = ({
     </>
   );
 };
+interface Context {
+  attributes: Record<string, any>;
+  listeners: DraggableSyntheticListeners;
+  ref(node: HTMLElement | null): void;
+}
+
+const SortableItemContext = createContext<Context>({
+  attributes: {},
+  listeners: undefined,
+  ref() {},
+});
 
 const SortableItem = ({
   id,
@@ -423,23 +445,34 @@ const SortableItem = ({
   children: React.ReactNode;
   canDrag: boolean;
 }) => {
-  const { attributes, listeners, setNodeRef, transform, transition } =
-    useSortable({ id: id, disabled: !canDrag });
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    setActivatorNodeRef,
+    transform,
+    transition,
+  } = useSortable({ id: id, disabled: !canDrag });
+
+  const context = useMemo(
+    () => ({
+      attributes,
+      listeners,
+      ref: setActivatorNodeRef,
+    }),
+    [attributes, listeners, setActivatorNodeRef]
+  );
 
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
   };
   return (
-    <div
-      ref={setNodeRef}
-      className="touch-none"
-      style={style}
-      {...attributes}
-      {...listeners}
-    >
-      {children}
-    </div>
+    <SortableItemContext.Provider value={context}>
+      <div ref={setNodeRef} style={style}>
+        {children}
+      </div>
+    </SortableItemContext.Provider>
   );
 };
 
@@ -801,9 +834,14 @@ const DraggableInput = ({
   placeholder: string;
   type: ListInputFields;
 }) => {
+  const { attributes, listeners, ref } = useContext(SortableItemContext);
   return (
     <div className="flex items-center gap-2">
-      {canDrag && <GrDrag size={25} className="cursor-grab " />}
+      {canDrag && (
+        <button className="touch-none" {...attributes} {...listeners} ref={ref}>
+          <GrDrag size={25} className="cursor-grab " />
+        </button>
+      )}
       <input
         value={value}
         placeholder={placeholder}
