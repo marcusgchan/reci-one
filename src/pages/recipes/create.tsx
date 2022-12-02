@@ -78,7 +78,7 @@ const Create: CustomReactFC = () => {
         method: "POST",
         body: newFormData,
       });
-      // navigateToRecipes();
+      navigateToRecipes();
     },
   });
 
@@ -130,9 +130,10 @@ const Create: CustomReactFC = () => {
         const newIndex = fd[type]
           .map(({ id }) => id)
           .indexOf(over.id as string);
+        const updatedArray = arrayMove(fd[type], oldIndex, newIndex);
         return {
           ...fd,
-          [type]: arrayMove(fd[type], oldIndex, newIndex),
+          [type]: updatedArray.map((item, i) => ({ ...item, order: i })),
         };
       });
     }
@@ -844,7 +845,7 @@ const DraggableInput = ({
           {...listeners}
           ref={ref}
         >
-          <GrDrag size={25} className="cursor-grab " />
+          <GrDrag size={25} className="cursor-grab" />
         </button>
       )}
       <input
