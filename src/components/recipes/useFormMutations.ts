@@ -52,7 +52,7 @@ export function useFormMutations(
           ...fd[type],
           {
             id: uuidv4(),
-            order: fd[type].length + 1,
+            order: fd[type].length,
             name: "",
             isHeader: isHeader,
           },

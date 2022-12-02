@@ -1,11 +1,5 @@
 import { CustomReactFC } from "@/shared/types";
-import React, {
-  useId,
-  useState,
-  createContext,
-  useMemo,
-  useContext,
-} from "react";
+import React, { useId, useState, useMemo, useContext } from "react";
 import { BiMinus } from "react-icons/bi";
 import { GrDrag } from "react-icons/gr";
 import { CgCloseO } from "react-icons/cg";
@@ -46,6 +40,10 @@ import { useRouter } from "next/router";
 import { useImageUpload } from "@/components/recipes/useImageUpload";
 import Image from "next/image";
 import { LoaderSection } from "@/components/LoaderSection";
+import {
+  SortableItemContext,
+  useSortableItemContext,
+} from "@/components/recipes/useSortableItemContext";
 
 const Create: CustomReactFC = () => {
   const router = useRouter();
@@ -78,7 +76,7 @@ const Create: CustomReactFC = () => {
         method: "POST",
         body: newFormData,
       });
-      // navigateToRecipes();
+      navigateToRecipes();
     },
   });
 
@@ -130,9 +128,10 @@ const Create: CustomReactFC = () => {
         const newIndex = fd[type]
           .map(({ id }) => id)
           .indexOf(over.id as string);
+        const updatedArray = arrayMove(fd[type], oldIndex, newIndex);
         return {
           ...fd,
-          [type]: arrayMove(fd[type], oldIndex, newIndex),
+          [type]: updatedArray.map((item, i) => ({ ...item, order: i })),
         };
       });
     }
@@ -424,17 +423,6 @@ const IngredientsSection = ({
     </>
   );
 };
-interface Context {
-  attributes: Record<string, any>;
-  listeners: DraggableSyntheticListeners;
-  ref(node: HTMLElement | null): void;
-}
-
-const SortableItemContext = createContext<Context>({
-  attributes: {},
-  listeners: undefined,
-  ref() {},
-});
 
 const SortableItem = ({
   id,
@@ -834,7 +822,7 @@ const DraggableInput = ({
   placeholder: string;
   type: ListInputFields;
 }) => {
-  const { attributes, listeners, ref } = useContext(SortableItemContext);
+  const { attributes, listeners, ref } = useSortableItemContext();
   return (
     <div className="flex items-center gap-2">
       {canDrag && (
@@ -844,7 +832,7 @@ const DraggableInput = ({
           {...listeners}
           ref={ref}
         >
-          <GrDrag size={25} className="cursor-grab " />
+          <GrDrag size={25} className="cursor-grab" />
         </button>
       )}
       <input
