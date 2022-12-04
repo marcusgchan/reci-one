@@ -5,13 +5,14 @@ import { Context } from "src/server/trpc/router/context";
 export async function createRecipe(
   ctx: Context,
   userId: string,
-  input: addRecipeWithMainImage
+  input: addRecipeWithMainImage,
+  formattedSignedDate: string
 ) {
   // Unable to connect multiple on create b/c it requires recipeId
   const recipe = await ctx.prisma.recipe.create({
     data: {
       name: input.name,
-      mainImage: input.imageMetadata.name,
+      mainImage: `${input.imageMetadata.name}-${formattedSignedDate}`,
       description: input.description,
       prepTime: input.prepTime || undefined,
       cookTime: input.cookTime || undefined,
