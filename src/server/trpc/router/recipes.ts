@@ -34,12 +34,28 @@ export const recipesRouter = router({
     .input(addRecipeWithMainImagesSchema)
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.session.user.id;
-      const recipe = await createRecipe(ctx, userId, input);
+      const roundedSignedDate = getFormattedUtcDate();
+      const recipe = await createRecipe(ctx, userId, input, roundedSignedDate);
       const signedUrl = await getUploadSignedUrl(
         userId,
         recipe.id,
-        input.imageMetadata
+        input.imageMetadata,
+        roundedSignedDate
       );
       return signedUrl;
     }),
 });
+
+// Create a date that will be appended to the end
+// of the imageName to deal with caching
+// The same url needs to be created for the browser to cache
+// therefore round date to the start of each week
+function getFormattedUtcDate() {
+  const date = new Date();
+  date.setDate(Math.floor(date.getDate() / 7));
+  date.setHours(0);
+  date.setMinutes(0);
+  date.setSeconds(0);
+  date.setMilliseconds(0);
+  return date.toISOString();
+}

@@ -10,13 +10,14 @@ import { addRecipeWithMainImage } from "@/schemas/recipe";
 export const getUploadSignedUrl = async (
   userId: string,
   recipeId: string,
-  imageMetadata: addRecipeWithMainImage["imageMetadata"]
+  imageMetadata: addRecipeWithMainImage["imageMetadata"],
+  formattedSignedDate: string
 ) => {
   try {
     const { name, size, type } = imageMetadata;
     const presignedPost = await createPresignedPost(s3Client, {
       Bucket: env.BUCKET_NAME,
-      Key: `${userId}/${recipeId}/${name}`,
+      Key: `${userId}/${recipeId}/${name}-${formattedSignedDate}`,
       Expires: config.s3.presignedUrlDuration,
 
       Fields: {
@@ -59,14 +60,19 @@ export const getImageSignedUrl = async (
     Bucket: `${env.BUCKET_NAME}`,
     Key: `${userId}/${recipeId}/${imageName}`,
   });
-  // const date = new Date();
-  // date.setHours(9);
-  // date.setMinutes(0);
-  // date.setSeconds(0);
-  // date.setMilliseconds(0);
+  // Create a date that will be appended to the end
+  // of the imageName to deal with caching
+  // The same url needs to be created for the browser to cache
+  // therefore round date to the start of each week
+  const date = new Date();
+  date.setDate(Math.floor(date.getDate() / 7));
+  date.setHours(0);
+  date.setMinutes(0);
+  date.setSeconds(0);
+  date.setMilliseconds(0);
   const signedUrl = await getSignedUrl(s3Client, command, {
     expiresIn: config.s3.presignedUrlDuration,
-    // signingDate: date,
+    signingDate: date.toISOString(),
   });
   return signedUrl;
 };
