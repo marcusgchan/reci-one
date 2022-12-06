@@ -5,6 +5,8 @@ import React, {
   useReducer,
   useRef,
 } from "react";
+import { AiOutlineCheckCircle } from "react-icons/ai";
+import { BiErrorCircle } from "react-icons/bi";
 
 export type SnackNotification = {
   message: string | undefined;
@@ -105,7 +107,14 @@ function Notification({ message, type, dispatch }: Notification) {
       ref={notificationRef}
       className="fixed top-0 left-1/2 z-50 flex max-h-20 max-w-sm -translate-x-1/2 -translate-y-full justify-center overflow-y-auto overflow-x-hidden rounded border-2 border-gray-400 p-2 leading-tight"
     >
-      <h3 className="h-full w-full overflow-clip text-ellipsis">{message}</h3>
+      <span className="flex h-full w-full items-center gap-2 overflow-clip text-ellipsis ">
+        {type === "SUCCESS" ? (
+          <AiOutlineCheckCircle className="text-green-500" size={20} />
+        ) : (
+          <BiErrorCircle className="text-red-500" size={20} />
+        )}
+        {message}
+      </span>
     </div>
   );
 }
