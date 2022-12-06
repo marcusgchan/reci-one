@@ -44,6 +44,7 @@ import {
   SortableItemContext,
   useSortableItemContext,
 } from "@/components/recipes/useSortableItemContext";
+import { useSnackbarDispatch } from "@/components/Snackbar";
 
 const Create: CustomReactFC = () => {
   const router = useRouter();
@@ -137,6 +138,8 @@ const Create: CustomReactFC = () => {
     }
   };
 
+  const snackbarDispatch = useSnackbarDispatch();
+
   const createRecipe = (e: React.FormEvent) => {
     e.preventDefault();
     const data = {
@@ -148,6 +151,7 @@ const Create: CustomReactFC = () => {
       mutation.mutate(result.data);
     }
     // Todo: handle errors
+    snackbarDispatch({ type: "ERROR", message: "Image is required" });
   };
 
   const navigateToRecipes = () => router.push("/recipes");
