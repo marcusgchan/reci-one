@@ -73,6 +73,7 @@ function snacksReducer(state: SnackNotification[], action: SnackAction) {
 function Notification({ message, type, dispatch }: Notification) {
   const animationRef = useRef<Animation>();
   const notificationRef = useRef<HTMLDivElement>(null);
+  const hoveringRef = useRef(false);
 
   useEffect(() => {
     if (
@@ -98,6 +99,7 @@ function Notification({ message, type, dispatch }: Notification) {
     );
     animationRef.current.play();
     animationRef.current.finished.then(() => {
+      console.log("ended");
       dispatch({ type: "REMOVE_NOTIFICATION" });
     });
   });
@@ -105,6 +107,21 @@ function Notification({ message, type, dispatch }: Notification) {
   return (
     <div
       ref={notificationRef}
+      onMouseEnter={() => {
+        if (
+          !hoveringRef.current &&
+          animationRef.current?.playState === "running"
+        ) {
+          animationRef.current.pause();
+          hoveringRef.current = true;
+        }
+      }}
+      onMouseLeave={() => {
+        if (hoveringRef.current && animationRef.current) {
+          animationRef.current.play();
+          hoveringRef.current = false;
+        }
+      }}
       className="fixed top-0 left-1/2 z-50 flex max-h-20 max-w-sm -translate-x-1/2 -translate-y-full justify-center overflow-y-auto overflow-x-hidden rounded border-2 border-gray-400 p-2 leading-tight"
     >
       <span className="flex h-full w-full items-center gap-2 overflow-clip text-ellipsis ">
