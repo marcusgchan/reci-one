@@ -99,7 +99,6 @@ function Notification({ message, type, dispatch }: Notification) {
     );
     animationRef.current.play();
     animationRef.current.finished.then(() => {
-      console.log("ended");
       dispatch({ type: "REMOVE_NOTIFICATION" });
     });
   });
@@ -122,9 +121,10 @@ function Notification({ message, type, dispatch }: Notification) {
           hoveringRef.current = false;
         }
       }}
-      className="fixed top-0 left-1/2 z-50 flex max-h-20 max-w-sm -translate-x-1/2 -translate-y-full justify-center overflow-y-auto overflow-x-hidden rounded border-2 border-gray-400 p-2 leading-tight"
+      aria-live="polite"
+      className="fixed top-0 left-1/2 z-50 flex max-h-20 min-w-[200px] max-w-sm -translate-x-1/2 -translate-y-full justify-center overflow-y-auto overflow-x-hidden rounded border-2 border-gray-400 bg-white p-2 leading-tight"
     >
-      <span className="flex h-full w-full items-center gap-2 overflow-clip text-ellipsis ">
+      <span className="flex h-full w-full items-center gap-2 overflow-clip text-ellipsis">
         {type === "SUCCESS" ? (
           <AiOutlineCheckCircle className="text-green-500" size={20} />
         ) : (

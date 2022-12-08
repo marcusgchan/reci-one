@@ -4,6 +4,12 @@
 
 html {
   height: 100%;
+
+  /* Add margin left to match scrollbar width to fix jumping scrollbar */
+  /* https://aykevl.nl/2014/09/fix-jumping-scrollbar */
+  overflow: auto;
+  margin-left: calc(100vw - 100%);
+  margin-right: 0;
 }
 
 #__next {

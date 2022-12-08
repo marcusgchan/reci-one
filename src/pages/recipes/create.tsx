@@ -63,7 +63,11 @@ const Create: CustomReactFC = () => {
     async onSuccess(presignedPost) {
       const file = formData.get("file");
       if (!file) {
-        // error unable to upload file (show snackbar)
+        // error unable to upload file or user somehow removed img after upload
+        snackbarDispatch({
+          type: "ERROR",
+          message: "There was a problem with uploading your image",
+        });
         return;
       }
       // Add fields that are required for presigned post
@@ -73,11 +77,22 @@ const Create: CustomReactFC = () => {
       });
       // File must be last item that is appended to form
       newFormData.append("file", file);
-      await fetch(presignedPost.url, {
-        method: "POST",
-        body: newFormData,
-      });
-      navigateToRecipes();
+      try {
+        await fetch(presignedPost.url, {
+          method: "POST",
+          body: newFormData,
+        });
+        snackbarDispatch({
+          type: "SUCCESS",
+          message: "Successfully create recipe",
+        });
+        navigateToRecipes();
+      } catch (e) {
+        snackbarDispatch({
+          type: "ERROR",
+          message: "There was a problem with uploading your image",
+        });
+      }
     },
   });
 
@@ -151,7 +166,6 @@ const Create: CustomReactFC = () => {
       mutation.mutate(result.data);
     }
     // Todo: handle errors
-    snackbarDispatch({ type: "ERROR", message: "Image is required" });
   };
 
   const navigateToRecipes = () => router.push("/recipes");
@@ -216,7 +230,7 @@ const Create: CustomReactFC = () => {
             deleteFromList={deleteFromList}
           />
         </SectionWrapper>
-        <SectionWrapper>
+        {/* <SectionWrapper>
           <NationalitySection
             nationalitiesFormData={recipeData.nationalities}
             nationalities={nationalitiesData || []}
@@ -231,7 +245,7 @@ const Create: CustomReactFC = () => {
             addToList={addToList}
             deleteFromList={deleteFromList}
           />
-        </SectionWrapper>
+        </SectionWrapper> */}
         <button className="border-2 border-gray-500 p-1">Create</button>
       </form>
     </section>
