@@ -10,7 +10,7 @@
 - Docker is used for the dev environment
 
 ## How to run
-- Install docker
+- Install docker and run the daemon
 - Create a .env file in the root directory
 - Generate the NEXTAUTH_SECRET by running ```openssl rand -base64 32``` for <NextAuth Secret>
 - Create a Github client id and secret pair for <Github OAuth ID> and <Github OAuth Secret>
@@ -36,3 +36,7 @@ BUCKET_NAME=minio-reci-one
 BUCKET_DOMAIN=http://localhost:9000
 
 ```
+
+- Run ```npm run dev``` to start the NextJs server
+- Run ```docker compose up``` to start the docker containers
+
