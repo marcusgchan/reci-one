@@ -13,8 +13,8 @@
 ## How to run
 - Install docker and run the daemon
 - Create a .env file in the root directory
-- Generate the NEXTAUTH_SECRET by running ```openssl rand -base64 32``` for <NextAuth Secret>
-- Create a Github client id and secret pair for <Github OAuth ID> and <Github OAuth Secret>
+- Generate the NEXTAUTH_SECRET by running ```openssl rand -base64 32```
+- Create a Github client id and secret pair
 
 ```
 # Prisma
