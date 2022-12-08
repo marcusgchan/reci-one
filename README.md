@@ -4,11 +4,12 @@
 - Currently, most features are still in development
 
 ## Tech Stack
-- This is an app bootstrapped according to the [init.tips](https://init.tips) stack, also known as the T3-Stack.
-- T3-Stack: React, React Query, tRPC, TypeScript, Zod, Prisma, NextAuth, NextJs, MySQL
+- This is an app bootstrapped according to the [init.tips](https://init.tips) stack, also known as the T3-Stack
+- T3-Stack: React, React Query, tRPC, TypeScript, Zod, Prisma, NextAuth, NextJS, MySQL
 - Images are stored in S3 in production and in a minIO container during local development
 - Using PlanetScale for production and MySQL docker image for local development
 - Docker is used for the dev environment
+- Hosted on Vercel in production
 
 ## How to run
 - Install docker and run the daemon
@@ -40,4 +41,3 @@ BUCKET_DOMAIN=http://localhost:9000
 
 - Run ```npm run dev``` to start the NextJS server
 - Run ```docker compose up``` to start the docker containers
-
