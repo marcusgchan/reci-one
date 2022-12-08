@@ -16,6 +16,7 @@
 - Create a .env file in the root directory
 - Generate the NEXTAUTH_SECRET by running ```openssl rand -base64 32```
 - Create a Github client id and secret pair
+- The home page url and callback url is http://localhost:3000
 
 ```
 # Prisma
