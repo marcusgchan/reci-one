@@ -38,6 +38,6 @@ BUCKET_DOMAIN=http://localhost:9000
 
 ```
 
-- Run ```npm run dev``` to start the NextJs server
+- Run ```npm run dev``` to start the NextJS server
 - Run ```docker compose up``` to start the docker containers
 
