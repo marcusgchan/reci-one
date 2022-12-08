@@ -1,5 +1,6 @@
 # Reci One
 - A recipe cookbook web app for add, viewing, deleting recipes
+- Store recipes from other recipe websites by URL
 - Currently, most features are still in development
 
 ## Tech Stack
