@@ -8,6 +8,7 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Loader } from "@/shared/components/Loader";
 import { trpc } from "@/utils/trpc";
+import { SnackbarProvider } from "@/components/Snackbar";
 
 type CustomPageProps = AppProps & {
   Component: NextComponentType & { auth?: boolean; hideNav?: boolean };
@@ -22,11 +23,13 @@ const MyApp = ({
   return (
     <QueryClientProvider client={queryClient}>
       <SessionProvider session={session}>
-        <Auth componentAuth={Component.auth}>
-          <Layout hideNav={Component.hideNav}>
-            <Component {...pageProps} />
-          </Layout>
-        </Auth>
+        <SnackbarProvider>
+          <Auth componentAuth={Component.auth}>
+            <Layout hideNav={Component.hideNav}>
+              <Component {...pageProps} />
+            </Layout>
+          </Auth>
+        </SnackbarProvider>
       </SessionProvider>
       <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>

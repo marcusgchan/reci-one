@@ -44,6 +44,7 @@ import {
   SortableItemContext,
   useSortableItemContext,
 } from "@/components/recipes/useSortableItemContext";
+import { useSnackbarDispatch } from "@/components/Snackbar";
 
 const Create: CustomReactFC = () => {
   const router = useRouter();
@@ -62,7 +63,11 @@ const Create: CustomReactFC = () => {
     async onSuccess(presignedPost) {
       const file = formData.get("file");
       if (!file) {
-        // error unable to upload file (show snackbar)
+        // error unable to upload file or user somehow removed img after upload
+        snackbarDispatch({
+          type: "ERROR",
+          message: "There was a problem with uploading your image",
+        });
         return;
       }
       // Add fields that are required for presigned post
@@ -72,11 +77,22 @@ const Create: CustomReactFC = () => {
       });
       // File must be last item that is appended to form
       newFormData.append("file", file);
-      await fetch(presignedPost.url, {
-        method: "POST",
-        body: newFormData,
-      });
-      navigateToRecipes();
+      try {
+        await fetch(presignedPost.url, {
+          method: "POST",
+          body: newFormData,
+        });
+        snackbarDispatch({
+          type: "SUCCESS",
+          message: "Successfully create recipe",
+        });
+        navigateToRecipes();
+      } catch (e) {
+        snackbarDispatch({
+          type: "ERROR",
+          message: "There was a problem with uploading your image",
+        });
+      }
     },
   });
 
@@ -136,6 +152,8 @@ const Create: CustomReactFC = () => {
       });
     }
   };
+
+  const snackbarDispatch = useSnackbarDispatch();
 
   const createRecipe = (e: React.FormEvent) => {
     e.preventDefault();
