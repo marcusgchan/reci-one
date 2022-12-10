@@ -13,11 +13,15 @@ export const recipesRouter = router({
     .query(async ({ ctx, input }) => {
       const userId = ctx.session?.user?.id;
       const recipes = await getRecipes(ctx, userId, input);
+      const roundedDate = getFormattedUtcDate();
       const signedUrls = await Promise.all(
         recipes.map((recipe) =>
-          getImageSignedUrl(recipe.authorId, recipe.id, recipe.mainImage).catch(
-            () => ""
-          )
+          getImageSignedUrl(
+            recipe.authorId,
+            recipe.id,
+            recipe.mainImage,
+            roundedDate
+          ).catch(() => "")
         )
       );
       recipes.forEach(
@@ -34,13 +38,13 @@ export const recipesRouter = router({
     .input(addRecipeWithMainImagesSchema)
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.session.user.id;
-      const roundedSignedDate = getFormattedUtcDate();
-      const recipe = await createRecipe(ctx, userId, input, roundedSignedDate);
+      const roundedDate = getFormattedUtcDate();
+      const recipe = await createRecipe(ctx, userId, input, roundedDate);
       const signedUrl = await getUploadSignedUrl(
         userId,
         recipe.id,
         input.imageMetadata,
-        roundedSignedDate
+        roundedDate
       );
       return signedUrl;
     }),
@@ -52,7 +56,7 @@ export const recipesRouter = router({
 // therefore round date to the start of each week
 function getFormattedUtcDate() {
   const date = new Date();
-  date.setDate(Math.floor(date.getDate() / 7));
+  date.setDate(date.getDate() - date.getDay() + 1);
   date.setHours(0);
   date.setMinutes(0);
   date.setSeconds(0);
