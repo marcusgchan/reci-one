@@ -230,7 +230,7 @@ const Create: CustomReactFC = () => {
             deleteFromList={deleteFromList}
           />
         </SectionWrapper>
-        {/* <SectionWrapper>
+        <SectionWrapper>
           <NationalitySection
             nationalitiesFormData={recipeData.nationalities}
             nationalities={nationalitiesData || []}
@@ -245,7 +245,7 @@ const Create: CustomReactFC = () => {
             addToList={addToList}
             deleteFromList={deleteFromList}
           />
-        </SectionWrapper> */}
+        </SectionWrapper>
         <button className="border-2 border-gray-500 p-1">Create</button>
       </form>
     </section>
