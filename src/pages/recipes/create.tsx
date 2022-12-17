@@ -1,5 +1,5 @@
 import { CustomReactFC } from "@/shared/types";
-import React, { useId, useState, useMemo, useContext } from "react";
+import React, { useId, useState, useMemo } from "react";
 import { BiMinus } from "react-icons/bi";
 import { GrDrag } from "react-icons/gr";
 import { CgCloseO } from "react-icons/cg";
