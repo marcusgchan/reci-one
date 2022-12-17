@@ -6,13 +6,13 @@ export interface ButtonProps
 
 export function Button({ intent, children, ...props }: ButtonProps) {
   return (
-    <button className={button()} {...props}>
+    <button className={button({ intent })} {...props}>
       {children}
     </button>
   );
 }
 
-const button = cva("border-gray-400 border-2 p-1", {
+const button = cva("border-gray-500 border-2 p-1", {
   variants: {
     intent: {
       primary: "",

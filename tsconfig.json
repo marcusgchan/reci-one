@@ -18,7 +18,7 @@
     "baseUrl": ".",
     "paths": {
       "@/components/*": ["src/components/*"],
-      "@/ui/*": ["src/components/*"],
+      "@/ui/*": ["src/components/ui/*"],
       "@/prisma/*": ["prisma/*"],
       "@/router/*": ["src/server/trpc/router/*"],
       "@/shared/*": ["src/shared/*"],

@@ -10,6 +10,7 @@ module.exports = {
         sans: ["Inter var", ...defaultTheme.fontFamily.sans],
       },
       colors: {
+        "accent-600": "#9d7611",
         "accent-500": "#B48714",
         "accent-400": "#D6B665",
         "accent-300": "#E0C98C",

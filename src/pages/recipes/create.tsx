@@ -3,8 +3,6 @@ import React, { useId, useState, useMemo, useContext } from "react";
 import { BiMinus } from "react-icons/bi";
 import { GrDrag } from "react-icons/gr";
 import { CgCloseO } from "react-icons/cg";
-import { CheckIcon, ChevronUpDownIcon } from "@heroicons/react/20/solid";
-import { Combobox } from "@headlessui/react";
 import { useDropdownQuery } from "@/components/recipes/useDropdownQuery";
 import {
   addRecipeWithMainImagesSchema,
@@ -13,12 +11,7 @@ import {
 import { v4 as uuidv4 } from "uuid";
 import type { MealType, Nationality, CookingMethod } from "@prisma/client";
 import { trpc } from "@/utils/trpc";
-import {
-  DndContext,
-  closestCenter,
-  DragEndEvent,
-  DraggableSyntheticListeners,
-} from "@dnd-kit/core";
+import { DndContext, closestCenter, DragEndEvent } from "@dnd-kit/core";
 import {
   SortableContext,
   useSortable,
@@ -45,6 +38,8 @@ import {
   useSortableItemContext,
 } from "@/components/recipes/useSortableItemContext";
 import { useSnackbarDispatch } from "@/components/Snackbar";
+import { Combobox } from "@/ui/Combobox";
+import { Chip } from "@/components/ui/Chip";
 
 const Create: CustomReactFC = () => {
   const router = useRouter();
@@ -498,7 +493,7 @@ const CookingMethodsSection = ({
       <h2>Add Cooking methods</h2>
       <p>Add optional cooking methods to filter meals easier in the future</p>
       <div className="flex items-stretch gap-2">
-        <SearchableSelect
+        <Combobox
           data={cookingMethods}
           handleAdd={(objToAdd: DropdownListValues) =>
             addToList("cookingMethods", objToAdd)
@@ -538,7 +533,7 @@ const MealTypeSection = ({
         Add optional meal types to make filter by meals easier in the future
       </p>
       <div className="flex items-stretch gap-2">
-        <SearchableSelect
+        <Combobox
           data={mealTypes}
           handleAdd={(objToAdd: DropdownListValues) =>
             addToList("mealTypes", objToAdd)
@@ -576,12 +571,13 @@ const NationalitySection = ({
       <h2>Add Nationalities</h2>
       <p>Add optional nationalities to filter by meals easier in the future</p>
       <div className="flex items-stretch gap-2">
-        <SearchableSelect
+        <Combobox
           data={nationalities}
           handleAdd={(objToAdd: DropdownListValues) =>
             addToList("nationalities", objToAdd)
           }
           selectedData={nationalitiesFormData}
+          multiple={false}
         />
       </div>
       <ChipContainer>
@@ -600,134 +596,6 @@ const NationalitySection = ({
 
 const ChipContainer = ({ children }: { children: React.ReactNode }) => {
   return <div className="flex flex-wrap gap-2">{children}</div>;
-};
-
-const Chip = ({
-  data,
-  id,
-  deleteChip,
-}: {
-  data: string;
-  id: string;
-  deleteChip: (id: string) => void;
-}) => {
-  return (
-    <span className="inline-flex items-center rounded-full bg-indigo-100 py-0.5 pl-2.5 pr-1 text-sm font-medium text-indigo-700">
-      {data}
-      <button
-        onClick={() => deleteChip(id)}
-        type="button"
-        className="ml-0.5 inline-flex h-4 w-4 flex-shrink-0 items-center justify-center rounded-full text-indigo-400 hover:bg-indigo-200 hover:text-indigo-500 focus:bg-indigo-500 focus:text-white focus:outline-none"
-      >
-        <span className="sr-only">Remove {data} option</span>
-        <svg
-          onClick={() => deleteChip(id)}
-          className="h-2 w-2"
-          stroke="currentColor"
-          fill="none"
-          viewBox="0 0 8 8"
-        >
-          <path strokeLinecap="round" strokeWidth="1.5" d="M1 1l6 6m0-6L1 7" />
-        </svg>
-      </button>
-    </span>
-  );
-};
-
-function classNames(...classes: (string | boolean)[]) {
-  return classes.filter(Boolean).join(" ");
-}
-
-const SearchableSelect = ({
-  data,
-  handleAdd,
-  selectedData,
-}: {
-  data: MealType[];
-  handleAdd: (value: MealType) => void;
-  selectedData: MealType[];
-}) => {
-  const [query, setQuery] = useState("");
-  const [selectedPerson, setSelectedPerson] = useState<MealType | "">();
-
-  const filteredData =
-    query === ""
-      ? data
-      : data.filter((mealType) => {
-          return mealType.name.toLowerCase().includes(query.toLowerCase());
-        });
-
-  return (
-    <Combobox
-      className="flex-1"
-      as="div"
-      value={selectedPerson}
-      onChange={(e: MealType | Nationality | CookingMethod) => {
-        if (selectedData.filter((data) => data.id === e.id).length > 0) {
-          setSelectedPerson("");
-          return;
-        }
-        handleAdd(e);
-        setSelectedPerson("");
-      }}
-    >
-      <div className="relative">
-        <Combobox.Input
-          autoComplete="off"
-          className="w-full border-2 border-gray-500 py-2 pl-3 pr-10 shadow-sm sm:text-sm"
-          onChange={(e) => setQuery(e.target.value)}
-          displayValue={(mealType: MealType) => mealType?.name}
-        />
-        <Combobox.Button className="absolute inset-y-0 right-0 flex items-center rounded-r-md px-2">
-          <ChevronUpDownIcon
-            className="h-5 w-5 text-gray-400"
-            aria-hidden="true"
-          />
-        </Combobox.Button>
-
-        {filteredData.length > 0 && (
-          <Combobox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 sm:text-sm">
-            {filteredData.map((data) => (
-              <Combobox.Option
-                key={data.id}
-                value={data}
-                className={({ active }) =>
-                  classNames(
-                    "relative cursor-default select-none py-2 pl-3 pr-9",
-                    active ? "bg-indigo-600 text-white" : "text-gray-900"
-                  )
-                }
-              >
-                {({ active, selected }) => (
-                  <>
-                    <span
-                      className={classNames(
-                        "block truncate",
-                        selected && "font-semibold"
-                      )}
-                    >
-                      {data.name}
-                    </span>
-
-                    {selectedData.map((data) => data.id).includes(data.id) && (
-                      <span
-                        className={classNames(
-                          "absolute inset-y-0 right-0 flex items-center pr-4",
-                          active ? "text-white" : "text-indigo-600"
-                        )}
-                      >
-                        <CheckIcon className="h-5 w-5" aria-hidden="true" />
-                      </span>
-                    )}
-                  </>
-                )}
-              </Combobox.Option>
-            ))}
-          </Combobox.Options>
-        )}
-      </div>
-    </Combobox>
-  );
 };
 
 const SectionWrapper = ({ children }: { children: React.ReactNode }) => {
