@@ -2,7 +2,6 @@ import { CustomReactFC } from "@/shared/types";
 import React, { useId, useState, useMemo } from "react";
 import { BiMinus } from "react-icons/bi";
 import { GrDrag } from "react-icons/gr";
-import { CgCloseO } from "react-icons/cg";
 import { useDropdownQuery } from "@/components/recipes/useDropdownQuery";
 import {
   addRecipeWithMainImagesSchema,
@@ -30,7 +29,7 @@ import {
   DropdownListValues,
 } from "@/components/recipes/types";
 import { useRouter } from "next/router";
-import { useImageUpload } from "@/components/recipes/useImageUpload";
+
 import Image from "next/image";
 import { LoaderSection } from "@/components/LoaderSection";
 import {
@@ -40,6 +39,7 @@ import {
 import { useSnackbarDispatch } from "@/components/Snackbar";
 import { Combobox } from "@/ui/Combobox";
 import { Chip } from "@/components/ui/Chip";
+import { ImageUpload, useImageUpload } from "@/ui/ImageUpload";
 
 const Create: CustomReactFC = () => {
   const router = useRouter();
@@ -296,7 +296,7 @@ const NameDesImgSection = ({
         </div>
       </div>
       <div className="h-60 sm:h-full">
-        <UploadImages
+        <ImageUpload
           handleFileLoad={handleFileLoad}
           removeFile={removeFile}
           handleFilesSelect={handleFileSelect}
@@ -734,84 +734,6 @@ const DraggableInput = ({
         <button type="button" onClick={() => remove(id, type)}>
           <BiMinus size={30} />
         </button>
-      )}
-    </div>
-  );
-};
-
-const UploadImages = ({
-  handleFilesSelect,
-  handleFileDrop,
-  imgObjUrl,
-  handleFileLoad,
-  removeFile,
-}: {
-  handleFilesSelect: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  handleFileDrop: (e: React.DragEvent) => void;
-  imgObjUrl: string | undefined;
-  handleFileLoad: (src: string) => void;
-  removeFile: (src: string) => void;
-}) => {
-  return (
-    <div className="flex h-full flex-col">
-      <label htmlFor="cover-photo">Upload Recipe Image</label>
-      {!imgObjUrl ? (
-        <div
-          className="cursor-drop flex h-full items-center justify-center rounded-md border-2 border-dashed border-gray-400 px-6 py-8"
-          onDrop={handleFileDrop}
-          onDragOver={(e) => e.preventDefault()}
-        >
-          <div className="space-y-1 text-center">
-            <svg
-              className="mx-auto h-12 w-12 text-gray-400"
-              stroke="currentColor"
-              fill="none"
-              viewBox="0 0 48 48"
-              aria-hidden="true"
-            >
-              <path
-                d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
-                strokeWidth={2}
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-            <div className="flex items-center text-sm text-gray-600">
-              <label
-                htmlFor="file-upload"
-                className="border-gray relative cursor-pointer rounded-md border-2 bg-white p-[0.5px] font-medium text-gray-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2"
-              >
-                <span>Upload a file</span>
-                <input
-                  id="file-upload"
-                  name="file-upload"
-                  type="file"
-                  multiple={false}
-                  onChange={handleFilesSelect}
-                  className="sr-only"
-                />
-              </label>
-              <p className="pl-1">or drag and drop</p>
-            </div>
-            <p className="text-xs text-gray-500">PNG, JPG, GIF up to 10MB</p>
-          </div>
-        </div>
-      ) : (
-        <div className="relative h-full">
-          <button
-            onClick={() => removeFile(imgObjUrl)}
-            className="absolute right-0 top-0 z-10 translate-x-1/2 -translate-y-1/2 rounded-full bg-white text-gray-400 outline-offset-2 transition-transform hover:scale-110 focus:scale-110"
-          >
-            <CgCloseO size={25} />
-          </button>
-          <Image
-            src={imgObjUrl}
-            onLoad={() => handleFileLoad(imgObjUrl)}
-            objectFit="cover"
-            layout="fill"
-            alt="uploaded image"
-          />
-        </div>
       )}
     </div>
   );
