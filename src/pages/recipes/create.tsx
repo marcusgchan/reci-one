@@ -29,8 +29,6 @@ import {
   DropdownListValues,
 } from "@/components/recipes/types";
 import { useRouter } from "next/router";
-
-import Image from "next/image";
 import { LoaderSection } from "@/components/LoaderSection";
 import {
   SortableItemContext,
@@ -40,6 +38,9 @@ import { useSnackbarDispatch } from "@/components/Snackbar";
 import { Combobox } from "@/ui/Combobox";
 import { Chip } from "@/components/ui/Chip";
 import { ImageUpload, useImageUpload } from "@/ui/ImageUpload";
+import { Input } from "@/ui/Input";
+import { Textarea } from "@/ui/Textarea";
+import { Button } from "@/ui/Button";
 
 const Create: CustomReactFC = () => {
   const router = useRouter();
@@ -176,9 +177,14 @@ const Create: CustomReactFC = () => {
         onSubmit={createRecipe}
       >
         <div>
-          <button type="button" onClick={navigateToRecipes} className="p-1">
+          <Button
+            intent="noBoarder"
+            type="button"
+            onClick={navigateToRecipes}
+            className="p-1"
+          >
             Back
-          </button>
+          </Button>
           <h2 className="text-2xl">Add Recipe</h2>
         </div>
         <SectionWrapper>
@@ -241,7 +247,7 @@ const Create: CustomReactFC = () => {
             deleteFromList={deleteFromList}
           />
         </SectionWrapper>
-        <button className="border-2 border-gray-500 p-1">Create</button>
+        <Button>Create</Button>
       </form>
     </section>
   );
@@ -276,7 +282,7 @@ const NameDesImgSection = ({
           <label className="block" htmlFor={id + "-name"}>
             Name
           </label>
-          <input
+          <Input
             id={id + "-name"}
             type="text"
             value={name}
@@ -288,9 +294,9 @@ const NameDesImgSection = ({
           <label className="block" htmlFor={id + "-description"}>
             Description
           </label>
-          <textarea
+          <Textarea
             id={id + "-description"}
-            className="w-full flex-1 basis-full resize-none border-2 border-gray-500 p-1"
+            className="h-full resize-none border-2 border-gray-500 p-1"
             onChange={(e) => handleStringInput(e, "string", "description")}
           />
         </div>
@@ -377,14 +383,15 @@ const IngredientsSection = ({
         Enter ingredients below. One ingredient per line and it should include
         the measurements. Add optional headers to group ingredients
       </p>
-      <button
+      <Button
+        intent="noBoarder"
         className="self-start"
         type="button"
         aria-label="Toggle rearrange"
         onClick={toggleCanDrag}
       >
-        <MdCompareArrows className="rotate-90" size={20} />
-      </button>
+        <MdCompareArrows className="rotate-90" />
+      </Button>
       <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}
@@ -418,20 +425,20 @@ const IngredientsSection = ({
       </DndContext>
 
       <div className="flex gap-2">
-        <button
+        <Button
           type="button"
           onClick={(e) => addItemToList(e, false, "ingredients")}
           className="border-2 border-gray-500 p-1"
         >
           Add Ingredient
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
           onClick={(e) => addItemToList(e, true, "ingredients")}
           className="border-2 border-gray-500 p-1"
         >
           Add Header
-        </button>
+        </Button>
       </div>
     </>
   );
@@ -631,14 +638,15 @@ const StepsSection = ({
         Enter Steps below. One Step per line. Add optional headers to group
         steps
       </p>
-      <button
+      <Button
+        intent="noBoarder"
         className="self-start"
         type="button"
         aria-label="Toggle rearrange"
         onClick={toggleCanDrag}
       >
         <MdCompareArrows className="rotate-90" size={20} />
-      </button>
+      </Button>
       <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}
@@ -666,20 +674,20 @@ const StepsSection = ({
         </SortableContext>
       </DndContext>
       <div className="flex gap-2">
-        <button
+        <Button
           type="button"
           onClick={(e) => addItemToList(e, false, "steps")}
           className="border-2 border-gray-500 p-1"
         >
           Add Step
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
           onClick={(e) => addItemToList(e, true, "steps")}
           className="border-2 border-gray-500 p-1"
         >
           Add Header
-        </button>
+        </Button>
       </div>
     </>
   );
@@ -712,14 +720,14 @@ const DraggableInput = ({
   return (
     <div className="flex items-center gap-2">
       {canDrag && (
-        <button
+        <Button
           className="touch-manipulation"
           {...attributes}
           {...listeners}
           ref={ref}
         >
           <GrDrag size={25} className="cursor-grab" />
-        </button>
+        </Button>
       )}
       <input
         value={value}
@@ -731,9 +739,13 @@ const DraggableInput = ({
         } flex-1 border-2 border-gray-500 p-1 tracking-wide`}
       />
       {!canDrag && (
-        <button type="button" onClick={() => remove(id, type)}>
+        <Button
+          intent="noBoarder"
+          type="button"
+          onClick={() => remove(id, type)}
+        >
           <BiMinus size={30} />
-        </button>
+        </Button>
       )}
     </div>
   );
