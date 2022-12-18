@@ -43,7 +43,7 @@ export function ImageUpload({
             <div className="flex items-center text-sm text-gray-600">
               <label
                 htmlFor="file-upload"
-                className="border-gray relative cursor-pointer rounded-md border-2 bg-white p-[0.5px] font-medium text-gray-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2"
+                className="border-gray relative cursor-pointer rounded-md border-2 bg-white px-1 py-[0.2rem] font-medium text-gray-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2"
               >
                 <span>Upload a file</span>
                 <input
