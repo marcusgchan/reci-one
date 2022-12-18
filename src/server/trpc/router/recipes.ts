@@ -56,7 +56,12 @@ export const recipesRouter = router({
 // therefore round date to the start of each week
 function getFormattedUtcDate() {
   const date = new Date();
-  date.setDate(date.getDate() - date.getDay() + 1);
+  // Don't add 1 on Sunday
+  if (!date.getDay()) {
+    date.setDate(date.getDate() - date.getDay());
+  } else {
+    date.setDate(date.getDate() - date.getDay() + 1);
+  }
   date.setHours(0);
   date.setMinutes(0);
   date.setSeconds(0);
