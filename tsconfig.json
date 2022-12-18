@@ -17,6 +17,7 @@
     "noUncheckedIndexedAccess": true,
     "baseUrl": ".",
     "paths": {
+      "@/ui/*": ["src/components/ui/*"],
       "@/components/*": ["src/components/*"],
       "@/prisma/*": ["prisma/*"],
       "@/router/*": ["src/server/trpc/router/*"],
