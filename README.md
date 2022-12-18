@@ -42,3 +42,4 @@ BUCKET_DOMAIN=http://localhost:9000
 
 - Run ```npm run dev``` to start the NextJS server
 - Run ```docker compose up``` to start the docker containers
+- Run ```npx prisma migrate dev``` and ```npx prisma db seed```
