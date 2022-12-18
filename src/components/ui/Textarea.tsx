@@ -1,10 +1,12 @@
 import { cva, VariantProps } from "class-variance-authority";
 
-type TextareaProps = React.TextareaHTMLAttributes<HTMLTextAreaElement> &
+type TextareaProps = Omit<
   React.DetailedHTMLProps<
-    React.InputHTMLAttributes<HTMLTextAreaElement>,
+    React.TextareaHTMLAttributes<HTMLTextAreaElement>,
     HTMLTextAreaElement
-  > &
+  >,
+  "size"
+> &
   VariantProps<typeof textarea>;
 
 export function Textarea({ intent, size, className, ...props }: TextareaProps) {
@@ -19,6 +21,7 @@ const textarea = cva("border-gray-500 border-2 p-1", {
       primary: [""],
     },
     size: {
+      medium: [""],
       stretch: ["h-full", "w-full"],
     },
   },

@@ -1,10 +1,12 @@
 import { cva, VariantProps } from "class-variance-authority";
 
-type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> &
+type ButtonProps = Omit<
   React.DetailedHTMLProps<
-    React.InputHTMLAttributes<HTMLButtonElement>,
+    React.ButtonHTMLAttributes<HTMLButtonElement>,
     HTMLButtonElement
-  > &
+  >,
+  "size"
+> &
   VariantProps<typeof button>;
 
 export function Button({

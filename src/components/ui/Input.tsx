@@ -2,11 +2,13 @@ import { cva, VariantProps } from "class-variance-authority";
 
 // Exclude size b/c it clashes with cva 'size'
 // Detailed props has stuf like refs
-type InputProps = Omit<React.InputHTMLAttributes<HTMLInputElement>, "size"> &
+type InputProps = Omit<
   React.DetailedHTMLProps<
     React.InputHTMLAttributes<HTMLInputElement>,
     HTMLInputElement
-  > &
+  >,
+  "size"
+> &
   VariantProps<typeof input>;
 
 export function Input({ intent, size, className, ...props }: InputProps) {
