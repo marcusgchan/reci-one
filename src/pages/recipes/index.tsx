@@ -8,11 +8,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { GetRecipesQuery, getRecipesSchema } from "@/schemas/recipe";
 import { useRouter } from "next/router";
 import { LoaderSection } from "@/components/LoaderSection";
+import { CustomReactFC } from "@/shared/types";
 
 type Recipes = RouterOutputs["recipes"]["getRecipes"];
 const scopes = ["PRIVATE", "PUBLIC", "ALL"] as const;
 
-const Index = () => {
+const Index: CustomReactFC = () => {
   const [sharingScopeIndex, setSharingScopeIndex] = useState(0);
   const toggleSharingScope = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -173,5 +174,7 @@ const RecipeCard = ({
     </article>
   );
 };
+
+Index.auth = true;
 
 export default Index;
