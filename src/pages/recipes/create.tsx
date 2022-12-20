@@ -4,6 +4,7 @@ import { BiMinus } from "react-icons/bi";
 import { GrDrag } from "react-icons/gr";
 import { useDropdownQuery } from "@/components/recipes/useDropdownQuery";
 import {
+  addRecipeWithMainImage,
   addRecipeWithMainImagesSchema,
   addRecipeWithoutMainImage,
 } from "@/schemas/recipe";
@@ -41,10 +42,13 @@ import { ImageUpload, useImageUpload } from "@/ui/ImageUpload";
 import { Input } from "@/ui/Input";
 import { Textarea } from "@/ui/Textarea";
 import { Button } from "@/ui/Button";
+import { ZodFormattedError } from "zod";
+import { FieldValidation } from "@/ui/FieldValidation";
+
+type FormErrors = ZodFormattedError<addRecipeWithMainImage, string>;
 
 const Create: CustomReactFC = () => {
   const router = useRouter();
-
   const {
     file,
     handleFileSelect,
@@ -54,7 +58,7 @@ const Create: CustomReactFC = () => {
     handleFileLoad,
     removeFile,
   } = useImageUpload();
-
+  const [formErrors, setFormErrors] = useState<FormErrors | null>();
   const mutation = trpc.recipes.addRecipe.useMutation({
     async onSuccess(presignedPost) {
       const file = formData.get("file");
@@ -160,8 +164,10 @@ const Create: CustomReactFC = () => {
     const result = addRecipeWithMainImagesSchema.safeParse(data);
     if (result.success) {
       mutation.mutate(result.data);
+    } else {
+      console.log(result.error.format());
+      setFormErrors(result.error.format());
     }
-    // Todo: handle errors
   };
 
   const navigateToRecipes = () => router.push("/recipes");
@@ -282,13 +288,15 @@ const NameDesImgSection = ({
           <label className="block" htmlFor={id + "-name"}>
             Name
           </label>
-          <Input
-            id={id + "-name"}
-            type="text"
-            value={name}
-            onChange={(e) => handleStringInput(e, "string", "name")}
-            className="inline-block w-full border-2 border-gray-500 p-1"
-          />
+          <FieldValidation>
+            <Input
+              id={id + "-name"}
+              type="text"
+              value={name}
+              onChange={(e) => handleStringInput(e, "string", "name")}
+              className="inline-block w-full border-2 border-gray-500 p-1"
+            />
+          </FieldValidation>
         </div>
         <div className="flex h-full flex-col">
           <label className="block" htmlFor={id + "-description"}>
