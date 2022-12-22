@@ -1,5 +1,11 @@
 import { CustomReactFC } from "@/shared/types";
-import React, { useId, useState, useMemo } from "react";
+import React, {
+  useId,
+  useState,
+  useMemo,
+  useContext,
+  createContext,
+} from "react";
 import { BiMinus } from "react-icons/bi";
 import { GrDrag } from "react-icons/gr";
 import { useDropdownQuery } from "@/components/recipes/useDropdownQuery";
@@ -47,6 +53,25 @@ import { FieldValidation } from "@/ui/FieldValidation";
 
 type FormErrors = ZodFormattedError<addRecipeWithMainImage, string>;
 
+const FormErrorContext = createContext<FormErrors | null>(null);
+
+function handleImageErrors(errors: FormErrors["imageMetadata"]) {
+  if (!errors) return;
+  // File doesn't exist
+  // Name must exist if the file is uploaded to browser
+  if (errors.name?._errors?.length) {
+    return errors.name;
+  }
+  // File too big
+  if (errors.size?._errors.length) {
+    return errors.size;
+  }
+  // Invalid file type
+  if (errors.type?._errors.length) {
+    return errors.type;
+  }
+}
+
 const Create: CustomReactFC = () => {
   const router = useRouter();
   const {
@@ -58,7 +83,7 @@ const Create: CustomReactFC = () => {
     handleFileLoad,
     removeFile,
   } = useImageUpload();
-  const [formErrors, setFormErrors] = useState<FormErrors | null>();
+  const [formErrors, setFormErrors] = useState<FormErrors | null>(null);
   const mutation = trpc.recipes.addRecipe.useMutation({
     async onSuccess(presignedPost) {
       const file = formData.get("file");
@@ -178,83 +203,85 @@ const Create: CustomReactFC = () => {
 
   return (
     <section className="p-5 pb-10">
-      <form
-        className="m-auto grid w-full max-w-xl grid-cols-1 gap-5 pb-2 text-gray-500"
-        onSubmit={createRecipe}
-      >
-        <div>
-          <Button
-            intent="noBoarder"
-            type="button"
-            onClick={navigateToRecipes}
-            className="p-1"
-          >
-            Back
-          </Button>
-          <h2 className="text-2xl">Add Recipe</h2>
-        </div>
-        <SectionWrapper>
-          <NameDesImgSection
-            name={recipeData.name}
-            handleStringInput={handleBasicInput}
-            handleFileSelect={handleFileSelect}
-            handleFileDrop={handleFileDrop}
-            handleFileLoad={handleFileLoad}
-            removeFile={removeFile}
-            imgObjUrl={imgObjUrlRef.current}
-          />
-        </SectionWrapper>
-        <SectionWrapper>
-          <IngredientsSection
-            updateListInput={updateListInput}
-            removeListInput={removeListInput}
-            ingredients={recipeData.ingredients}
-            addItemToList={addItemToList}
-            handleDragEnd={handleDragEnd}
-          />
-        </SectionWrapper>
-        <SectionWrapper>
-          <StepsSection
-            updateListInput={updateListInput}
-            removeListInput={removeListInput}
-            steps={recipeData.steps}
-            addItemToList={addItemToList}
-            handleDragEnd={handleDragEnd}
-          />
-        </SectionWrapper>
-        <SectionWrapper>
-          <TimeSection
-            cookTime={recipeData.cookTime}
-            prepTime={recipeData.prepTime}
-            handleBasicInput={handleBasicInput}
-          />
-        </SectionWrapper>
-        <SectionWrapper>
-          <MealTypeSection
-            mealTypesFormData={recipeData.mealTypes}
-            mealTypes={mealTypesData || []}
-            addToList={addToList}
-            deleteFromList={deleteFromList}
-          />
-        </SectionWrapper>
-        <SectionWrapper>
-          <NationalitySection
-            nationalitiesFormData={recipeData.nationalities}
-            nationalities={nationalitiesData || []}
-            addToList={addToList}
-            deleteFromList={deleteFromList}
-          />
-        </SectionWrapper>
-        <SectionWrapper>
-          <CookingMethodsSection
-            cookingMethodsFormData={recipeData.cookingMethods}
-            cookingMethods={cookingMethodsData || []}
-            addToList={addToList}
-            deleteFromList={deleteFromList}
-          />
-        </SectionWrapper>
-        <Button>Create</Button>
-      </form>
+      <FormErrorContext.Provider value={formErrors}>
+        <form
+          className="m-auto grid w-full max-w-xl grid-cols-1 gap-5 pb-2 text-gray-500"
+          onSubmit={createRecipe}
+        >
+          <div>
+            <Button
+              intent="noBoarder"
+              type="button"
+              onClick={navigateToRecipes}
+              className="p-1"
+            >
+              Back
+            </Button>
+            <h2 className="text-2xl">Add Recipe</h2>
+          </div>
+          <SectionWrapper>
+            <NameDesImgSection
+              name={recipeData.name}
+              handleStringInput={handleBasicInput}
+              handleFileSelect={handleFileSelect}
+              handleFileDrop={handleFileDrop}
+              handleFileLoad={handleFileLoad}
+              removeFile={removeFile}
+              imgObjUrl={imgObjUrlRef.current}
+            />
+          </SectionWrapper>
+          <SectionWrapper>
+            <IngredientsSection
+              updateListInput={updateListInput}
+              removeListInput={removeListInput}
+              ingredients={recipeData.ingredients}
+              addItemToList={addItemToList}
+              handleDragEnd={handleDragEnd}
+            />
+          </SectionWrapper>
+          <SectionWrapper>
+            <StepsSection
+              updateListInput={updateListInput}
+              removeListInput={removeListInput}
+              steps={recipeData.steps}
+              addItemToList={addItemToList}
+              handleDragEnd={handleDragEnd}
+            />
+          </SectionWrapper>
+          <SectionWrapper>
+            <TimeSection
+              cookTime={recipeData.cookTime}
+              prepTime={recipeData.prepTime}
+              handleBasicInput={handleBasicInput}
+            />
+          </SectionWrapper>
+          <SectionWrapper>
+            <MealTypeSection
+              mealTypesFormData={recipeData.mealTypes}
+              mealTypes={mealTypesData || []}
+              addToList={addToList}
+              deleteFromList={deleteFromList}
+            />
+          </SectionWrapper>
+          <SectionWrapper>
+            <NationalitySection
+              nationalitiesFormData={recipeData.nationalities}
+              nationalities={nationalitiesData || []}
+              addToList={addToList}
+              deleteFromList={deleteFromList}
+            />
+          </SectionWrapper>
+          <SectionWrapper>
+            <CookingMethodsSection
+              cookingMethodsFormData={recipeData.cookingMethods}
+              cookingMethods={cookingMethodsData || []}
+              addToList={addToList}
+              deleteFromList={deleteFromList}
+            />
+          </SectionWrapper>
+          <Button>Create</Button>
+        </form>
+      </FormErrorContext.Provider>
     </section>
   );
 };
@@ -281,6 +308,7 @@ const NameDesImgSection = ({
   removeFile: (src: string) => void;
 }) => {
   const id = useId();
+  const formErrors = useContext(FormErrorContext);
   return (
     <div className="grid grid-cols-1 gap-2 sm:h-56 sm:grid-cols-2">
       <div className="flex min-w-[50%] flex-1 shrink-0 flex-col gap-4">
@@ -288,7 +316,7 @@ const NameDesImgSection = ({
           <label className="block" htmlFor={id + "-name"}>
             Name
           </label>
-          <FieldValidation>
+          <FieldValidation error={formErrors?.name}>
             <Input
               id={id + "-name"}
               type="text"
@@ -309,15 +337,18 @@ const NameDesImgSection = ({
           />
         </div>
       </div>
-      <div className="h-60 sm:h-full">
-        <ImageUpload
-          handleFileLoad={handleFileLoad}
-          removeFile={removeFile}
-          handleFilesSelect={handleFileSelect}
-          handleFileDrop={handleFileDrop}
-          imgObjUrl={imgObjUrl}
-        />
-      </div>
+      {/* Wrapped outside to prevent image upload from shrinking if there's an error */}
+      <FieldValidation error={handleImageErrors(formErrors?.imageMetadata)}>
+        <div className="h-60 sm:h-full">
+          <ImageUpload
+            handleFileLoad={handleFileLoad}
+            removeFile={removeFile}
+            handleFilesSelect={handleFileSelect}
+            handleFileDrop={handleFileDrop}
+            imgObjUrl={imgObjUrl}
+          />
+        </div>
+      </FieldValidation>
     </div>
   );
 };
@@ -398,7 +429,7 @@ const IngredientsSection = ({
         aria-label="Toggle rearrange"
         onClick={toggleCanDrag}
       >
-        <MdCompareArrows className="rotate-90" />
+        <MdCompareArrows className="rotate-90" size={20} />
       </Button>
       <DndContext
         sensors={sensors}
