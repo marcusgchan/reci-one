@@ -7,7 +7,8 @@ export function FieldValidation<T>({
   children: React.ReactNode;
   error: ZodFormattedError<T, string> | undefined;
 }) {
-  if (!error || (error._errors && !error._errors.length)) return <></>;
+  if (!error || (error._errors && !error._errors.length))
+    return <>{children}</>;
   return (
     <div>
       {children}
