@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { ZodFormattedError } from "zod";
+import { AiOutlineInfoCircle } from "react-icons/ai";
 
 export function FieldValidation<T>({
   children,
@@ -18,6 +19,15 @@ export function FieldValidation<T>({
       {!highlightOnly && (
         <span className="text-red-500">{error._errors.join(". ")}</span>
       )}
+    </div>
+  );
+}
+
+export function ErrorBox({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="flex items-center gap-2 border-2 border-red-500 bg-red-100 p-2 text-red-500">
+      <AiOutlineInfoCircle size={20} />
+      {children}
     </div>
   );
 }

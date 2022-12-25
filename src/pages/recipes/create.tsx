@@ -49,7 +49,7 @@ import { Input } from "@/ui/Input";
 import { Textarea } from "@/ui/Textarea";
 import { Button } from "@/ui/Button";
 import { ZodFormattedError } from "zod";
-import { FieldValidation } from "@/ui/FieldValidation";
+import { ErrorBox, FieldValidation } from "@/ui/FieldValidation";
 
 type FormErrors = ZodFormattedError<addRecipeWithMainImage, string>;
 
@@ -691,7 +691,13 @@ const StepsSection = ({
   handleDragEnd: (e: DragEndEvent, type: ListInputFields) => void;
 }) => {
   const { canDrag, toggleCanDrag, sensors } = useListDnd();
-  const formErrors = useContext(FormErrorContext);
+  const formContext = useContext(FormErrorContext);
+  const result = addRecipeWithMainImagesSchema
+    .pick({ steps: true })
+    .safeParse({ steps: steps });
+  if (!result.success && formContext?.formErrors) {
+    console.log(result.error.flatten());
+  }
   return (
     <>
       <h2>Add Steps</h2>
@@ -735,6 +741,9 @@ const StepsSection = ({
           })}
         </SortableContext>
       </DndContext>
+      {!result.success && formContext?.formErrors && (
+        <ErrorBox>{result.error.flatten().fieldErrors.steps?.[0]}</ErrorBox>
+      )}
       <div className="flex gap-2">
         <Button
           type="button"
@@ -783,10 +792,10 @@ const DraggableInput = ({
   const { attributes, listeners, ref } = useSortableItemContext();
   const formContext = useContext(FormErrorContext);
   return (
-    <div className="flex h-10 items-stretch gap-2">
+    <div className="flex h-10 items-stretch">
       {canDrag && (
         <button
-          className="touch-manipulation"
+          className="mr-2 touch-manipulation"
           {...attributes}
           {...listeners}
           ref={ref}
@@ -814,7 +823,7 @@ const DraggableInput = ({
           type="button"
           onClick={() => remove(id, type)}
         >
-          <BiMinus size={30} />
+          <BiMinus size={25} />
         </Button>
       )}
     </div>
