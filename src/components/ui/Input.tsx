@@ -15,18 +15,21 @@ export function Input({ intent, size, className, ...props }: InputProps) {
   return <input className={input({ intent, size, className })} {...props} />;
 }
 
-const input = cva("border-gray-500 border-2 p-1", {
-  variants: {
-    intent: {
-      primary: [""],
+const input = cva(
+  "border-gray-500 border-2 p-1 group-[.error]:border-red-500",
+  {
+    variants: {
+      intent: {
+        primary: [""],
+      },
+      size: {
+        medium: [""],
+        large: ["tracking-wide", "text-xl"],
+      },
     },
-    size: {
-      medium: [""],
-      large: ["tracking-wide", "text-xl"],
+    defaultVariants: {
+      intent: "primary",
+      size: "medium",
     },
-  },
-  defaultVariants: {
-    intent: "primary",
-    size: "medium",
-  },
-});
+  }
+);

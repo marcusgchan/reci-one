@@ -53,7 +53,10 @@ import { FieldValidation } from "@/ui/FieldValidation";
 
 type FormErrors = ZodFormattedError<addRecipeWithMainImage, string>;
 
-const FormErrorContext = createContext<FormErrors | null>(null);
+const FormErrorContext = createContext<{
+  formErrors: FormErrors | null;
+  resetForm: () => void;
+} | null>(null);
 
 function handleImageErrors(errors: FormErrors["imageMetadata"]) {
   if (!errors) return;
@@ -84,6 +87,7 @@ const Create: CustomReactFC = () => {
     removeFile,
   } = useImageUpload();
   const [formErrors, setFormErrors] = useState<FormErrors | null>(null);
+  const resetForm = () => setFormErrors(null);
   const mutation = trpc.recipes.addRecipe.useMutation({
     async onSuccess(presignedPost) {
       const file = formData.get("file");
@@ -162,18 +166,31 @@ const Create: CustomReactFC = () => {
   const handleDragEnd = (event: DragEndEvent, type: ListInputFields) => {
     const { active, over } = event;
     if (active && over && active.id !== over!.id) {
+      const oldIndex = recipeData[type]
+        .map(({ id }) => id)
+        .indexOf(active.id as string);
+      const newIndex = recipeData[type]
+        .map(({ id }) => id)
+        .indexOf(over.id as string);
       setRecipeData((fd) => {
-        const oldIndex = fd[type]
-          .map(({ id }) => id)
-          .indexOf(active.id as string);
-        const newIndex = fd[type]
-          .map(({ id }) => id)
-          .indexOf(over.id as string);
         const updatedArray = arrayMove(fd[type], oldIndex, newIndex);
-        return {
+        const updatedRecipeData = {
           ...fd,
           [type]: updatedArray.map((item, i) => ({ ...item, order: i })),
         };
+        const data = {
+          ...updatedRecipeData,
+          imageMetadata: {
+            name: file?.name,
+            type: file?.type,
+            size: file?.size,
+          },
+        };
+        const result = addRecipeWithMainImagesSchema.safeParse(data);
+        if (!result.success) {
+          setFormErrors(result.error.format());
+        }
+        return updatedRecipeData;
       });
     }
   };
@@ -190,7 +207,7 @@ const Create: CustomReactFC = () => {
     if (result.success) {
       mutation.mutate(result.data);
     } else {
-      console.log(result.error.format());
+      console.log(result.error.flatten());
       setFormErrors(result.error.format());
     }
   };
@@ -203,7 +220,7 @@ const Create: CustomReactFC = () => {
 
   return (
     <section className="p-5 pb-10">
-      <FormErrorContext.Provider value={formErrors}>
+      <FormErrorContext.Provider value={{ formErrors, resetForm }}>
         <form
           className="m-auto grid w-full max-w-xl grid-cols-1 gap-5 pb-2 text-gray-500"
           onSubmit={createRecipe}
@@ -308,7 +325,7 @@ const NameDesImgSection = ({
   removeFile: (src: string) => void;
 }) => {
   const id = useId();
-  const formErrors = useContext(FormErrorContext);
+  const formContext = useContext(FormErrorContext);
   return (
     <div className="grid grid-cols-1 gap-2 sm:h-56 sm:grid-cols-2">
       <div className="flex min-w-[50%] flex-1 shrink-0 flex-col gap-4">
@@ -316,7 +333,7 @@ const NameDesImgSection = ({
           <label className="block" htmlFor={id + "-name"}>
             Name
           </label>
-          <FieldValidation error={formErrors?.name}>
+          <FieldValidation error={formContext?.formErrors?.name}>
             <Input
               id={id + "-name"}
               type="text"
@@ -338,8 +355,10 @@ const NameDesImgSection = ({
         </div>
       </div>
       {/* Wrapped outside to prevent image upload from shrinking if there's an error */}
-      <FieldValidation error={handleImageErrors(formErrors?.imageMetadata)}>
-        <div className="h-60 sm:h-full">
+      <div className="h-60 sm:h-full">
+        <FieldValidation
+          error={handleImageErrors(formContext?.formErrors?.imageMetadata)}
+        >
           <ImageUpload
             handleFileLoad={handleFileLoad}
             removeFile={removeFile}
@@ -347,8 +366,8 @@ const NameDesImgSection = ({
             handleFileDrop={handleFileDrop}
             imgObjUrl={imgObjUrl}
           />
-        </div>
-      </FieldValidation>
+        </FieldValidation>
+      </div>
     </div>
   );
 };
@@ -415,6 +434,7 @@ const IngredientsSection = ({
   handleDragEnd: (e: DragEndEvent, type: ListInputFields) => void;
 }) => {
   const { canDrag, toggleCanDrag, sensors } = useListDnd();
+  const formContext = useContext(FormErrorContext);
   return (
     <>
       <h2>Add Ingredients</h2>
@@ -440,11 +460,12 @@ const IngredientsSection = ({
           items={ingredients}
           strategy={verticalListSortingStrategy}
         >
-          {ingredients.map(({ id, name, isHeader }) => {
+          {ingredients.map(({ id, name, isHeader }, index) => {
             return (
               <SortableItem key={id} id={id} canDrag={canDrag}>
                 <DraggableInput
                   id={id}
+                  index={index}
                   type="ingredients"
                   placeholder={
                     isHeader
@@ -670,6 +691,7 @@ const StepsSection = ({
   handleDragEnd: (e: DragEndEvent, type: ListInputFields) => void;
 }) => {
   const { canDrag, toggleCanDrag, sensors } = useListDnd();
+  const formErrors = useContext(FormErrorContext);
   return (
     <>
       <h2>Add Steps</h2>
@@ -692,11 +714,12 @@ const StepsSection = ({
         onDragEnd={(e) => handleDragEnd(e, "steps")}
       >
         <SortableContext items={steps} strategy={verticalListSortingStrategy}>
-          {steps.map(({ id, name, isHeader }) => {
+          {steps.map(({ id, name, isHeader }, index) => {
             return (
               <SortableItem key={id} id={id} canDrag={canDrag}>
                 <DraggableInput
                   id={id}
+                  index={index}
                   type="steps"
                   placeholder={
                     isHeader ? "Steps Header placeholder" : "e.g. Soup"
@@ -741,6 +764,7 @@ const DraggableInput = ({
   canDrag,
   placeholder,
   type,
+  index,
 }: {
   id: string;
   remove: (id: string, type: ListInputFields) => void;
@@ -754,29 +778,36 @@ const DraggableInput = ({
   canDrag: boolean;
   placeholder: string;
   type: ListInputFields;
+  index: number;
 }) => {
   const { attributes, listeners, ref } = useSortableItemContext();
+  const formContext = useContext(FormErrorContext);
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex h-10 items-stretch gap-2">
       {canDrag && (
-        <Button
+        <button
           className="touch-manipulation"
           {...attributes}
           {...listeners}
           ref={ref}
         >
           <GrDrag size={25} className="cursor-grab" />
-        </Button>
+        </button>
       )}
-      <input
-        value={value}
-        placeholder={placeholder}
-        disabled={canDrag}
-        onChange={(e) => onChange(e, id, type)}
-        className={`${
-          isHeader ? "font-extrabold" : ""
-        } flex-1 border-2 border-gray-500 p-1 tracking-wide`}
-      />
+      <FieldValidation
+        highlightOnly
+        error={formContext?.formErrors?.[type]?.[index]?.name}
+      >
+        <Input
+          value={value}
+          placeholder={placeholder}
+          disabled={canDrag}
+          onChange={(e) => onChange(e, id, type)}
+          className={`${
+            isHeader ? "font-extrabold" : ""
+          } flex-1 border-2 border-gray-500 p-1 tracking-wide`}
+        />
+      </FieldValidation>
       {!canDrag && (
         <Button
           intent="noBoarder"
