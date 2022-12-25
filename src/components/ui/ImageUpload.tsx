@@ -21,7 +21,7 @@ export function ImageUpload({
       <label htmlFor="cover-photo">Upload Recipe Image</label>
       {!imgObjUrl ? (
         <div
-          className="cursor-drop flex h-full items-center justify-center rounded-md border-2 border-dashed border-gray-400 px-6 py-8"
+          className="cursor-drop flex h-full items-center justify-center rounded-md border-2 border-dashed border-gray-400 px-6 py-8 group-[.error]:border-red-500"
           onDrop={handleFileDrop}
           onDragOver={(e) => e.preventDefault()}
         >
@@ -128,7 +128,7 @@ export function useImageUpload() {
     };
     router.events.on("beforeHistoryChange", handleRouteChange);
     return () => router.events.off("beforeHistoryChange", handleRouteChange);
-  });
+  }, [router]);
 
   return {
     file,

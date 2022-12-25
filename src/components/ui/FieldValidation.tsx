@@ -14,7 +14,7 @@ export function FieldValidation<T>({
   if (!error || (error._errors && !error._errors.length))
     return <>{children}</>;
   return (
-    <div className={"error group flex w-full flex-col"}>
+    <div className="error group flex h-full w-full flex-col">
       {children}
       {!highlightOnly && (
         <span className="text-red-500">{error._errors.join(". ")}</span>

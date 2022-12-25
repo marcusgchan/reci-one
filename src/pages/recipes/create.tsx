@@ -435,6 +435,9 @@ const IngredientsSection = ({
 }) => {
   const { canDrag, toggleCanDrag, sensors } = useListDnd();
   const formContext = useContext(FormErrorContext);
+  const result = addRecipeWithMainImagesSchema
+    .pick({ ingredients: true })
+    .safeParse({ ingredients: ingredients });
   return (
     <>
       <h2>Add Ingredients</h2>
@@ -483,7 +486,11 @@ const IngredientsSection = ({
           })}
         </SortableContext>
       </DndContext>
-
+      {!result.success && formContext?.formErrors && (
+        <ErrorBox>
+          {result.error.flatten().fieldErrors.ingredients?.[0]}
+        </ErrorBox>
+      )}
       <div className="flex gap-2">
         <Button
           type="button"
@@ -695,9 +702,6 @@ const StepsSection = ({
   const result = addRecipeWithMainImagesSchema
     .pick({ steps: true })
     .safeParse({ steps: steps });
-  if (!result.success && formContext?.formErrors) {
-    console.log(result.error.flatten());
-  }
   return (
     <>
       <h2>Add Steps</h2>
