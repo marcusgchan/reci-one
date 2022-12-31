@@ -805,7 +805,7 @@ const DraggableInput = ({
         highlightOnly
         error={formContext?.formErrors?.[type]?.[index]?.name}
       > */}
-      <input
+      <Input
         placeholder={placeholder}
         disabled={canDrag}
         {...register(`${type}.${index}.name`)}
