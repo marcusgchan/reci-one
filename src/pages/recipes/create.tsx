@@ -50,32 +50,61 @@ import { Textarea } from "@/ui/Textarea";
 import { Button } from "@/ui/Button";
 import { ZodFormattedError } from "zod";
 import { ErrorBox, FieldValidation } from "@/ui/FieldValidation";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  FieldValues,
+  FormProvider,
+  UseFieldArrayAppend,
+  UseFieldArrayRemove,
+  UseFieldArrayUpdate,
+  UseFormRegister,
+  useFieldArray,
+  useForm,
+  useFormContext,
+} from "react-hook-form";
 
-type FormErrors = ZodFormattedError<addRecipeWithMainImage, string>;
-
-const FormErrorContext = createContext<{
-  formErrors: FormErrors | null;
-  resetForm: () => void;
-} | null>(null);
-
-function handleImageErrors(errors: FormErrors["imageMetadata"]) {
-  if (!errors) return;
-  // File doesn't exist
-  // Name must exist if the file is uploaded to browser
-  if (errors.name?._errors?.length) {
-    return errors.name;
-  }
-  // File too big
-  if (errors.size?._errors.length) {
-    return errors.size;
-  }
-  // Invalid file type
-  if (errors.type?._errors.length) {
-    return errors.type;
-  }
-}
+// function handleImageErrors(errors: FormErrors["imageMetadata"]) {
+//   if (!errors) return;
+//   // File doesn't exist
+//   // Name must exist if the file is uploaded to browser
+//   if (errors.name?._errors?.length) {
+//     return errors.name;
+//   }
+//   // File too big
+//   if (errors.size?._errors.length) {
+//     return errors.size;
+//   }
+//   // Invalid file type
+//   if (errors.type?._errors.length) {
+//     return errors.type;
+//   }
+// }
 
 const Create: CustomReactFC = () => {
+  const methods = useForm<addRecipeWithMainImage>({
+    resolver: zodResolver(addRecipeWithMainImagesSchema),
+    defaultValues: {
+      name: "",
+      description: "",
+      ingredients: [
+        { id: uuidv4(), order: 0, name: "", isHeader: false },
+        { id: uuidv4(), order: 1, name: "", isHeader: false },
+        { id: uuidv4(), order: 2, name: "", isHeader: false },
+      ],
+      steps: [
+        { id: uuidv4(), order: 0, name: "", isHeader: false },
+        { id: uuidv4(), order: 1, name: "", isHeader: false },
+        { id: uuidv4(), order: 2, name: "", isHeader: false },
+      ],
+      prepTime: "",
+      cookTime: "",
+      isPublic: false,
+      cookingMethods: [],
+      mealTypes: [],
+      nationalities: [],
+    },
+  });
+
   const router = useRouter();
   const {
     file,
@@ -86,8 +115,6 @@ const Create: CustomReactFC = () => {
     handleFileLoad,
     removeFile,
   } = useImageUpload();
-  const [formErrors, setFormErrors] = useState<FormErrors | null>(null);
-  const resetForm = () => setFormErrors(null);
   const mutation = trpc.recipes.addRecipe.useMutation({
     async onSuccess(presignedPost) {
       const file = formData.get("file");
@@ -188,7 +215,7 @@ const Create: CustomReactFC = () => {
         };
         const result = addRecipeWithMainImagesSchema.safeParse(data);
         if (!result.success) {
-          setFormErrors(result.error.format());
+          // setFormErrors(result.error.format());
         }
         return updatedRecipeData;
       });
@@ -208,7 +235,7 @@ const Create: CustomReactFC = () => {
       mutation.mutate(result.data);
     } else {
       console.log(result.error.flatten());
-      setFormErrors(result.error.format());
+      // setFormErrors(result.error.format());
     }
   };
 
@@ -220,7 +247,7 @@ const Create: CustomReactFC = () => {
 
   return (
     <section className="p-5 pb-10">
-      <FormErrorContext.Provider value={{ formErrors, resetForm }}>
+      <FormProvider {...methods}>
         <form
           className="m-auto grid w-full max-w-xl grid-cols-1 gap-5 pb-2 text-gray-500"
           onSubmit={createRecipe}
@@ -248,22 +275,16 @@ const Create: CustomReactFC = () => {
             />
           </SectionWrapper>
           <SectionWrapper>
-            <IngredientsSection
-              updateListInput={updateListInput}
-              removeListInput={removeListInput}
-              ingredients={recipeData.ingredients}
-              addItemToList={addItemToList}
-              handleDragEnd={handleDragEnd}
-            />
+            <IngredientsSection handleDragEnd={handleDragEnd} />
           </SectionWrapper>
           <SectionWrapper>
-            <StepsSection
+            {/* <StepsSection
               updateListInput={updateListInput}
               removeListInput={removeListInput}
               steps={recipeData.steps}
               addItemToList={addItemToList}
               handleDragEnd={handleDragEnd}
-            />
+            /> */}
           </SectionWrapper>
           <SectionWrapper>
             <TimeSection
@@ -298,7 +319,7 @@ const Create: CustomReactFC = () => {
           </SectionWrapper>
           <Button>Create</Button>
         </form>
-      </FormErrorContext.Provider>
+      </FormProvider>
     </section>
   );
 };
@@ -325,7 +346,7 @@ const NameDesImgSection = ({
   removeFile: (src: string) => void;
 }) => {
   const id = useId();
-  const formContext = useContext(FormErrorContext);
+  const { register } = useFormContext<addRecipeWithMainImage>();
   return (
     <div className="grid grid-cols-1 gap-2 sm:h-56 sm:grid-cols-2">
       <div className="flex min-w-[50%] flex-1 shrink-0 flex-col gap-4">
@@ -333,15 +354,14 @@ const NameDesImgSection = ({
           <label className="block" htmlFor={id + "-name"}>
             Name
           </label>
-          <FieldValidation error={formContext?.formErrors?.name}>
-            <Input
-              id={id + "-name"}
-              type="text"
-              value={name}
-              onChange={(e) => handleStringInput(e, "string", "name")}
-              className="inline-block w-full border-2 border-gray-500 p-1"
-            />
-          </FieldValidation>
+          {/* <FieldValidation error={formContext?.formErrors?.name}> */}
+          <Input
+            id={id + "-name"}
+            type="text"
+            {...register("name")}
+            className="inline-block w-full border-2 border-gray-500 p-1"
+          />
+          {/* </FieldValidation> */}
         </div>
         <div className="flex h-full flex-col">
           <label className="block" htmlFor={id + "-description"}>
@@ -350,23 +370,23 @@ const NameDesImgSection = ({
           <Textarea
             id={id + "-description"}
             className="h-full resize-none border-2 border-gray-500 p-1"
-            onChange={(e) => handleStringInput(e, "string", "description")}
+            {...register("description")}
           />
         </div>
       </div>
       {/* Wrapped outside to prevent image upload from shrinking if there's an error */}
       <div className="h-60 sm:h-full">
-        <FieldValidation
+        {/* <FieldValidation
           error={handleImageErrors(formContext?.formErrors?.imageMetadata)}
-        >
-          <ImageUpload
-            handleFileLoad={handleFileLoad}
-            removeFile={removeFile}
-            handleFilesSelect={handleFileSelect}
-            handleFileDrop={handleFileDrop}
-            imgObjUrl={imgObjUrl}
-          />
-        </FieldValidation>
+        > */}
+        <ImageUpload
+          handleFileLoad={handleFileLoad}
+          removeFile={removeFile}
+          handleFilesSelect={handleFileSelect}
+          handleFileDrop={handleFileDrop}
+          imgObjUrl={imgObjUrl}
+        />
+        {/* </FieldValidation> */}
       </div>
     </div>
   );
@@ -413,31 +433,17 @@ const TimeSection = ({
 };
 
 const IngredientsSection = ({
-  updateListInput,
-  removeListInput,
-  ingredients,
-  addItemToList,
   handleDragEnd,
 }: {
-  updateListInput: (
-    e: React.ChangeEvent<HTMLInputElement>,
-    id: string,
-    type: ListInputFields
-  ) => void;
-  removeListInput: (id: string, type: ListInputFields) => void;
-  ingredients: addRecipeWithoutMainImage["ingredients"];
-  addItemToList: (
-    e: React.MouseEvent<HTMLButtonElement>,
-    isHeader: boolean,
-    type: ListInputFields
-  ) => void;
   handleDragEnd: (e: DragEndEvent, type: ListInputFields) => void;
 }) => {
   const { canDrag, toggleCanDrag, sensors } = useListDnd();
-  const formContext = useContext(FormErrorContext);
-  const result = addRecipeWithMainImagesSchema
-    .pick({ ingredients: true })
-    .safeParse({ ingredients: ingredients });
+  const { register, control, getValues } =
+    useFormContext<addRecipeWithMainImage>();
+  const { fields, append, remove } = useFieldArray({
+    name: "ingredients",
+    control,
+  });
   return (
     <>
       <h2>Add Ingredients</h2>
@@ -460,48 +466,60 @@ const IngredientsSection = ({
         onDragEnd={(e) => handleDragEnd(e, "ingredients")}
       >
         <SortableContext
-          items={ingredients}
+          items={getValues("ingredients")}
           strategy={verticalListSortingStrategy}
         >
-          {ingredients.map(({ id, name, isHeader }, index) => {
-            return (
-              <SortableItem key={id} id={id} canDrag={canDrag}>
-                <DraggableInput
-                  id={id}
-                  index={index}
-                  type="ingredients"
-                  placeholder={
-                    isHeader
-                      ? "Ingredient Header placeholder"
-                      : "e.g. 2 cups of sugar"
-                  }
-                  canDrag={canDrag}
-                  value={name}
-                  remove={removeListInput}
-                  onChange={updateListInput}
-                  isHeader={isHeader}
-                />
-              </SortableItem>
-            );
-          })}
+          {fields.map((field, index) => (
+            <SortableItem key={field.id} id={field.id} canDrag={canDrag}>
+              <DraggableInput
+                id={field.id}
+                index={index}
+                type="ingredients"
+                placeholder={
+                  field.isHeader
+                    ? "Ingredient Header placeholder"
+                    : "e.g. 2 cups of sugar"
+                }
+                canDrag={canDrag}
+                remove={remove}
+                register={register}
+                isHeader={field.isHeader}
+              />
+            </SortableItem>
+          ))}
         </SortableContext>
       </DndContext>
-      {!result.success && formContext?.formErrors && (
+      {/* {!result.success && formContext?.formErrors && (
         <ErrorBox>
           {result.error.flatten().fieldErrors.ingredients?.[0]}
         </ErrorBox>
-      )}
+      )} */}
       <div className="flex gap-2">
         <Button
           type="button"
-          onClick={(e) => addItemToList(e, false, "ingredients")}
+          onClick={(e) => {
+            console.log(control);
+            append({
+              id: uuidv4(),
+              name: "",
+              order: getValues("ingredients").length,
+              isHeader: false,
+            });
+          }}
           className="border-2 border-gray-500 p-1"
         >
           Add Ingredient
         </Button>
         <Button
           type="button"
-          onClick={(e) => addItemToList(e, true, "ingredients")}
+          onClick={(e) =>
+            append({
+              id: uuidv4(),
+              name: "",
+              order: getValues("ingredients").length,
+              isHeader: true,
+            })
+          }
           className="border-2 border-gray-500 p-1"
         >
           Add Header
@@ -676,125 +694,118 @@ const SectionWrapper = ({ children }: { children: React.ReactNode }) => {
   return <div className="flex flex-col gap-4">{children}</div>;
 };
 
-const StepsSection = ({
-  updateListInput,
-  removeListInput,
-  steps,
-  addItemToList,
-  handleDragEnd,
-}: {
-  updateListInput: (
-    e: React.ChangeEvent<HTMLInputElement>,
-    id: string,
-    type: ListInputFields
-  ) => void;
-  removeListInput: (id: string, type: ListInputFields) => void;
-  steps: addRecipeWithoutMainImage["steps"];
-  addItemToList: (
-    e: React.MouseEvent<HTMLButtonElement>,
-    isHeader: boolean,
-    type: ListInputFields
-  ) => void;
-  handleDragEnd: (e: DragEndEvent, type: ListInputFields) => void;
-}) => {
-  const { canDrag, toggleCanDrag, sensors } = useListDnd();
-  const formContext = useContext(FormErrorContext);
-  const result = addRecipeWithMainImagesSchema
-    .pick({ steps: true })
-    .safeParse({ steps: steps });
-  return (
-    <>
-      <h2>Add Steps</h2>
-      <p>
-        Enter Steps below. One Step per line. Add optional headers to group
-        steps
-      </p>
-      <Button
-        intent="noBoarder"
-        className="self-start"
-        type="button"
-        aria-label="Toggle rearrange"
-        onClick={toggleCanDrag}
-      >
-        <MdCompareArrows className="rotate-90" size={20} />
-      </Button>
-      <DndContext
-        sensors={sensors}
-        collisionDetection={closestCenter}
-        onDragEnd={(e) => handleDragEnd(e, "steps")}
-      >
-        <SortableContext items={steps} strategy={verticalListSortingStrategy}>
-          {steps.map(({ id, name, isHeader }, index) => {
-            return (
-              <SortableItem key={id} id={id} canDrag={canDrag}>
-                <DraggableInput
-                  id={id}
-                  index={index}
-                  type="steps"
-                  placeholder={
-                    isHeader ? "Steps Header placeholder" : "e.g. Soup"
-                  }
-                  canDrag={canDrag}
-                  value={name}
-                  remove={removeListInput}
-                  onChange={updateListInput}
-                  isHeader={isHeader}
-                />
-              </SortableItem>
-            );
-          })}
-        </SortableContext>
-      </DndContext>
-      {!result.success && formContext?.formErrors && (
-        <ErrorBox>{result.error.flatten().fieldErrors.steps?.[0]}</ErrorBox>
-      )}
-      <div className="flex gap-2">
-        <Button
-          type="button"
-          onClick={(e) => addItemToList(e, false, "steps")}
-          className="border-2 border-gray-500 p-1"
-        >
-          Add Step
-        </Button>
-        <Button
-          type="button"
-          onClick={(e) => addItemToList(e, true, "steps")}
-          className="border-2 border-gray-500 p-1"
-        >
-          Add Header
-        </Button>
-      </div>
-    </>
-  );
-};
+// const StepsSection = ({
+//   updateListInput,
+//   removeListInput,
+//   steps,
+//   addItemToList,
+//   handleDragEnd,
+// }: {
+//   updateListInput: (
+//     e: React.ChangeEvent<HTMLInputElement>,
+//     id: string,
+//     type: ListInputFields
+//   ) => void;
+//   removeListInput: (id: string, type: ListInputFields) => void;
+//   steps: addRecipeWithoutMainImage["steps"];
+//   addItemToList: (
+//     e: React.MouseEvent<HTMLButtonElement>,
+//     isHeader: boolean,
+//     type: ListInputFields
+//   ) => void;
+//   handleDragEnd: (e: DragEndEvent, type: ListInputFields) => void;
+// }) => {
+//   const { canDrag, toggleCanDrag, sensors } = useListDnd();
+//   const formContext = useContext(FormErrorContext);
+//   const result = addRecipeWithMainImagesSchema
+//     .pick({ steps: true })
+//     .safeParse({ steps: steps });
+//   return (
+//     <>
+//       <h2>Add Steps</h2>
+//       <p>
+//         Enter Steps below. One Step per line. Add optional headers to group
+//         steps
+//       </p>
+//       <Button
+//         intent="noBoarder"
+//         className="self-start"
+//         type="button"
+//         aria-label="Toggle rearrange"
+//         onClick={toggleCanDrag}
+//       >
+//         <MdCompareArrows className="rotate-90" size={20} />
+//       </Button>
+//       <DndContext
+//         sensors={sensors}
+//         collisionDetection={closestCenter}
+//         onDragEnd={(e) => handleDragEnd(e, "steps")}
+//       >
+//         <SortableContext items={steps} strategy={verticalListSortingStrategy}>
+//           {steps.map(({ id, name, isHeader }, index) => {
+//             return (
+//               <SortableItem key={id} id={id} canDrag={canDrag}>
+//                 <DraggableInput
+//                   id={id}
+//                   index={index}
+//                   type="steps"
+//                   placeholder={
+//                     isHeader ? "Steps Header placeholder" : "e.g. Soup"
+//                   }
+//                   canDrag={canDrag}
+//                   value={name}
+//                   remove={removeListInput}
+//                   onChange={updateListInput}
+//                   isHeader={isHeader}
+//                 />
+//               </SortableItem>
+//             );
+//           })}
+//         </SortableContext>
+//       </DndContext>
+//       {!result.success && formContext?.formErrors && (
+//         <ErrorBox>{result.error.flatten().fieldErrors.steps?.[0]}</ErrorBox>
+//       )}
+//       <div className="flex gap-2">
+//         <Button
+//           type="button"
+//           onClick={(e) => addItemToList(e, false, "steps")}
+//           className="border-2 border-gray-500 p-1"
+//         >
+//           Add Step
+//         </Button>
+//         <Button
+//           type="button"
+//           onClick={(e) => addItemToList(e, true, "steps")}
+//           className="border-2 border-gray-500 p-1"
+//         >
+//           Add Header
+//         </Button>
+//       </div>
+//     </>
+//   );
+// };
 
 const DraggableInput = ({
   id,
-  remove,
-  onChange,
-  value,
   isHeader,
   canDrag,
   placeholder,
   type,
   index,
+  register,
+  remove,
 }: {
   id: string;
-  remove: (id: string, type: ListInputFields) => void;
-  onChange: (
-    e: React.ChangeEvent<HTMLInputElement>,
-    id: string,
-    type: ListInputFields
-  ) => void;
-  value: string | number;
   isHeader: boolean;
   canDrag: boolean;
   placeholder: string;
   type: ListInputFields;
   index: number;
+  register: UseFormRegister<addRecipeWithMainImage>;
+  remove: UseFieldArrayRemove;
 }) => {
   const { attributes, listeners, ref } = useSortableItemContext();
-  const formContext = useContext(FormErrorContext);
   return (
     <div className="flex h-10 items-stretch">
       {canDrag && (
@@ -807,26 +818,21 @@ const DraggableInput = ({
           <GrDrag size={25} className="cursor-grab" />
         </button>
       )}
-      <FieldValidation
+      {/* <FieldValidation
         highlightOnly
         error={formContext?.formErrors?.[type]?.[index]?.name}
-      >
-        <Input
-          value={value}
-          placeholder={placeholder}
-          disabled={canDrag}
-          onChange={(e) => onChange(e, id, type)}
-          className={`${
-            isHeader ? "font-extrabold" : ""
-          } flex-1 border-2 border-gray-500 p-1 tracking-wide`}
-        />
-      </FieldValidation>
+      > */}
+      <input
+        placeholder={placeholder}
+        disabled={canDrag}
+        {...register(`${type}.${index}.name` as const)}
+        className={`${
+          isHeader ? "font-extrabold" : ""
+        } flex-1 border-2 border-gray-500 p-1 tracking-wide`}
+      />
+      {/* </FieldValidation> */}
       {!canDrag && (
-        <Button
-          intent="noBoarder"
-          type="button"
-          onClick={() => remove(id, type)}
-        >
+        <Button intent="noBoarder" type="button" onClick={() => remove(index)}>
           <BiMinus size={25} />
         </Button>
       )}
