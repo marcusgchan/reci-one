@@ -81,7 +81,10 @@ export function ImageUpload({
   );
 }
 
-export function useImageUpload() {
+// SetFileMetadata is used to sync file metadeta stored in form state with file
+export function useImageUpload(
+  setFileMetadata: (file: File | undefined) => void
+) {
   const [file, setFile] = useState<File>();
   const formData = new FormData();
   const router = useRouter();
@@ -94,6 +97,7 @@ export function useImageUpload() {
     const fileList = e.target.files;
     if (fileList && fileList[0]) {
       setFile(fileList[0]);
+      setFileMetadata(fileList[0]);
       imgObjUrlRef.current = URL.createObjectURL(fileList[0]);
     }
   };
@@ -107,6 +111,7 @@ export function useImageUpload() {
       const file = items[0]?.getAsFile();
       if (file) {
         setFile(file);
+        setFileMetadata(file);
         imgObjUrlRef.current = URL.createObjectURL(file);
       }
     }
@@ -118,6 +123,7 @@ export function useImageUpload() {
     imgObjUrlRef.current = undefined;
     URL.revokeObjectURL(src);
     setFile(undefined);
+    setFileMetadata(undefined);
   };
   // Hacky way to ensure no memory leaks when navigating away while img has not uploaded
   // Since when uploaded it will revoke the url object however since it hasn't uploaded it may cause

@@ -1,37 +1,24 @@
 import { CustomReactFC } from "@/shared/types";
-import React, {
-  useId,
-  useState,
-  useMemo,
-  useContext,
-  createContext,
-} from "react";
+import React, { useId, useMemo } from "react";
 import { BiMinus } from "react-icons/bi";
 import { GrDrag } from "react-icons/gr";
 import { useDropdownQuery } from "@/components/recipes/useDropdownQuery";
 import {
   addRecipeWithMainImage,
   addRecipeWithMainImagesSchema,
-  addRecipeWithoutMainImage,
 } from "@/schemas/recipe";
 import { v4 as uuidv4 } from "uuid";
-import type { MealType, Nationality, CookingMethod } from "@prisma/client";
 import { trpc } from "@/utils/trpc";
 import { DndContext, closestCenter, DragEndEvent } from "@dnd-kit/core";
 import {
   SortableContext,
   useSortable,
   verticalListSortingStrategy,
-  arrayMove,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { useListDnd } from "@/components/recipes/useListDnd";
 import { MdCompareArrows } from "react-icons/md";
-import { useFormMutations } from "@/components/recipes/useFormMutations";
 import {
-  StringInputNames,
-  NumberInputNames,
-  DropdownListNames,
   ListInputFields,
   DropdownListValues,
 } from "@/components/recipes/types";
@@ -48,15 +35,10 @@ import { ImageUpload, useImageUpload } from "@/ui/ImageUpload";
 import { Input } from "@/ui/Input";
 import { Textarea } from "@/ui/Textarea";
 import { Button } from "@/ui/Button";
-import { ZodFormattedError } from "zod";
-import { ErrorBox, FieldValidation } from "@/ui/FieldValidation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
-  FieldValues,
   FormProvider,
-  UseFieldArrayAppend,
   UseFieldArrayRemove,
-  UseFieldArrayUpdate,
   UseFormRegister,
   useFieldArray,
   useForm,
@@ -112,15 +94,25 @@ const Create: CustomReactFC = () => {
     isLoading,
   } = useDropdownQuery();
   const router = useRouter();
+  const setFileMetadata = (file: File | undefined) => {
+    if (file) {
+      methods.setValue("imageMetadata", {
+        name: file.name,
+        size: file.size,
+        type: file.type,
+      });
+    } else {
+      methods.resetField("imageMetadata");
+    }
+  };
   const {
-    file,
     handleFileSelect,
     handleFileDrop,
     formData,
     imgObjUrlRef,
     handleFileLoad,
     removeFile,
-  } = useImageUpload();
+  } = useImageUpload(setFileMetadata);
   const mutation = trpc.recipes.addRecipe.useMutation({
     async onSuccess(presignedPost) {
       const file = formData.get("file");
@@ -157,46 +149,10 @@ const Create: CustomReactFC = () => {
       }
     },
   });
-
-  const [recipeData, setRecipeData] = useState<addRecipeWithoutMainImage>({
-    name: "",
-    description: "",
-    ingredients: [
-      { id: uuidv4(), order: 0, name: "", isHeader: false },
-      { id: uuidv4(), order: 1, name: "", isHeader: false },
-      { id: uuidv4(), order: 2, name: "", isHeader: false },
-    ],
-    steps: [
-      { id: uuidv4(), order: 0, name: "", isHeader: false },
-      { id: uuidv4(), order: 1, name: "", isHeader: false },
-      { id: uuidv4(), order: 2, name: "", isHeader: false },
-    ],
-    prepTime: "",
-    cookTime: "",
-    isPublic: false,
-    cookingMethods: [],
-    mealTypes: [],
-    nationalities: [],
-  });
-
-  const {
-    updateListInput,
-    removeListInput,
-    addItemToList,
-    handleBasicInput,
-    addToList,
-    deleteFromList,
-  } = useFormMutations(setRecipeData);
-
   const snackbarDispatch = useSnackbarDispatch();
-
   const createRecipe = (e: React.FormEvent) => {
     e.preventDefault();
-    const data = {
-      ...recipeData,
-      imageMetadata: { name: file?.name, type: file?.type, size: file?.size },
-    };
-    const result = addRecipeWithMainImagesSchema.safeParse(data);
+    const result = addRecipeWithMainImagesSchema.safeParse(methods.getValues());
     if (result.success) {
       mutation.mutate(result.data);
     } else {
@@ -204,13 +160,10 @@ const Create: CustomReactFC = () => {
       // setFormErrors(result.error.format());
     }
   };
-
   const navigateToRecipes = () => router.push("/recipes");
-
   if (isLoading || isError) {
     return <LoaderSection centerFixed />;
   }
-
   return (
     <section className="p-5 pb-10">
       <FormProvider {...methods}>
@@ -231,8 +184,6 @@ const Create: CustomReactFC = () => {
           </div>
           <SectionWrapper>
             <NameDesImgSection
-              name={recipeData.name}
-              handleStringInput={handleBasicInput}
               handleFileSelect={handleFileSelect}
               handleFileDrop={handleFileDrop}
               handleFileLoad={handleFileLoad}
@@ -266,20 +217,12 @@ const Create: CustomReactFC = () => {
 };
 
 const NameDesImgSection = ({
-  name,
-  handleStringInput,
   handleFileSelect,
   handleFileDrop,
   imgObjUrl,
   handleFileLoad,
   removeFile,
 }: {
-  name: addRecipeWithoutMainImage["name"];
-  handleStringInput: (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-    type: "string" | "number",
-    name: StringInputNames
-  ) => void;
   handleFileSelect: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleFileDrop: (e: React.DragEvent) => void;
   imgObjUrl: undefined | string;
@@ -288,6 +231,7 @@ const NameDesImgSection = ({
 }) => {
   const id = useId();
   const { register } = useFormContext<addRecipeWithMainImage>();
+
   return (
     <div className="grid grid-cols-1 gap-2 sm:h-56 sm:grid-cols-2">
       <div className="flex min-w-[50%] flex-1 shrink-0 flex-col gap-4">
@@ -432,7 +376,6 @@ const IngredientsSection = ({}: {}) => {
               isHeader: false,
             })
           }
-          className="border-2 border-gray-500 p-1"
         >
           Add Ingredient
         </Button>
@@ -446,7 +389,6 @@ const IngredientsSection = ({}: {}) => {
               isHeader: true,
             })
           }
-          className="border-2 border-gray-500 p-1"
         >
           Add Header
         </Button>
@@ -498,7 +440,7 @@ const SortableItem = ({
 const CookingMethodsSection = ({
   cookingMethods,
 }: {
-  cookingMethods: CookingMethod[];
+  cookingMethods: addRecipeWithMainImage["cookingMethods"];
 }) => {
   const { control, getValues } = useFormContext<addRecipeWithMainImage>();
   const { append, remove } = useFieldArray({
@@ -572,7 +514,7 @@ const MealTypeSection = ({
 const NationalitySection = ({
   nationalities,
 }: {
-  nationalities: Nationality[];
+  nationalities: addRecipeWithMainImage["nationalities"];
 }) => {
   const { control, getValues } = useFormContext<addRecipeWithMainImage>();
   const { append, remove } = useFieldArray({
@@ -683,7 +625,6 @@ const StepsSection = () => {
               isHeader: false,
             })
           }
-          className="border-2 border-gray-500 p-1"
         >
           Add Step
         </Button>
@@ -697,7 +638,6 @@ const StepsSection = () => {
               isHeader: true,
             })
           }
-          className="border-2 border-gray-500 p-1"
         >
           Add Header
         </Button>
