@@ -104,7 +104,6 @@ const Create: CustomReactFC = () => {
       nationalities: [],
     },
   });
-
   const router = useRouter();
   const {
     file,
@@ -190,38 +189,6 @@ const Create: CustomReactFC = () => {
     deleteFromList,
   } = useFormMutations(setRecipeData);
 
-  const handleDragEnd = (event: DragEndEvent, type: ListInputFields) => {
-    const { active, over } = event;
-    if (active && over && active.id !== over!.id) {
-      const oldIndex = recipeData[type]
-        .map(({ id }) => id)
-        .indexOf(active.id as string);
-      const newIndex = recipeData[type]
-        .map(({ id }) => id)
-        .indexOf(over.id as string);
-      setRecipeData((fd) => {
-        const updatedArray = arrayMove(fd[type], oldIndex, newIndex);
-        const updatedRecipeData = {
-          ...fd,
-          [type]: updatedArray.map((item, i) => ({ ...item, order: i })),
-        };
-        const data = {
-          ...updatedRecipeData,
-          imageMetadata: {
-            name: file?.name,
-            type: file?.type,
-            size: file?.size,
-          },
-        };
-        const result = addRecipeWithMainImagesSchema.safeParse(data);
-        if (!result.success) {
-          // setFormErrors(result.error.format());
-        }
-        return updatedRecipeData;
-      });
-    }
-  };
-
   const snackbarDispatch = useSnackbarDispatch();
 
   const createRecipe = (e: React.FormEvent) => {
@@ -275,10 +242,10 @@ const Create: CustomReactFC = () => {
             />
           </SectionWrapper>
           <SectionWrapper>
-            <IngredientsSection handleDragEnd={handleDragEnd} />
+            <IngredientsSection />
           </SectionWrapper>
           <SectionWrapper>
-            <StepsSection handleDragEnd={handleDragEnd} />
+            <StepsSection />
           </SectionWrapper>
           <SectionWrapper>
             <TimeSection
@@ -426,17 +393,21 @@ const TimeSection = ({
   );
 };
 
-const IngredientsSection = ({
-  handleDragEnd,
-}: {
-  handleDragEnd: (e: DragEndEvent, type: ListInputFields) => void;
-}) => {
+const IngredientsSection = ({}: {}) => {
   const { canDrag, toggleCanDrag, sensors } = useListDnd();
   const { register, control } = useFormContext<addRecipeWithMainImage>();
-  const { fields, append, remove } = useFieldArray({
+  const { fields, append, remove, swap } = useFieldArray({
     name: "ingredients",
     control,
   });
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (active && over && active.id !== over!.id) {
+      const oldIndex = fields.map(({ id }) => id).indexOf(active.id as string);
+      const newIndex = fields.map(({ id }) => id).indexOf(over.id as string);
+      swap(oldIndex, newIndex);
+    }
+  };
   return (
     <>
       <h2>Add Ingredients</h2>
@@ -456,7 +427,7 @@ const IngredientsSection = ({
       <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}
-        onDragEnd={(e) => handleDragEnd(e, "ingredients")}
+        onDragEnd={handleDragEnd}
       >
         <SortableContext items={fields} strategy={verticalListSortingStrategy}>
           {fields.map((field, index) => (
@@ -682,17 +653,21 @@ const SectionWrapper = ({ children }: { children: React.ReactNode }) => {
   return <div className="flex flex-col gap-4">{children}</div>;
 };
 
-const StepsSection = ({
-  handleDragEnd,
-}: {
-  handleDragEnd: (e: DragEndEvent, type: ListInputFields) => void;
-}) => {
+const StepsSection = ({}: {}) => {
   const { canDrag, toggleCanDrag, sensors } = useListDnd();
   const { register, control } = useFormContext<addRecipeWithMainImage>();
-  const { fields, append, remove } = useFieldArray({
+  const { fields, append, remove, swap } = useFieldArray({
     name: "steps",
     control,
   });
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (active && over && active.id !== over!.id) {
+      const oldIndex = fields.map(({ id }) => id).indexOf(active.id as string);
+      const newIndex = fields.map(({ id }) => id).indexOf(over.id as string);
+      swap(oldIndex, newIndex);
+    }
+  };
   return (
     <>
       <h2>Add Steps</h2>
@@ -712,7 +687,7 @@ const StepsSection = ({
       <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}
-        onDragEnd={(e) => handleDragEnd(e, "steps")}
+        onDragEnd={handleDragEnd}
       >
         <SortableContext items={fields} strategy={verticalListSortingStrategy}>
           {fields.map(({ id, isHeader }, index) => {
