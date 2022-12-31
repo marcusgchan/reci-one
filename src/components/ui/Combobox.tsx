@@ -18,7 +18,7 @@ export function Combobox<T extends { name: string; id: string }>({
     T | ""
   >();
 
-  const filteredData =
+  const filteredData: T[] =
     query === ""
       ? data
       : data.filter((option) => {

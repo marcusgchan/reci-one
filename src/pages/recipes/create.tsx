@@ -253,20 +253,10 @@ const Create: CustomReactFC = () => {
             <MealTypeSection mealTypes={mealTypesData || []} />
           </SectionWrapper>
           <SectionWrapper>
-            <NationalitySection
-              nationalitiesFormData={recipeData.nationalities}
-              nationalities={nationalitiesData || []}
-              addToList={addToList}
-              deleteFromList={deleteFromList}
-            />
+            <NationalitySection nationalities={nationalitiesData || []} />
           </SectionWrapper>
           <SectionWrapper>
-            <CookingMethodsSection
-              cookingMethodsFormData={recipeData.cookingMethods}
-              cookingMethods={cookingMethodsData || []}
-              addToList={addToList}
-              deleteFromList={deleteFromList}
-            />
+            <CookingMethodsSection cookingMethods={cookingMethodsData || []} />
           </SectionWrapper>
           <Button>Create</Button>
         </form>
@@ -507,15 +497,15 @@ const SortableItem = ({
 
 const CookingMethodsSection = ({
   cookingMethods,
-  cookingMethodsFormData,
-  addToList,
-  deleteFromList,
 }: {
   cookingMethods: CookingMethod[];
-  cookingMethodsFormData: addRecipeWithoutMainImage["cookingMethods"];
-  addToList: (type: DropdownListNames, objToAdd: DropdownListValues) => void;
-  deleteFromList: (type: DropdownListNames, id: string) => void;
 }) => {
+  const { control, getValues } = useFormContext<addRecipeWithMainImage>();
+  const { append, remove } = useFieldArray({
+    name: "cookingMethods",
+    control,
+  });
+  const fields = getValues("cookingMethods");
   return (
     <>
       <h2>Add Cooking methods</h2>
@@ -523,19 +513,17 @@ const CookingMethodsSection = ({
       <div className="flex items-stretch gap-2">
         <Combobox
           data={cookingMethods}
-          handleAdd={(objToAdd: DropdownListValues) =>
-            addToList("cookingMethods", objToAdd)
-          }
-          selectedData={cookingMethodsFormData}
+          handleAdd={(objToAdd: DropdownListValues) => append(objToAdd)}
+          selectedData={fields}
         />
       </div>
       <ChipContainer>
-        {cookingMethodsFormData.map(({ id, name }) => (
+        {fields.map(({ id, name }, index) => (
           <Chip
             key={id}
             id={id}
             data={name}
-            deleteChip={(id: string) => deleteFromList("cookingMethods", id)}
+            deleteChip={(id: string) => remove(index)}
           />
         ))}
       </ChipContainer>
@@ -583,15 +571,15 @@ const MealTypeSection = ({
 
 const NationalitySection = ({
   nationalities,
-  nationalitiesFormData,
-  addToList,
-  deleteFromList,
 }: {
   nationalities: Nationality[];
-  nationalitiesFormData: addRecipeWithoutMainImage["nationalities"];
-  addToList: (type: DropdownListNames, objToAdd: DropdownListValues) => void;
-  deleteFromList: (type: DropdownListNames, id: string) => void;
 }) => {
+  const { control, getValues } = useFormContext<addRecipeWithMainImage>();
+  const { append, remove } = useFieldArray({
+    name: "nationalities",
+    control,
+  });
+  const fields = getValues("nationalities");
   return (
     <>
       <h2>Add Nationalities</h2>
@@ -599,20 +587,17 @@ const NationalitySection = ({
       <div className="flex items-stretch gap-2">
         <Combobox
           data={nationalities}
-          handleAdd={(objToAdd: DropdownListValues) =>
-            addToList("nationalities", objToAdd)
-          }
-          selectedData={nationalitiesFormData}
-          multiple={false}
+          handleAdd={(objToAdd: DropdownListValues) => append(objToAdd)}
+          selectedData={fields}
         />
       </div>
       <ChipContainer>
-        {nationalitiesFormData.map(({ id, name }) => (
+        {fields.map(({ id, name }, index) => (
           <Chip
             key={id}
             id={id}
             data={name}
-            deleteChip={(id: string) => deleteFromList("nationalities", id)}
+            deleteChip={(id: string) => remove(index)}
           />
         ))}
       </ChipContainer>
@@ -628,7 +613,7 @@ const SectionWrapper = ({ children }: { children: React.ReactNode }) => {
   return <div className="flex flex-col gap-4">{children}</div>;
 };
 
-const StepsSection = ({}: {}) => {
+const StepsSection = () => {
   const { canDrag, toggleCanDrag, sensors } = useListDnd();
   const { register, control } = useFormContext<addRecipeWithMainImage>();
   const { fields, append, remove, swap } = useFieldArray({
