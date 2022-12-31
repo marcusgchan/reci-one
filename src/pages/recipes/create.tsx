@@ -278,13 +278,7 @@ const Create: CustomReactFC = () => {
             <IngredientsSection handleDragEnd={handleDragEnd} />
           </SectionWrapper>
           <SectionWrapper>
-            {/* <StepsSection
-              updateListInput={updateListInput}
-              removeListInput={removeListInput}
-              steps={recipeData.steps}
-              addItemToList={addItemToList}
-              handleDragEnd={handleDragEnd}
-            /> */}
+            <StepsSection handleDragEnd={handleDragEnd} />
           </SectionWrapper>
           <SectionWrapper>
             <TimeSection
@@ -438,8 +432,7 @@ const IngredientsSection = ({
   handleDragEnd: (e: DragEndEvent, type: ListInputFields) => void;
 }) => {
   const { canDrag, toggleCanDrag, sensors } = useListDnd();
-  const { register, control, getValues } =
-    useFormContext<addRecipeWithMainImage>();
+  const { register, control } = useFormContext<addRecipeWithMainImage>();
   const { fields, append, remove } = useFieldArray({
     name: "ingredients",
     control,
@@ -465,14 +458,10 @@ const IngredientsSection = ({
         collisionDetection={closestCenter}
         onDragEnd={(e) => handleDragEnd(e, "ingredients")}
       >
-        <SortableContext
-          items={getValues("ingredients")}
-          strategy={verticalListSortingStrategy}
-        >
+        <SortableContext items={fields} strategy={verticalListSortingStrategy}>
           {fields.map((field, index) => (
             <SortableItem key={field.id} id={field.id} canDrag={canDrag}>
               <DraggableInput
-                id={field.id}
                 index={index}
                 type="ingredients"
                 placeholder={
@@ -497,15 +486,14 @@ const IngredientsSection = ({
       <div className="flex gap-2">
         <Button
           type="button"
-          onClick={(e) => {
-            console.log(control);
+          onClick={(e) =>
             append({
               id: uuidv4(),
               name: "",
-              order: getValues("ingredients").length,
+              order: fields.length,
               isHeader: false,
-            });
-          }}
+            })
+          }
           className="border-2 border-gray-500 p-1"
         >
           Add Ingredient
@@ -516,7 +504,7 @@ const IngredientsSection = ({
             append({
               id: uuidv4(),
               name: "",
-              order: getValues("ingredients").length,
+              order: fields.length,
               isHeader: true,
             })
           }
@@ -694,100 +682,96 @@ const SectionWrapper = ({ children }: { children: React.ReactNode }) => {
   return <div className="flex flex-col gap-4">{children}</div>;
 };
 
-// const StepsSection = ({
-//   updateListInput,
-//   removeListInput,
-//   steps,
-//   addItemToList,
-//   handleDragEnd,
-// }: {
-//   updateListInput: (
-//     e: React.ChangeEvent<HTMLInputElement>,
-//     id: string,
-//     type: ListInputFields
-//   ) => void;
-//   removeListInput: (id: string, type: ListInputFields) => void;
-//   steps: addRecipeWithoutMainImage["steps"];
-//   addItemToList: (
-//     e: React.MouseEvent<HTMLButtonElement>,
-//     isHeader: boolean,
-//     type: ListInputFields
-//   ) => void;
-//   handleDragEnd: (e: DragEndEvent, type: ListInputFields) => void;
-// }) => {
-//   const { canDrag, toggleCanDrag, sensors } = useListDnd();
-//   const formContext = useContext(FormErrorContext);
-//   const result = addRecipeWithMainImagesSchema
-//     .pick({ steps: true })
-//     .safeParse({ steps: steps });
-//   return (
-//     <>
-//       <h2>Add Steps</h2>
-//       <p>
-//         Enter Steps below. One Step per line. Add optional headers to group
-//         steps
-//       </p>
-//       <Button
-//         intent="noBoarder"
-//         className="self-start"
-//         type="button"
-//         aria-label="Toggle rearrange"
-//         onClick={toggleCanDrag}
-//       >
-//         <MdCompareArrows className="rotate-90" size={20} />
-//       </Button>
-//       <DndContext
-//         sensors={sensors}
-//         collisionDetection={closestCenter}
-//         onDragEnd={(e) => handleDragEnd(e, "steps")}
-//       >
-//         <SortableContext items={steps} strategy={verticalListSortingStrategy}>
-//           {steps.map(({ id, name, isHeader }, index) => {
-//             return (
-//               <SortableItem key={id} id={id} canDrag={canDrag}>
-//                 <DraggableInput
-//                   id={id}
-//                   index={index}
-//                   type="steps"
-//                   placeholder={
-//                     isHeader ? "Steps Header placeholder" : "e.g. Soup"
-//                   }
-//                   canDrag={canDrag}
-//                   value={name}
-//                   remove={removeListInput}
-//                   onChange={updateListInput}
-//                   isHeader={isHeader}
-//                 />
-//               </SortableItem>
-//             );
-//           })}
-//         </SortableContext>
-//       </DndContext>
-//       {!result.success && formContext?.formErrors && (
-//         <ErrorBox>{result.error.flatten().fieldErrors.steps?.[0]}</ErrorBox>
-//       )}
-//       <div className="flex gap-2">
-//         <Button
-//           type="button"
-//           onClick={(e) => addItemToList(e, false, "steps")}
-//           className="border-2 border-gray-500 p-1"
-//         >
-//           Add Step
-//         </Button>
-//         <Button
-//           type="button"
-//           onClick={(e) => addItemToList(e, true, "steps")}
-//           className="border-2 border-gray-500 p-1"
-//         >
-//           Add Header
-//         </Button>
-//       </div>
-//     </>
-//   );
-// };
+const StepsSection = ({
+  handleDragEnd,
+}: {
+  handleDragEnd: (e: DragEndEvent, type: ListInputFields) => void;
+}) => {
+  const { canDrag, toggleCanDrag, sensors } = useListDnd();
+  const { register, control } = useFormContext<addRecipeWithMainImage>();
+  const { fields, append, remove } = useFieldArray({
+    name: "steps",
+    control,
+  });
+  return (
+    <>
+      <h2>Add Steps</h2>
+      <p>
+        Enter Steps below. One Step per line. Add optional headers to group
+        steps
+      </p>
+      <Button
+        intent="noBoarder"
+        className="self-start"
+        type="button"
+        aria-label="Toggle rearrange"
+        onClick={toggleCanDrag}
+      >
+        <MdCompareArrows className="rotate-90" size={20} />
+      </Button>
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragEnd={(e) => handleDragEnd(e, "steps")}
+      >
+        <SortableContext items={fields} strategy={verticalListSortingStrategy}>
+          {fields.map(({ id, isHeader }, index) => {
+            return (
+              <SortableItem key={id} id={id} canDrag={canDrag}>
+                <DraggableInput
+                  index={index}
+                  type="steps"
+                  placeholder={
+                    isHeader ? "Steps Header placeholder" : "e.g. Soup"
+                  }
+                  canDrag={canDrag}
+                  isHeader={isHeader}
+                  remove={remove}
+                  register={register}
+                />
+              </SortableItem>
+            );
+          })}
+        </SortableContext>
+      </DndContext>
+      {/* {!result.success && formContext?.formErrors && (
+        <ErrorBox>{result.error.flatten().fieldErrors.steps?.[0]}</ErrorBox>
+      )} */}
+      <div className="flex gap-2">
+        <Button
+          type="button"
+          onClick={(e) =>
+            append({
+              id: uuidv4(),
+              name: "",
+              order: fields.length,
+              isHeader: false,
+            })
+          }
+          className="border-2 border-gray-500 p-1"
+        >
+          Add Step
+        </Button>
+        <Button
+          type="button"
+          onClick={(e) =>
+            append({
+              id: uuidv4(),
+              name: "",
+              order: fields.length,
+              isHeader: true,
+            })
+          }
+          className="border-2 border-gray-500 p-1"
+        >
+          Add Header
+        </Button>
+      </div>
+    </>
+  );
+};
 
 const DraggableInput = ({
-  id,
   isHeader,
   canDrag,
   placeholder,
@@ -796,7 +780,6 @@ const DraggableInput = ({
   register,
   remove,
 }: {
-  id: string;
   isHeader: boolean;
   canDrag: boolean;
   placeholder: string;
@@ -825,7 +808,7 @@ const DraggableInput = ({
       <input
         placeholder={placeholder}
         disabled={canDrag}
-        {...register(`${type}.${index}.name` as const)}
+        {...register(`${type}.${index}.name`)}
         className={`${
           isHeader ? "font-extrabold" : ""
         } flex-1 border-2 border-gray-500 p-1 tracking-wide`}
