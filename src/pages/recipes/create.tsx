@@ -104,6 +104,13 @@ const Create: CustomReactFC = () => {
       nationalities: [],
     },
   });
+  const {
+    mealTypesData,
+    cookingMethodsData,
+    nationalitiesData,
+    isError,
+    isLoading,
+  } = useDropdownQuery();
   const router = useRouter();
   const {
     file,
@@ -150,14 +157,6 @@ const Create: CustomReactFC = () => {
       }
     },
   });
-
-  const {
-    mealTypesData,
-    cookingMethodsData,
-    nationalitiesData,
-    isError,
-    isLoading,
-  } = useDropdownQuery();
 
   const [recipeData, setRecipeData] = useState<addRecipeWithoutMainImage>({
     name: "",
@@ -248,19 +247,10 @@ const Create: CustomReactFC = () => {
             <StepsSection />
           </SectionWrapper>
           <SectionWrapper>
-            <TimeSection
-              cookTime={recipeData.cookTime}
-              prepTime={recipeData.prepTime}
-              handleBasicInput={handleBasicInput}
-            />
+            <TimeSection />
           </SectionWrapper>
           <SectionWrapper>
-            <MealTypeSection
-              mealTypesFormData={recipeData.mealTypes}
-              mealTypes={mealTypesData || []}
-              addToList={addToList}
-              deleteFromList={deleteFromList}
-            />
+            <MealTypeSection mealTypes={mealTypesData || []} />
           </SectionWrapper>
           <SectionWrapper>
             <NationalitySection
@@ -353,20 +343,9 @@ const NameDesImgSection = ({
   );
 };
 
-const TimeSection = ({
-  cookTime,
-  prepTime,
-  handleBasicInput,
-}: {
-  cookTime: addRecipeWithoutMainImage["cookTime"];
-  prepTime: addRecipeWithoutMainImage["prepTime"];
-  handleBasicInput: (
-    e: React.ChangeEvent<HTMLInputElement>,
-    type: "string" | "number",
-    name: NumberInputNames
-  ) => void;
-}) => {
+const TimeSection = () => {
   const id = useId();
+  const { register } = useFormContext<addRecipeWithMainImage>();
   return (
     <div className="flex gap-4">
       <div className="flex-1">
@@ -374,8 +353,7 @@ const TimeSection = ({
         <input
           id={id + "-prepTime"}
           type="text"
-          value={prepTime}
-          onChange={(e) => handleBasicInput(e, "number", "prepTime")}
+          {...register("prepTime")}
           className="inline-block w-full border-2 border-gray-500 p-1"
         />
       </div>
@@ -384,8 +362,7 @@ const TimeSection = ({
         <input
           id={id + "-cookTime"}
           type="text"
-          value={cookTime}
-          onChange={(e) => handleBasicInput(e, "number", "cookTime")}
+          {...register("cookTime")}
           className="inline-block w-full border-2 border-gray-500 p-1"
         />
       </div>
@@ -568,15 +545,15 @@ const CookingMethodsSection = ({
 
 const MealTypeSection = ({
   mealTypes,
-  mealTypesFormData,
-  addToList,
-  deleteFromList,
 }: {
-  mealTypes: MealType[];
-  mealTypesFormData: addRecipeWithoutMainImage["mealTypes"];
-  addToList: (type: DropdownListNames, objToAdd: DropdownListValues) => void;
-  deleteFromList: (type: DropdownListNames, id: string) => void;
+  mealTypes: addRecipeWithMainImage["mealTypes"];
 }) => {
+  const { control, getValues } = useFormContext<addRecipeWithMainImage>();
+  const { append, remove } = useFieldArray({
+    name: "mealTypes",
+    control,
+  });
+  const fields = getValues("mealTypes");
   return (
     <>
       <h2>Add Meal Types</h2>
@@ -586,19 +563,17 @@ const MealTypeSection = ({
       <div className="flex items-stretch gap-2">
         <Combobox
           data={mealTypes}
-          handleAdd={(objToAdd: DropdownListValues) =>
-            addToList("mealTypes", objToAdd)
-          }
-          selectedData={mealTypesFormData}
+          handleAdd={(objToAdd: DropdownListValues) => append(objToAdd)}
+          selectedData={fields}
         />
       </div>
       <ChipContainer>
-        {mealTypesFormData.map(({ id, name }) => (
+        {fields.map(({ id, name }, index) => (
           <Chip
             key={id}
             id={id}
             data={name}
-            deleteChip={(id: string) => deleteFromList("mealTypes", id)}
+            deleteChip={(id: string) => remove(index)}
           />
         ))}
       </ChipContainer>
