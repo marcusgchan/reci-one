@@ -24,7 +24,11 @@ export function FieldValidation({
   );
 }
 
-export function ErrorBox({ children }: { children: React.ReactNode | undefined }) {
+export function ErrorBox({
+  children,
+}: {
+  children: React.ReactNode | undefined;
+}) {
   if (!children) return null;
   return (
     <div className="flex items-center gap-2 border-2 border-red-500 bg-red-100 p-2 text-red-500">
