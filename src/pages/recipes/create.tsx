@@ -47,7 +47,8 @@ import {
   FieldErrorsImpl,
   Merge,
 } from "react-hook-form";
-import { FieldValidation } from "@/ui/FieldValidation";
+import { ErrorBox, FieldValidation } from "@/ui/FieldValidation";
+import { ErrorMessage } from "@hookform/error-message";
 
 const Create: CustomReactFC = () => {
   const methods = useForm<addRecipeWithMainImage>({
@@ -78,7 +79,6 @@ const Create: CustomReactFC = () => {
       nationalities: [],
     },
   });
-  //console.log(methods.formState.dirtyFields);
   return (
     <section className="p-5 pb-10">
       <FormProvider {...methods}>
@@ -89,7 +89,6 @@ const Create: CustomReactFC = () => {
 };
 
 const Form = () => {
-  console.log("child");
   const methods = useFormContext<addRecipeWithMainImage>();
   const {
     mealTypesData,
@@ -113,8 +112,8 @@ const Form = () => {
       methods.setValue("imageMetadata", {
         name: undefined,
         type: undefined,
-        size: undefined
-      } as unknown as addRecipeWithMainImage['imageMetadata']);
+        size: undefined,
+      } as unknown as addRecipeWithMainImage["imageMetadata"]);
     }
   };
   const {
@@ -255,7 +254,6 @@ const NameDesImgSection = ({
     //}
     return errors.types;
   }
-  console.log("in create", errors);
   return (
     <div className="grid grid-cols-1 gap-2 sm:h-56 sm:grid-cols-2">
       <div className="flex min-w-[50%] flex-1 shrink-0 flex-col gap-4">
@@ -326,9 +324,13 @@ const TimeSection = () => {
   );
 };
 
-const IngredientsSection = ({}: {}) => {
+const IngredientsSection = () => {
   const { canDrag, toggleCanDrag, sensors } = useListDnd();
-  const { register, control } = useFormContext<addRecipeWithMainImage>();
+  const {
+    register,
+    control,
+    formState: { errors },
+  } = useFormContext<addRecipeWithMainImage>();
   const { fields, append, remove, swap } = useFieldArray({
     name: "ingredients",
     control,
@@ -381,12 +383,22 @@ const IngredientsSection = ({}: {}) => {
             </SortableItem>
           ))}
         </SortableContext>
+        <ErrorMessage
+          errors={errors}
+          name="ingredients"
+          render={() => {
+            return (
+              <ErrorBox>
+                {
+                  errors?.ingredients?.find?.(
+                    (ingredient) => ingredient?.name?.message
+                  )?.name?.message
+                }
+              </ErrorBox>
+            );
+          }}
+        />
       </DndContext>
-      {/* {!result.success && formContext?.formErrors && (
-        <ErrorBox>
-          {result.error.flatten().fieldErrors.ingredients?.[0]}
-        </ErrorBox>
-      )} */}
       <div className="flex gap-2">
         <Button
           type="button"
@@ -580,7 +592,11 @@ const SectionWrapper = ({ children }: { children: React.ReactNode }) => {
 
 const StepsSection = () => {
   const { canDrag, toggleCanDrag, sensors } = useListDnd();
-  const { register, control } = useFormContext<addRecipeWithMainImage>();
+  const {
+    register,
+    control,
+    formState: { errors },
+  } = useFormContext<addRecipeWithMainImage>();
   const { fields, append, remove, swap } = useFieldArray({
     name: "steps",
     control,
@@ -634,9 +650,20 @@ const StepsSection = () => {
           })}
         </SortableContext>
       </DndContext>
-      {/* {!result.success && formContext?.formErrors && (
-        <ErrorBox>{result.error.flatten().fieldErrors.steps?.[0]}</ErrorBox>
-      )} */}
+      <ErrorMessage
+        errors={errors}
+        name="steps"
+        render={() => {
+          return (
+            <ErrorBox>
+              {
+                errors?.steps?.find?.((step) => step?.name?.message)?.name
+                  ?.message
+              }
+            </ErrorBox>
+          );
+        }}
+      />
       <div className="flex gap-2">
         <Button
           type="button"
@@ -687,6 +714,9 @@ const DraggableInput = ({
   remove: UseFieldArrayRemove;
 }) => {
   const { attributes, listeners, ref } = useSortableItemContext();
+  const {
+    formState: { errors },
+  } = useFormContext<addRecipeWithMainImage>();
   return (
     <div className="flex h-10 items-stretch">
       {canDrag && (
@@ -699,19 +729,16 @@ const DraggableInput = ({
           <GrDrag size={25} className="cursor-grab" />
         </button>
       )}
-      {/* <FieldValidation
-        highlightOnly
-        error={formContext?.formErrors?.[type]?.[index]?.name}
-      > */}
-      <Input
-        placeholder={placeholder}
-        disabled={canDrag}
-        {...register(`${type}.${index}.name`)}
-        className={`${
-          isHeader ? "font-extrabold" : ""
-        } flex-1 border-2 border-gray-500 p-1 tracking-wide`}
-      />
-      {/* </FieldValidation> */}
+      <FieldValidation highlightOnly error={errors?.[type]?.[index]?.name}>
+        <Input
+          placeholder={placeholder}
+          disabled={canDrag}
+          {...register(`${type}.${index}.name`)}
+          className={`${
+            isHeader ? "font-extrabold" : ""
+          } flex-1 border-2 border-gray-500 p-1 tracking-wide`}
+        />
+      </FieldValidation>
       {!canDrag && (
         <Button intent="noBoarder" type="button" onClick={() => remove(index)}>
           <BiMinus size={25} />
