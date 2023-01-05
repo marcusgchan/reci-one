@@ -1,30 +1,24 @@
 import { CustomReactFC } from "@/shared/types";
-import React, { useId, useState, useMemo } from "react";
+import React, { useId, useMemo } from "react";
 import { BiMinus } from "react-icons/bi";
 import { GrDrag } from "react-icons/gr";
 import { useDropdownQuery } from "@/components/recipes/useDropdownQuery";
 import {
+  addRecipeWithMainImage,
   addRecipeWithMainImagesSchema,
-  addRecipeWithoutMainImage,
 } from "@/schemas/recipe";
 import { v4 as uuidv4 } from "uuid";
-import type { MealType, Nationality, CookingMethod } from "@prisma/client";
 import { trpc } from "@/utils/trpc";
 import { DndContext, closestCenter, DragEndEvent } from "@dnd-kit/core";
 import {
   SortableContext,
   useSortable,
   verticalListSortingStrategy,
-  arrayMove,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { useListDnd } from "@/components/recipes/useListDnd";
 import { MdCompareArrows } from "react-icons/md";
-import { useFormMutations } from "@/components/recipes/useFormMutations";
 import {
-  StringInputNames,
-  NumberInputNames,
-  DropdownListNames,
   ListInputFields,
   DropdownListValues,
 } from "@/components/recipes/types";
@@ -41,20 +35,99 @@ import { ImageUpload, useImageUpload } from "@/ui/ImageUpload";
 import { Input } from "@/ui/Input";
 import { Textarea } from "@/ui/Textarea";
 import { Button } from "@/ui/Button";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  FormProvider,
+  UseFieldArrayRemove,
+  UseFormRegister,
+  useFieldArray,
+  useForm,
+  useFormContext,
+  FieldError,
+  FieldErrorsImpl,
+  Merge,
+} from "react-hook-form";
+import { ErrorBox, FieldValidation } from "@/ui/FieldValidation";
+import { ErrorMessage } from "@hookform/error-message";
 
 const Create: CustomReactFC = () => {
-  const router = useRouter();
+  const methods = useForm<addRecipeWithMainImage>({
+    resolver: zodResolver(addRecipeWithMainImagesSchema),
+    defaultValues: {
+      name: "",
+      description: "",
+      imageMetadata: {
+        name: undefined,
+        size: undefined,
+        type: undefined,
+      },
+      ingredients: [
+        { id: uuidv4(), order: 0, name: "", isHeader: false },
+        { id: uuidv4(), order: 1, name: "", isHeader: false },
+        { id: uuidv4(), order: 2, name: "", isHeader: false },
+      ],
+      steps: [
+        { id: uuidv4(), order: 0, name: "", isHeader: false },
+        { id: uuidv4(), order: 1, name: "", isHeader: false },
+        { id: uuidv4(), order: 2, name: "", isHeader: false },
+      ],
+      prepTime: "",
+      cookTime: "",
+      isPublic: false,
+      cookingMethods: [],
+      mealTypes: [],
+      nationalities: [],
+    },
+  });
+  return (
+    <section className="p-5 pb-10">
+      <FormProvider {...methods}>
+        <Form />
+      </FormProvider>
+    </section>
+  );
+};
 
+const Form = () => {
+  const methods = useFormContext<addRecipeWithMainImage>();
   const {
-    file,
+    mealTypesData,
+    cookingMethodsData,
+    nationalitiesData,
+    isError,
+    isLoading,
+  } = useDropdownQuery();
+  const router = useRouter();
+  const setFileMetadata = (file: File | undefined) => {
+    if (file) {
+      methods.setValue(
+        "imageMetadata",
+        { name: file.name, type: file.type, size: file.size },
+        { shouldValidate: true, shouldDirty: true, shouldTouch: true }
+      );
+    } else {
+      // Workaround b/c resetField('imageMetadeta) resets the field visually but isn't
+      // in the control state (control > formValues > imageMetadata)
+      // This results in incorrect validation (adding image and removing then submitting wouldn't show error)
+      methods.setValue(
+        "imageMetadata",
+        {
+          name: undefined,
+          type: undefined,
+          size: undefined,
+        } as unknown as addRecipeWithMainImage["imageMetadata"],
+        { shouldValidate: true, shouldDirty: true, shouldTouch: true }
+      );
+    }
+  };
+  const {
     handleFileSelect,
     handleFileDrop,
     formData,
     imgObjUrlRef,
     handleFileLoad,
     removeFile,
-  } = useImageUpload();
-
+  } = useImageUpload(setFileMetadata);
   const mutation = trpc.recipes.addRecipe.useMutation({
     async onSuccess(presignedPost) {
       const file = formData.get("file");
@@ -91,183 +164,69 @@ const Create: CustomReactFC = () => {
       }
     },
   });
-
-  const {
-    mealTypesData,
-    cookingMethodsData,
-    nationalitiesData,
-    isError,
-    isLoading,
-  } = useDropdownQuery();
-
-  const [recipeData, setRecipeData] = useState<addRecipeWithoutMainImage>({
-    name: "",
-    description: "",
-    ingredients: [
-      { id: uuidv4(), order: 0, name: "", isHeader: false },
-      { id: uuidv4(), order: 1, name: "", isHeader: false },
-      { id: uuidv4(), order: 2, name: "", isHeader: false },
-    ],
-    steps: [
-      { id: uuidv4(), order: 0, name: "", isHeader: false },
-      { id: uuidv4(), order: 1, name: "", isHeader: false },
-      { id: uuidv4(), order: 2, name: "", isHeader: false },
-    ],
-    prepTime: "",
-    cookTime: "",
-    isPublic: false,
-    cookingMethods: [],
-    mealTypes: [],
-    nationalities: [],
-  });
-
-  const {
-    updateListInput,
-    removeListInput,
-    addItemToList,
-    handleBasicInput,
-    addToList,
-    deleteFromList,
-  } = useFormMutations(setRecipeData);
-
-  const handleDragEnd = (event: DragEndEvent, type: ListInputFields) => {
-    const { active, over } = event;
-    if (active && over && active.id !== over!.id) {
-      setRecipeData((fd) => {
-        const oldIndex = fd[type]
-          .map(({ id }) => id)
-          .indexOf(active.id as string);
-        const newIndex = fd[type]
-          .map(({ id }) => id)
-          .indexOf(over.id as string);
-        const updatedArray = arrayMove(fd[type], oldIndex, newIndex);
-        return {
-          ...fd,
-          [type]: updatedArray.map((item, i) => ({ ...item, order: i })),
-        };
-      });
-    }
-  };
-
   const snackbarDispatch = useSnackbarDispatch();
-
-  const createRecipe = (e: React.FormEvent) => {
-    e.preventDefault();
-    const data = {
-      ...recipeData,
-      imageMetadata: { name: file?.name, type: file?.type, size: file?.size },
-    };
-    const result = addRecipeWithMainImagesSchema.safeParse(data);
-    if (result.success) {
-      mutation.mutate(result.data);
-    }
-    // Todo: handle errors
-  };
-
+  const createRecipe = methods.handleSubmit((data) => {
+    mutation.mutate(data);
+  });
   const navigateToRecipes = () => router.push("/recipes");
-
   if (isLoading || isError) {
     return <LoaderSection centerFixed />;
   }
-
   return (
-    <section className="p-5 pb-10">
-      <form
-        className="m-auto grid w-full max-w-xl grid-cols-1 gap-5 pb-2 text-gray-500"
-        onSubmit={createRecipe}
-      >
-        <div>
-          <Button
-            intent="noBoarder"
-            type="button"
-            onClick={navigateToRecipes}
-            className="p-1"
-          >
-            Back
-          </Button>
-          <h2 className="text-2xl">Add Recipe</h2>
-        </div>
-        <SectionWrapper>
-          <NameDesImgSection
-            name={recipeData.name}
-            handleStringInput={handleBasicInput}
-            handleFileSelect={handleFileSelect}
-            handleFileDrop={handleFileDrop}
-            handleFileLoad={handleFileLoad}
-            removeFile={removeFile}
-            imgObjUrl={imgObjUrlRef.current}
-          />
-        </SectionWrapper>
-        <SectionWrapper>
-          <IngredientsSection
-            updateListInput={updateListInput}
-            removeListInput={removeListInput}
-            ingredients={recipeData.ingredients}
-            addItemToList={addItemToList}
-            handleDragEnd={handleDragEnd}
-          />
-        </SectionWrapper>
-        <SectionWrapper>
-          <StepsSection
-            updateListInput={updateListInput}
-            removeListInput={removeListInput}
-            steps={recipeData.steps}
-            addItemToList={addItemToList}
-            handleDragEnd={handleDragEnd}
-          />
-        </SectionWrapper>
-        <SectionWrapper>
-          <TimeSection
-            cookTime={recipeData.cookTime}
-            prepTime={recipeData.prepTime}
-            handleBasicInput={handleBasicInput}
-          />
-        </SectionWrapper>
-        <SectionWrapper>
-          <MealTypeSection
-            mealTypesFormData={recipeData.mealTypes}
-            mealTypes={mealTypesData || []}
-            addToList={addToList}
-            deleteFromList={deleteFromList}
-          />
-        </SectionWrapper>
-        <SectionWrapper>
-          <NationalitySection
-            nationalitiesFormData={recipeData.nationalities}
-            nationalities={nationalitiesData || []}
-            addToList={addToList}
-            deleteFromList={deleteFromList}
-          />
-        </SectionWrapper>
-        <SectionWrapper>
-          <CookingMethodsSection
-            cookingMethodsFormData={recipeData.cookingMethods}
-            cookingMethods={cookingMethodsData || []}
-            addToList={addToList}
-            deleteFromList={deleteFromList}
-          />
-        </SectionWrapper>
-        <Button>Create</Button>
-      </form>
-    </section>
+    <form
+      className="m-auto grid w-full max-w-xl grid-cols-1 gap-5 pb-2 text-gray-500"
+      onSubmit={createRecipe}
+    >
+      <div>
+        <Button
+          intent="noBoarder"
+          type="button"
+          onClick={navigateToRecipes}
+          className="p-1"
+        >
+          Back
+        </Button>
+        <h2 className="text-2xl">Add Recipe</h2>
+      </div>
+      <SectionWrapper>
+        <NameDesImgSection
+          handleFileSelect={handleFileSelect}
+          handleFileDrop={handleFileDrop}
+          handleFileLoad={handleFileLoad}
+          removeFile={removeFile}
+          imgObjUrl={imgObjUrlRef.current}
+        />
+      </SectionWrapper>
+      <SectionWrapper>
+        <IngredientsSection />
+      </SectionWrapper>
+      <SectionWrapper>
+        <StepsSection />
+      </SectionWrapper>
+      <SectionWrapper>
+        <TimeSection />
+      </SectionWrapper>
+      <SectionWrapper>
+        <MealTypeSection mealTypes={mealTypesData || []} />
+      </SectionWrapper>
+      <SectionWrapper>
+        <NationalitySection nationalities={nationalitiesData || []} />
+      </SectionWrapper>
+      <SectionWrapper>
+        <CookingMethodsSection cookingMethods={cookingMethodsData || []} />
+      </SectionWrapper>
+      <Button>Create</Button>
+    </form>
   );
 };
 
 const NameDesImgSection = ({
-  name,
-  handleStringInput,
   handleFileSelect,
   handleFileDrop,
   imgObjUrl,
   handleFileLoad,
   removeFile,
 }: {
-  name: addRecipeWithoutMainImage["name"];
-  handleStringInput: (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-    type: "string" | "number",
-    name: StringInputNames
-  ) => void;
   handleFileSelect: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleFileDrop: (e: React.DragEvent) => void;
   imgObjUrl: undefined | string;
@@ -275,6 +234,30 @@ const NameDesImgSection = ({
   removeFile: (src: string) => void;
 }) => {
   const id = useId();
+  const {
+    register,
+    formState: { errors },
+  } = useFormContext<addRecipeWithMainImage>();
+  type imgMetadata = addRecipeWithMainImage["imageMetadata"];
+  function handleImageErrors(
+    errors: Merge<FieldError, FieldErrorsImpl<imgMetadata>> | undefined
+  ) {
+    if (!errors) return;
+    // File doesn't exist
+    // Name must exist if the file is uploaded to browser
+    if (errors.name) {
+      return errors.name;
+    }
+    // File too big
+    if (errors.size) {
+      return errors.size;
+    }
+    // Invalid file type
+    //if (errors.type) {
+    //return errors.type;
+    //}
+    return errors.types;
+  }
   return (
     <div className="grid grid-cols-1 gap-2 sm:h-56 sm:grid-cols-2">
       <div className="flex min-w-[50%] flex-1 shrink-0 flex-col gap-4">
@@ -282,13 +265,14 @@ const NameDesImgSection = ({
           <label className="block" htmlFor={id + "-name"}>
             Name
           </label>
-          <Input
-            id={id + "-name"}
-            type="text"
-            value={name}
-            onChange={(e) => handleStringInput(e, "string", "name")}
-            className="inline-block w-full border-2 border-gray-500 p-1"
-          />
+          <FieldValidation error={errors.name}>
+            <Input
+              id={id + "-name"}
+              type="text"
+              {...register("name")}
+              className="inline-block w-full border-2 border-gray-500 p-1"
+            />
+          </FieldValidation>
         </div>
         <div className="flex h-full flex-col">
           <label className="block" htmlFor={id + "-description"}>
@@ -297,37 +281,29 @@ const NameDesImgSection = ({
           <Textarea
             id={id + "-description"}
             className="h-full resize-none border-2 border-gray-500 p-1"
-            onChange={(e) => handleStringInput(e, "string", "description")}
+            {...register("description")}
           />
         </div>
       </div>
+      {/* Wrapped outside to prevent image upload from shrinking if there's an error */}
       <div className="h-60 sm:h-full">
-        <ImageUpload
-          handleFileLoad={handleFileLoad}
-          removeFile={removeFile}
-          handleFilesSelect={handleFileSelect}
-          handleFileDrop={handleFileDrop}
-          imgObjUrl={imgObjUrl}
-        />
+        <FieldValidation error={handleImageErrors(errors.imageMetadata)}>
+          <ImageUpload
+            handleFileLoad={handleFileLoad}
+            removeFile={removeFile}
+            handleFilesSelect={handleFileSelect}
+            handleFileDrop={handleFileDrop}
+            imgObjUrl={imgObjUrl}
+          />
+        </FieldValidation>
       </div>
     </div>
   );
 };
 
-const TimeSection = ({
-  cookTime,
-  prepTime,
-  handleBasicInput,
-}: {
-  cookTime: addRecipeWithoutMainImage["cookTime"];
-  prepTime: addRecipeWithoutMainImage["prepTime"];
-  handleBasicInput: (
-    e: React.ChangeEvent<HTMLInputElement>,
-    type: "string" | "number",
-    name: NumberInputNames
-  ) => void;
-}) => {
+const TimeSection = () => {
   const id = useId();
+  const { register } = useFormContext<addRecipeWithMainImage>();
   return (
     <div className="flex gap-4">
       <div className="flex-1">
@@ -335,8 +311,7 @@ const TimeSection = ({
         <input
           id={id + "-prepTime"}
           type="text"
-          value={prepTime}
-          onChange={(e) => handleBasicInput(e, "number", "prepTime")}
+          {...register("prepTime")}
           className="inline-block w-full border-2 border-gray-500 p-1"
         />
       </div>
@@ -345,8 +320,7 @@ const TimeSection = ({
         <input
           id={id + "-cookTime"}
           type="text"
-          value={cookTime}
-          onChange={(e) => handleBasicInput(e, "number", "cookTime")}
+          {...register("cookTime")}
           className="inline-block w-full border-2 border-gray-500 p-1"
         />
       </div>
@@ -354,28 +328,25 @@ const TimeSection = ({
   );
 };
 
-const IngredientsSection = ({
-  updateListInput,
-  removeListInput,
-  ingredients,
-  addItemToList,
-  handleDragEnd,
-}: {
-  updateListInput: (
-    e: React.ChangeEvent<HTMLInputElement>,
-    id: string,
-    type: ListInputFields
-  ) => void;
-  removeListInput: (id: string, type: ListInputFields) => void;
-  ingredients: addRecipeWithoutMainImage["ingredients"];
-  addItemToList: (
-    e: React.MouseEvent<HTMLButtonElement>,
-    isHeader: boolean,
-    type: ListInputFields
-  ) => void;
-  handleDragEnd: (e: DragEndEvent, type: ListInputFields) => void;
-}) => {
+const IngredientsSection = () => {
   const { canDrag, toggleCanDrag, sensors } = useListDnd();
+  const {
+    register,
+    control,
+    formState: { errors },
+  } = useFormContext<addRecipeWithMainImage>();
+  const { fields, append, remove, swap } = useFieldArray({
+    name: "ingredients",
+    control,
+  });
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (active && over && active.id !== over!.id) {
+      const oldIndex = fields.map(({ id }) => id).indexOf(active.id as string);
+      const newIndex = fields.map(({ id }) => id).indexOf(over.id as string);
+      swap(oldIndex, newIndex);
+    }
+  };
   return (
     <>
       <h2>Add Ingredients</h2>
@@ -390,52 +361,72 @@ const IngredientsSection = ({
         aria-label="Toggle rearrange"
         onClick={toggleCanDrag}
       >
-        <MdCompareArrows className="rotate-90" />
+        <MdCompareArrows className="rotate-90" size={20} />
       </Button>
       <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}
-        onDragEnd={(e) => handleDragEnd(e, "ingredients")}
+        onDragEnd={handleDragEnd}
       >
-        <SortableContext
-          items={ingredients}
-          strategy={verticalListSortingStrategy}
-        >
-          {ingredients.map(({ id, name, isHeader }) => {
-            return (
-              <SortableItem key={id} id={id} canDrag={canDrag}>
-                <DraggableInput
-                  id={id}
-                  type="ingredients"
-                  placeholder={
-                    isHeader
-                      ? "Ingredient Header placeholder"
-                      : "e.g. 2 cups of sugar"
-                  }
-                  canDrag={canDrag}
-                  value={name}
-                  remove={removeListInput}
-                  onChange={updateListInput}
-                  isHeader={isHeader}
-                />
-              </SortableItem>
-            );
-          })}
+        <SortableContext items={fields} strategy={verticalListSortingStrategy}>
+          {fields.map((field, index) => (
+            <SortableItem key={field.id} id={field.id} canDrag={canDrag}>
+              <DraggableInput
+                index={index}
+                type="ingredients"
+                placeholder={
+                  field.isHeader
+                    ? "Ingredient Header placeholder"
+                    : "e.g. 2 cups of sugar"
+                }
+                canDrag={canDrag}
+                remove={remove}
+                register={register}
+                isHeader={field.isHeader}
+              />
+            </SortableItem>
+          ))}
         </SortableContext>
+        <ErrorMessage
+          errors={errors}
+          name="ingredients"
+          render={() => {
+            return (
+              <ErrorBox>
+                {
+                  errors?.ingredients?.find?.(
+                    (ingredient) => ingredient?.name?.message
+                  )?.name?.message
+                }
+              </ErrorBox>
+            );
+          }}
+        />
       </DndContext>
-
       <div className="flex gap-2">
         <Button
           type="button"
-          onClick={(e) => addItemToList(e, false, "ingredients")}
-          className="border-2 border-gray-500 p-1"
+          onClick={(e) =>
+            append({
+              id: uuidv4(),
+              name: "",
+              order: fields.length,
+              isHeader: false,
+            })
+          }
         >
           Add Ingredient
         </Button>
         <Button
           type="button"
-          onClick={(e) => addItemToList(e, true, "ingredients")}
-          className="border-2 border-gray-500 p-1"
+          onClick={(e) =>
+            append({
+              id: uuidv4(),
+              name: "",
+              order: fields.length,
+              isHeader: true,
+            })
+          }
         >
           Add Header
         </Button>
@@ -456,6 +447,7 @@ const SortableItem = ({
   const {
     attributes,
     listeners,
+
     setNodeRef,
     setActivatorNodeRef,
     transform,
@@ -486,15 +478,15 @@ const SortableItem = ({
 
 const CookingMethodsSection = ({
   cookingMethods,
-  cookingMethodsFormData,
-  addToList,
-  deleteFromList,
 }: {
-  cookingMethods: CookingMethod[];
-  cookingMethodsFormData: addRecipeWithoutMainImage["cookingMethods"];
-  addToList: (type: DropdownListNames, objToAdd: DropdownListValues) => void;
-  deleteFromList: (type: DropdownListNames, id: string) => void;
+  cookingMethods: addRecipeWithMainImage["cookingMethods"];
 }) => {
+  const { control, getValues } = useFormContext<addRecipeWithMainImage>();
+  const { append, remove } = useFieldArray({
+    name: "cookingMethods",
+    control,
+  });
+  const fields = getValues("cookingMethods");
   return (
     <>
       <h2>Add Cooking methods</h2>
@@ -502,19 +494,17 @@ const CookingMethodsSection = ({
       <div className="flex items-stretch gap-2">
         <Combobox
           data={cookingMethods}
-          handleAdd={(objToAdd: DropdownListValues) =>
-            addToList("cookingMethods", objToAdd)
-          }
-          selectedData={cookingMethodsFormData}
+          handleAdd={(objToAdd: DropdownListValues) => append(objToAdd)}
+          selectedData={fields}
         />
       </div>
       <ChipContainer>
-        {cookingMethodsFormData.map(({ id, name }) => (
+        {fields.map(({ id, name }, index) => (
           <Chip
             key={id}
             id={id}
             data={name}
-            deleteChip={(id: string) => deleteFromList("cookingMethods", id)}
+            deleteChip={(id: string) => remove(index)}
           />
         ))}
       </ChipContainer>
@@ -524,15 +514,15 @@ const CookingMethodsSection = ({
 
 const MealTypeSection = ({
   mealTypes,
-  mealTypesFormData,
-  addToList,
-  deleteFromList,
 }: {
-  mealTypes: MealType[];
-  mealTypesFormData: addRecipeWithoutMainImage["mealTypes"];
-  addToList: (type: DropdownListNames, objToAdd: DropdownListValues) => void;
-  deleteFromList: (type: DropdownListNames, id: string) => void;
+  mealTypes: addRecipeWithMainImage["mealTypes"];
 }) => {
+  const { control, getValues } = useFormContext<addRecipeWithMainImage>();
+  const { append, remove } = useFieldArray({
+    name: "mealTypes",
+    control,
+  });
+  const fields = getValues("mealTypes");
   return (
     <>
       <h2>Add Meal Types</h2>
@@ -542,19 +532,17 @@ const MealTypeSection = ({
       <div className="flex items-stretch gap-2">
         <Combobox
           data={mealTypes}
-          handleAdd={(objToAdd: DropdownListValues) =>
-            addToList("mealTypes", objToAdd)
-          }
-          selectedData={mealTypesFormData}
+          handleAdd={(objToAdd: DropdownListValues) => append(objToAdd)}
+          selectedData={fields}
         />
       </div>
       <ChipContainer>
-        {mealTypesFormData.map(({ id, name }) => (
+        {fields.map(({ id, name }, index) => (
           <Chip
             key={id}
             id={id}
             data={name}
-            deleteChip={(id: string) => deleteFromList("mealTypes", id)}
+            deleteChip={(id: string) => remove(index)}
           />
         ))}
       </ChipContainer>
@@ -564,15 +552,15 @@ const MealTypeSection = ({
 
 const NationalitySection = ({
   nationalities,
-  nationalitiesFormData,
-  addToList,
-  deleteFromList,
 }: {
-  nationalities: Nationality[];
-  nationalitiesFormData: addRecipeWithoutMainImage["nationalities"];
-  addToList: (type: DropdownListNames, objToAdd: DropdownListValues) => void;
-  deleteFromList: (type: DropdownListNames, id: string) => void;
+  nationalities: addRecipeWithMainImage["nationalities"];
 }) => {
+  const { control, getValues } = useFormContext<addRecipeWithMainImage>();
+  const { append, remove } = useFieldArray({
+    name: "nationalities",
+    control,
+  });
+  const fields = getValues("nationalities");
   return (
     <>
       <h2>Add Nationalities</h2>
@@ -580,20 +568,17 @@ const NationalitySection = ({
       <div className="flex items-stretch gap-2">
         <Combobox
           data={nationalities}
-          handleAdd={(objToAdd: DropdownListValues) =>
-            addToList("nationalities", objToAdd)
-          }
-          selectedData={nationalitiesFormData}
-          multiple={false}
+          handleAdd={(objToAdd: DropdownListValues) => append(objToAdd)}
+          selectedData={fields}
         />
       </div>
       <ChipContainer>
-        {nationalitiesFormData.map(({ id, name }) => (
+        {fields.map(({ id, name }, index) => (
           <Chip
             key={id}
             id={id}
             data={name}
-            deleteChip={(id: string) => deleteFromList("nationalities", id)}
+            deleteChip={(id: string) => remove(index)}
           />
         ))}
       </ChipContainer>
@@ -609,28 +594,25 @@ const SectionWrapper = ({ children }: { children: React.ReactNode }) => {
   return <div className="flex flex-col gap-4">{children}</div>;
 };
 
-const StepsSection = ({
-  updateListInput,
-  removeListInput,
-  steps,
-  addItemToList,
-  handleDragEnd,
-}: {
-  updateListInput: (
-    e: React.ChangeEvent<HTMLInputElement>,
-    id: string,
-    type: ListInputFields
-  ) => void;
-  removeListInput: (id: string, type: ListInputFields) => void;
-  steps: addRecipeWithoutMainImage["steps"];
-  addItemToList: (
-    e: React.MouseEvent<HTMLButtonElement>,
-    isHeader: boolean,
-    type: ListInputFields
-  ) => void;
-  handleDragEnd: (e: DragEndEvent, type: ListInputFields) => void;
-}) => {
+const StepsSection = () => {
   const { canDrag, toggleCanDrag, sensors } = useListDnd();
+  const {
+    register,
+    control,
+    formState: { errors },
+  } = useFormContext<addRecipeWithMainImage>();
+  const { fields, append, remove, swap } = useFieldArray({
+    name: "steps",
+    control,
+  });
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (active && over && active.id !== over!.id) {
+      const oldIndex = fields.map(({ id }) => id).indexOf(active.id as string);
+      const newIndex = fields.map(({ id }) => id).indexOf(over.id as string);
+      swap(oldIndex, newIndex);
+    }
+  };
   return (
     <>
       <h2>Add Steps</h2>
@@ -650,41 +632,66 @@ const StepsSection = ({
       <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}
-        onDragEnd={(e) => handleDragEnd(e, "steps")}
+        onDragEnd={handleDragEnd}
       >
-        <SortableContext items={steps} strategy={verticalListSortingStrategy}>
-          {steps.map(({ id, name, isHeader }) => {
+        <SortableContext items={fields} strategy={verticalListSortingStrategy}>
+          {fields.map(({ id, isHeader }, index) => {
             return (
               <SortableItem key={id} id={id} canDrag={canDrag}>
                 <DraggableInput
-                  id={id}
+                  index={index}
                   type="steps"
                   placeholder={
                     isHeader ? "Steps Header placeholder" : "e.g. Soup"
                   }
                   canDrag={canDrag}
-                  value={name}
-                  remove={removeListInput}
-                  onChange={updateListInput}
                   isHeader={isHeader}
+                  remove={remove}
+                  register={register}
                 />
               </SortableItem>
             );
           })}
         </SortableContext>
       </DndContext>
+      <ErrorMessage
+        errors={errors}
+        name="steps"
+        render={() => {
+          return (
+            <ErrorBox>
+              {
+                errors?.steps?.find?.((step) => step?.name?.message)?.name
+                  ?.message
+              }
+            </ErrorBox>
+          );
+        }}
+      />
       <div className="flex gap-2">
         <Button
           type="button"
-          onClick={(e) => addItemToList(e, false, "steps")}
-          className="border-2 border-gray-500 p-1"
+          onClick={(e) =>
+            append({
+              id: uuidv4(),
+              name: "",
+              order: fields.length,
+              isHeader: false,
+            })
+          }
         >
           Add Step
         </Button>
         <Button
           type="button"
-          onClick={(e) => addItemToList(e, true, "steps")}
-          className="border-2 border-gray-500 p-1"
+          onClick={(e) =>
+            append({
+              id: uuidv4(),
+              name: "",
+              order: fields.length,
+              isHeader: true,
+            })
+          }
         >
           Add Header
         </Button>
@@ -694,57 +701,51 @@ const StepsSection = ({
 };
 
 const DraggableInput = ({
-  id,
-  remove,
-  onChange,
-  value,
   isHeader,
   canDrag,
   placeholder,
   type,
+  index,
+  register,
+  remove,
 }: {
-  id: string;
-  remove: (id: string, type: ListInputFields) => void;
-  onChange: (
-    e: React.ChangeEvent<HTMLInputElement>,
-    id: string,
-    type: ListInputFields
-  ) => void;
-  value: string | number;
   isHeader: boolean;
   canDrag: boolean;
   placeholder: string;
   type: ListInputFields;
+  index: number;
+  register: UseFormRegister<addRecipeWithMainImage>;
+  remove: UseFieldArrayRemove;
 }) => {
   const { attributes, listeners, ref } = useSortableItemContext();
+  const {
+    formState: { errors },
+  } = useFormContext<addRecipeWithMainImage>();
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex h-10 items-stretch">
       {canDrag && (
-        <Button
-          className="touch-manipulation"
+        <button
+          className="mr-2 touch-manipulation"
           {...attributes}
           {...listeners}
           ref={ref}
         >
           <GrDrag size={25} className="cursor-grab" />
-        </Button>
+        </button>
       )}
-      <input
-        value={value}
-        placeholder={placeholder}
-        disabled={canDrag}
-        onChange={(e) => onChange(e, id, type)}
-        className={`${
-          isHeader ? "font-extrabold" : ""
-        } flex-1 border-2 border-gray-500 p-1 tracking-wide`}
-      />
+      <FieldValidation highlightOnly error={errors?.[type]?.[index]?.name}>
+        <Input
+          placeholder={placeholder}
+          disabled={canDrag}
+          {...register(`${type}.${index}.name`)}
+          className={`${
+            isHeader ? "font-extrabold" : ""
+          } flex-1 border-2 border-gray-500 p-1 tracking-wide`}
+        />
+      </FieldValidation>
       {!canDrag && (
-        <Button
-          intent="noBoarder"
-          type="button"
-          onClick={() => remove(id, type)}
-        >
-          <BiMinus size={30} />
+        <Button intent="noBoarder" type="button" onClick={() => remove(index)}>
+          <BiMinus size={25} />
         </Button>
       )}
     </div>

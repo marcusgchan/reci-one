@@ -1,4 +1,5 @@
 import { cva, VariantProps } from "class-variance-authority";
+import { forwardRef } from "react";
 
 type TextareaProps = Omit<
   React.DetailedHTMLProps<
@@ -9,11 +10,17 @@ type TextareaProps = Omit<
 > &
   VariantProps<typeof textarea>;
 
-export function Textarea({ intent, size, className, ...props }: TextareaProps) {
-  return (
-    <textarea className={textarea({ intent, size, className })} {...props} />
-  );
-}
+export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
+  function Textarea({ intent, size, className, ...props }: TextareaProps, ref) {
+    return (
+      <textarea
+        ref={ref}
+        className={textarea({ intent, size, className })}
+        {...props}
+      />
+    );
+  }
+);
 
 const textarea = cva("border-gray-500 border-2 p-1", {
   variants: {

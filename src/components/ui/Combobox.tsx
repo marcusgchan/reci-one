@@ -18,25 +18,20 @@ export function Combobox<T extends { name: string; id: string }>({
     T | ""
   >();
 
-  const filteredData =
+  const filteredData: T[] =
     query === ""
       ? data
       : data.filter((option) => {
           return option.name.toLowerCase().includes(query.toLowerCase());
         });
-
   return (
     <HeadlessCombobox
       className="flex-1"
       as="div"
       value={currentlySelectedOption}
       onChange={(e: T) => {
-        if (
-          multiple &&
-          selectedData.filter((data) => data.id === e.id).length > 0
-        ) {
+        if (multiple) {
           setCurrentlySelectedOption("");
-          return;
         }
         handleAdd(e);
       }}
@@ -68,29 +63,33 @@ export function Combobox<T extends { name: string; id: string }>({
                   )
                 }
               >
-                {({ active, selected }) => (
-                  <>
-                    <span
-                      className={classNames(
-                        "block truncate",
-                        selected && "font-semibold"
-                      )}
-                    >
-                      {data.name}
-                    </span>
-
-                    {selectedData.map((data) => data.id).includes(data.id) && (
+                {({ active, selected }) => {
+                  return (
+                    <>
                       <span
                         className={classNames(
-                          "absolute inset-y-0 right-0 flex items-center pr-4",
-                          active ? "text-white" : "text-accent-400"
+                          "block truncate",
+                          selected && "font-semibold"
                         )}
                       >
-                        <CheckIcon className="h-5 w-5" aria-hidden="true" />
+                        {data.name}
                       </span>
-                    )}
-                  </>
-                )}
+
+                      {selectedData
+                        .map((data) => data.id)
+                        .includes(data.id) && (
+                        <span
+                          className={classNames(
+                            "absolute inset-y-0 right-0 flex items-center pr-4",
+                            active ? "text-white" : "text-accent-400"
+                          )}
+                        >
+                          <CheckIcon className="h-5 w-5" aria-hidden="true" />
+                        </span>
+                      )}
+                    </>
+                  );
+                }}
               </HeadlessCombobox.Option>
             ))}
           </HeadlessCombobox.Options>

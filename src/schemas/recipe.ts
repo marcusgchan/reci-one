@@ -22,18 +22,18 @@ export const getRecipeSchema = z.object({
 });
 
 export const addRecipeWithMainImagesSchema = z.object({
-  name: z.string().min(1),
+  name: z.string().min(1, "Name is required"),
   description: z.string(),
   imageMetadata: z.object({
-    name: z.string(),
-    type: z.string(),
-    size: z.number(),
+    name: z.string({ required_error: "Image is required" }),
+    type: z.string({ invalid_type_error: "Image format not supported" }),
+    size: z.number({ invalid_type_error: "Image too big" }),
   }),
   ingredients: z
     .object({
       id: z.string(),
       order: z.number().int(),
-      name: z.string(),
+      name: z.string().trim().min(1, { message: "Can't be empty string" }),
       isHeader: z.boolean(),
     })
     .array(),
@@ -41,7 +41,7 @@ export const addRecipeWithMainImagesSchema = z.object({
     .object({
       id: z.string(),
       order: z.number().int(),
-      name: z.string(),
+      name: z.string().trim().min(1, { message: "Can't be empty string" }),
       isHeader: z.boolean(),
     })
     .array(),
