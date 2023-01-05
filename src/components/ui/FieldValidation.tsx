@@ -1,29 +1,23 @@
-import { useState } from "react";
-import { ZodFormattedError } from "zod";
 import { AiOutlineInfoCircle } from "react-icons/ai";
-import {
-  addRecipeWithMainImage,
-  addRecipeWithoutMainImage,
-} from "@/schemas/recipe";
+import { FieldError, MultipleFieldErrors } from "react-hook-form";
 
-export function FieldValidation<T>({
+export function FieldValidation({
   children,
   error,
   highlightOnly,
 }: {
   children: React.ReactNode;
-  error: ZodFormattedError<T, string> | undefined;
+  error: FieldError | MultipleFieldErrors | undefined;
   highlightOnly?: boolean;
 }) {
-  if (!error || (error._errors && !error._errors.length))
-    return <>{children}</>;
+  console.log(error?.message);
   return (
-    <div className="error group flex h-full w-full flex-col">
+    <>
       {children}
-      {!highlightOnly && (
-        <span className="text-red-500">{error._errors.join(". ")}</span>
+      {!highlightOnly && error?.message && (
+        <span className="text-red-500">{error.message}</span>
       )}
-    </div>
+    </>
   );
 }
 
@@ -34,82 +28,4 @@ export function ErrorBox({ children }: { children: React.ReactNode }) {
       {children}
     </div>
   );
-}
-
-type FormState<Schema> = {
-  [K in keyof Schema]: Schema[K] extends string | number | boolean
-    ? Schema[K]
-    : Schema[K] extends Array<DefaultArrayItem>
-    ? Array<DefaultArrayItem>
-    : Schema[K] extends Array<BaseArrayItem & Record<string, string | number>>
-    ? Array<BaseArrayItem & Record<string, string | number>>
-    : never;
-};
-
-type BaseArrayItem = {
-  id: string;
-  order?: number;
-};
-
-type DefaultArrayItem = BaseArrayItem & { value: string };
-
-type FilterPrimitives<T> = {
-  [key in keyof T as T[key] extends Array<unknown> ? key : never]: T[key];
-};
-
-type a = keyof FilterPrimitives<addRecipeWithMainImage>;
-
-export function useForm<T>(initialState: FormState<T>) {
-  const [formData, setFormData] = useState<FormState<T>>(initialState);
-  const registerPrimitive = (key: keyof FormState<T>) => {
-    return {
-      onChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
-        setFormData({
-          ...formData,
-          [key]: e.currentTarget.value,
-        });
-      },
-      value: formData[key],
-    };
-  };
-  const registerArrayField = (
-    key: keyof FilterPrimitives<T>,
-    index: number,
-    innerKey?: string
-  ) => {
-    return {
-      onChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
-        const list = formData[key];
-        if (!isArray(list)) return;
-        if (!innerKey) {
-          list.push({ id: "1", order: 1, name: "a" });
-          setFormData({
-            ...formData,
-            [key]: [
-              ...list,
-              {
-                id: "1",
-                ordjer: index,
-                value: e.currentTarget.value,
-              },
-            ],
-          });
-        } else {
-          setFormData({
-            ...formData,
-            [key]: [
-              ...list,
-              { id: "1", order: index, [innerKey]: e.currentTarget.value },
-            ],
-          });
-        }
-      },
-      value: formData[key],
-    };
-  };
-  return { registerPrimitive, registerArrayField };
-
-  function isArray(input: unknown): input is DefaultArrayItem[] {
-    return Array.isArray(input);
-  }
 }

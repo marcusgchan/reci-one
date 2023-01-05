@@ -43,24 +43,11 @@ import {
   useFieldArray,
   useForm,
   useFormContext,
+  FieldError,
+  FieldErrorsImpl,
+  Merge,
 } from "react-hook-form";
-
-// function handleImageErrors(errors: FormErrors["imageMetadata"]) {
-//   if (!errors) return;
-//   // File doesn't exist
-//   // Name must exist if the file is uploaded to browser
-//   if (errors.name?._errors?.length) {
-//     return errors.name;
-//   }
-//   // File too big
-//   if (errors.size?._errors.length) {
-//     return errors.size;
-//   }
-//   // Invalid file type
-//   if (errors.type?._errors.length) {
-//     return errors.type;
-//   }
-// }
+import { FieldValidation } from "@/ui/FieldValidation";
 
 const Create: CustomReactFC = () => {
   const methods = useForm<addRecipeWithMainImage>({
@@ -68,6 +55,11 @@ const Create: CustomReactFC = () => {
     defaultValues: {
       name: "",
       description: "",
+      imageMetadata: {
+        name: undefined,
+        size: undefined,
+        type: undefined,
+      },
       ingredients: [
         { id: uuidv4(), order: 0, name: "", isHeader: false },
         { id: uuidv4(), order: 1, name: "", isHeader: false },
@@ -86,6 +78,19 @@ const Create: CustomReactFC = () => {
       nationalities: [],
     },
   });
+  //console.log(methods.formState.dirtyFields);
+  return (
+    <section className="p-5 pb-10">
+      <FormProvider {...methods}>
+        <Form />
+      </FormProvider>
+    </section>
+  );
+};
+
+const Form = () => {
+  console.log("child");
+  const methods = useFormContext<addRecipeWithMainImage>();
   const {
     mealTypesData,
     cookingMethodsData,
@@ -96,13 +101,20 @@ const Create: CustomReactFC = () => {
   const router = useRouter();
   const setFileMetadata = (file: File | undefined) => {
     if (file) {
-      methods.setValue("imageMetadata", {
-        name: file.name,
-        size: file.size,
-        type: file.type,
-      });
+      methods.setValue(
+        "imageMetadata",
+        { name: file.name, type: file.type, size: file.size },
+        { shouldValidate: true, shouldDirty: true, shouldTouch: true }
+      );
     } else {
-      methods.resetField("imageMetadata");
+      // Workaround b/c resetField('imageMetadeta) resets the field visually but isn't
+      // in the control state (control > formValues > imageMetadata)
+      // This results in incorrect validation (adding image and removing then submitting wouldn't show error)
+      methods.setValue("imageMetadata", {
+        name: undefined,
+        type: undefined,
+        size: undefined
+      } as unknown as addRecipeWithMainImage['imageMetadata']);
     }
   };
   const {
@@ -150,69 +162,58 @@ const Create: CustomReactFC = () => {
     },
   });
   const snackbarDispatch = useSnackbarDispatch();
-  const createRecipe = (e: React.FormEvent) => {
-    e.preventDefault();
-    const result = addRecipeWithMainImagesSchema.safeParse(methods.getValues());
-    if (result.success) {
-      mutation.mutate(result.data);
-    } else {
-      console.log(result.error.flatten());
-      // setFormErrors(result.error.format());
-    }
-  };
+  const createRecipe = methods.handleSubmit((data) => {
+    mutation.mutate(data);
+  });
   const navigateToRecipes = () => router.push("/recipes");
   if (isLoading || isError) {
     return <LoaderSection centerFixed />;
   }
   return (
-    <section className="p-5 pb-10">
-      <FormProvider {...methods}>
-        <form
-          className="m-auto grid w-full max-w-xl grid-cols-1 gap-5 pb-2 text-gray-500"
-          onSubmit={createRecipe}
+    <form
+      className="m-auto grid w-full max-w-xl grid-cols-1 gap-5 pb-2 text-gray-500"
+      onSubmit={createRecipe}
+    >
+      <div>
+        <Button
+          intent="noBoarder"
+          type="button"
+          onClick={navigateToRecipes}
+          className="p-1"
         >
-          <div>
-            <Button
-              intent="noBoarder"
-              type="button"
-              onClick={navigateToRecipes}
-              className="p-1"
-            >
-              Back
-            </Button>
-            <h2 className="text-2xl">Add Recipe</h2>
-          </div>
-          <SectionWrapper>
-            <NameDesImgSection
-              handleFileSelect={handleFileSelect}
-              handleFileDrop={handleFileDrop}
-              handleFileLoad={handleFileLoad}
-              removeFile={removeFile}
-              imgObjUrl={imgObjUrlRef.current}
-            />
-          </SectionWrapper>
-          <SectionWrapper>
-            <IngredientsSection />
-          </SectionWrapper>
-          <SectionWrapper>
-            <StepsSection />
-          </SectionWrapper>
-          <SectionWrapper>
-            <TimeSection />
-          </SectionWrapper>
-          <SectionWrapper>
-            <MealTypeSection mealTypes={mealTypesData || []} />
-          </SectionWrapper>
-          <SectionWrapper>
-            <NationalitySection nationalities={nationalitiesData || []} />
-          </SectionWrapper>
-          <SectionWrapper>
-            <CookingMethodsSection cookingMethods={cookingMethodsData || []} />
-          </SectionWrapper>
-          <Button>Create</Button>
-        </form>
-      </FormProvider>
-    </section>
+          Back
+        </Button>
+        <h2 className="text-2xl">Add Recipe</h2>
+      </div>
+      <SectionWrapper>
+        <NameDesImgSection
+          handleFileSelect={handleFileSelect}
+          handleFileDrop={handleFileDrop}
+          handleFileLoad={handleFileLoad}
+          removeFile={removeFile}
+          imgObjUrl={imgObjUrlRef.current}
+        />
+      </SectionWrapper>
+      <SectionWrapper>
+        <IngredientsSection />
+      </SectionWrapper>
+      <SectionWrapper>
+        <StepsSection />
+      </SectionWrapper>
+      <SectionWrapper>
+        <TimeSection />
+      </SectionWrapper>
+      <SectionWrapper>
+        <MealTypeSection mealTypes={mealTypesData || []} />
+      </SectionWrapper>
+      <SectionWrapper>
+        <NationalitySection nationalities={nationalitiesData || []} />
+      </SectionWrapper>
+      <SectionWrapper>
+        <CookingMethodsSection cookingMethods={cookingMethodsData || []} />
+      </SectionWrapper>
+      <Button>Create</Button>
+    </form>
   );
 };
 
@@ -230,8 +231,31 @@ const NameDesImgSection = ({
   removeFile: (src: string) => void;
 }) => {
   const id = useId();
-  const { register } = useFormContext<addRecipeWithMainImage>();
-
+  const {
+    register,
+    formState: { errors },
+  } = useFormContext<addRecipeWithMainImage>();
+  type imgMetadata = addRecipeWithMainImage["imageMetadata"];
+  function handleImageErrors(
+    errors: Merge<FieldError, FieldErrorsImpl<imgMetadata>> | undefined
+  ) {
+    if (!errors) return;
+    // File doesn't exist
+    // Name must exist if the file is uploaded to browser
+    if (errors.name) {
+      return errors.name;
+    }
+    // File too big
+    if (errors.size) {
+      return errors.size;
+    }
+    // Invalid file type
+    //if (errors.type) {
+    //return errors.type;
+    //}
+    return errors.types;
+  }
+  console.log("in create", errors);
   return (
     <div className="grid grid-cols-1 gap-2 sm:h-56 sm:grid-cols-2">
       <div className="flex min-w-[50%] flex-1 shrink-0 flex-col gap-4">
@@ -239,14 +263,14 @@ const NameDesImgSection = ({
           <label className="block" htmlFor={id + "-name"}>
             Name
           </label>
-          {/* <FieldValidation error={formContext?.formErrors?.name}> */}
-          <Input
-            id={id + "-name"}
-            type="text"
-            {...register("name")}
-            className="inline-block w-full border-2 border-gray-500 p-1"
-          />
-          {/* </FieldValidation> */}
+          <FieldValidation error={errors.name}>
+            <Input
+              id={id + "-name"}
+              type="text"
+              {...register("name")}
+              className="inline-block w-full border-2 border-gray-500 p-1"
+            />
+          </FieldValidation>
         </div>
         <div className="flex h-full flex-col">
           <label className="block" htmlFor={id + "-description"}>
@@ -261,17 +285,15 @@ const NameDesImgSection = ({
       </div>
       {/* Wrapped outside to prevent image upload from shrinking if there's an error */}
       <div className="h-60 sm:h-full">
-        {/* <FieldValidation
-          error={handleImageErrors(formContext?.formErrors?.imageMetadata)}
-        > */}
-        <ImageUpload
-          handleFileLoad={handleFileLoad}
-          removeFile={removeFile}
-          handleFilesSelect={handleFileSelect}
-          handleFileDrop={handleFileDrop}
-          imgObjUrl={imgObjUrl}
-        />
-        {/* </FieldValidation> */}
+        <FieldValidation error={handleImageErrors(errors.imageMetadata)}>
+          <ImageUpload
+            handleFileLoad={handleFileLoad}
+            removeFile={removeFile}
+            handleFilesSelect={handleFileSelect}
+            handleFileDrop={handleFileDrop}
+            imgObjUrl={imgObjUrl}
+          />
+        </FieldValidation>
       </div>
     </div>
   );
@@ -409,6 +431,7 @@ const SortableItem = ({
   const {
     attributes,
     listeners,
+
     setNodeRef,
     setActivatorNodeRef,
     transform,
