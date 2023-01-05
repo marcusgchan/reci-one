@@ -109,11 +109,15 @@ const Form = () => {
       // Workaround b/c resetField('imageMetadeta) resets the field visually but isn't
       // in the control state (control > formValues > imageMetadata)
       // This results in incorrect validation (adding image and removing then submitting wouldn't show error)
-      methods.setValue("imageMetadata", {
-        name: undefined,
-        type: undefined,
-        size: undefined,
-      } as unknown as addRecipeWithMainImage["imageMetadata"]);
+      methods.setValue(
+        "imageMetadata",
+        {
+          name: undefined,
+          type: undefined,
+          size: undefined,
+        } as unknown as addRecipeWithMainImage["imageMetadata"],
+        { shouldValidate: true, shouldDirty: true, shouldTouch: true }
+      );
     }
   };
   const {
