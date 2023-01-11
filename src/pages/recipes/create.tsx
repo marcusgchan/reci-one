@@ -116,7 +116,11 @@ const Form = () => {
           type: undefined,
           size: undefined,
         } as unknown as addRecipeWithMainImage["imageMetadata"],
-        { shouldValidate: true, shouldDirty: true, shouldTouch: true }
+        {
+          shouldValidate: methods.formState.isSubmitted ? true : false,
+          shouldDirty: true,
+          shouldTouch: true,
+        }
       );
     }
   };
@@ -147,10 +151,11 @@ const Form = () => {
       // File must be last item that is appended to form
       newFormData.append("file", file);
       try {
-        await fetch(presignedPost.url, {
+        const res = await fetch(presignedPost.url, {
           method: "POST",
           body: newFormData,
         });
+        if (!res.ok) throw new Error("Unable to upload file");
         snackbarDispatch({
           type: "SUCCESS",
           message: "Successfully create recipe",
