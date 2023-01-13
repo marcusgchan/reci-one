@@ -47,37 +47,37 @@ import {
   FieldErrorsImpl,
   Merge,
 } from "react-hook-form";
-import { ErrorBox, FieldValidation } from "@/ui/FieldValidation";
+import { ErrorBox, FieldValidation, FormItem } from "@/ui/FieldValidation";
 import { ErrorMessage } from "@hookform/error-message";
 
-const Create: CustomReactFC = () => { 
+const Create: CustomReactFC = () => {
   const methods = useForm<addRecipeWithMainImage>({
-resolver: zodResolver(addRecipeWithMainImagesSchema),
-defaultValues: {
-name: "",
-description: "",
-imageMetadata: {
-name: undefined,
-size: undefined,
-type: undefined,
-},
-ingredients: [
-{ id: uuidv4(), order: 0, name: "", isHeader: false },
-{ id: uuidv4(), order: 1, name: "", isHeader: false },
-{ id: uuidv4(), order: 2, name: "", isHeader: false },
-],
-steps: [
-{ id: uuidv4(), order: 0, name: "", isHeader: false },
-{ id: uuidv4(), order: 1, name: "", isHeader: false },
-{ id: uuidv4(), order: 2, name: "", isHeader: false },
-],
-prepTime: "",
-  cookTime: "",
-  isPublic: false,
-  cookingMethods: [],
-  mealTypes: [],
-  nationalities: [],
-  },
+    resolver: zodResolver(addRecipeWithMainImagesSchema),
+    defaultValues: {
+      name: "",
+      description: "",
+      imageMetadata: {
+        name: undefined,
+        size: undefined,
+        type: undefined,
+      },
+      ingredients: [
+        { id: uuidv4(), order: 0, name: "", isHeader: false },
+        { id: uuidv4(), order: 1, name: "", isHeader: false },
+        { id: uuidv4(), order: 2, name: "", isHeader: false },
+      ],
+      steps: [
+        { id: uuidv4(), order: 0, name: "", isHeader: false },
+        { id: uuidv4(), order: 1, name: "", isHeader: false },
+        { id: uuidv4(), order: 2, name: "", isHeader: false },
+      ],
+      prepTime: "",
+      cookTime: "",
+      isPublic: false,
+      cookingMethods: [],
+      mealTypes: [],
+      nationalities: [],
+    },
   });
   const {
     mealTypesData,
@@ -169,190 +169,52 @@ prepTime: "",
   return (
     <section className="p-5 pb-10">
       <FormProvider {...methods}>
-
-    <form
-      className="m-auto grid w-full max-w-xl grid-cols-1 gap-5 pb-2 text-gray-500"
-      onSubmit={createRecipe}
-    >
-      <div>
-        <Button
-          intent="noBoarder"
-          type="button"
-          onClick={navigateToRecipes}
-          className="p-1"
+        <form
+          className="m-auto grid w-full max-w-xl grid-cols-1 gap-5 pb-2 text-gray-500"
+          onSubmit={createRecipe}
         >
-          Back
-        </Button>
-        <h2 className="text-2xl">Add Recipe</h2>
-      </div>
-      <SectionWrapper>
-        <NameDesImgSection
-          handleFileSelect={handleFileSelect}
-          handleFileDrop={handleFileDrop}
-          handleFileLoad={handleFileLoad}
-          removeFile={removeFile}
-          imgObjUrl={imgObjUrlRef.current}
-        />
-      </SectionWrapper>
-      <SectionWrapper>
-        <IngredientsSection />
-      </SectionWrapper>
-      <SectionWrapper>
-        <StepsSection />
-      </SectionWrapper>
-      <SectionWrapper>
-        <TimeSection />
-      </SectionWrapper>
-      <SectionWrapper>
-        <MealTypeSection mealTypes={mealTypesData || []} />
-      </SectionWrapper>
-      <SectionWrapper>
-        <NationalitySection nationalities={nationalitiesData || []} />
-      </SectionWrapper>
-      <SectionWrapper>
-        <CookingMethodsSection cookingMethods={cookingMethodsData || []} />
-      </SectionWrapper>
-      <Button>Create</Button>
-    </form>
+          <div>
+            <Button
+              intent="noBoarder"
+              type="button"
+              onClick={navigateToRecipes}
+              className="p-1"
+            >
+              Back
+            </Button>
+            <h2 className="text-2xl">Add Recipe</h2>
+          </div>
+          <SectionWrapper>
+            <NameDesImgSection
+              handleFileSelect={handleFileSelect}
+              handleFileDrop={handleFileDrop}
+              handleFileLoad={handleFileLoad}
+              removeFile={removeFile}
+              imgObjUrl={imgObjUrlRef.current}
+            />
+          </SectionWrapper>
+          <SectionWrapper>
+            <IngredientsSection />
+          </SectionWrapper>
+          <SectionWrapper>
+            <StepsSection />
+          </SectionWrapper>
+          <SectionWrapper>
+            <TimeSection />
+          </SectionWrapper>
+          <SectionWrapper>
+            <MealTypeSection mealTypes={mealTypesData || []} />
+          </SectionWrapper>
+          <SectionWrapper>
+            <NationalitySection nationalities={nationalitiesData || []} />
+          </SectionWrapper>
+          <SectionWrapper>
+            <CookingMethodsSection cookingMethods={cookingMethodsData || []} />
+          </SectionWrapper>
+          <Button>Create</Button>
+        </form>
       </FormProvider>
     </section>
-  );
-};
-
-const Form = () => {
-  const methods = useFormContext<addRecipeWithMainImage>();
-  const {
-    mealTypesData,
-    cookingMethodsData,
-    nationalitiesData,
-    isError,
-    isLoading,
-  } = useDropdownQuery();
-  const router = useRouter();
-  const setFileMetadata = (file: File | undefined) => {
-    if (file) {
-      methods.setValue(
-        "imageMetadata",
-        { name: file.name, type: file.type, size: file.size },
-        { shouldValidate: true, shouldDirty: true, shouldTouch: true }
-      );
-    } else {
-      // Workaround b/c resetField('imageMetadeta) resets the field visually but isn't
-      // in the control state (control > formValues > imageMetadata)
-      // This results in incorrect validation (adding image and removing then submitting wouldn't show error)
-      methods.setValue(
-        "imageMetadata",
-        {
-          name: undefined,
-          type: undefined,
-          size: undefined,
-        } as unknown as addRecipeWithMainImage["imageMetadata"],
-        {
-          shouldValidate: methods.formState.isSubmitted ? true : false,
-          shouldDirty: true,
-          shouldTouch: true,
-        }
-      );
-    }
-  };
-  const {
-    handleFileSelect,
-    handleFileDrop,
-    formData,
-    imgObjUrlRef,
-    handleFileLoad,
-    removeFile,
-  } = useImageUpload(setFileMetadata);
-  const mutation = trpc.recipes.addRecipe.useMutation({
-    async onSuccess(presignedPost) {
-      const file = formData.get("file");
-      if (!file) {
-        // error unable to upload file or user somehow removed img after upload
-        snackbarDispatch({
-          type: "ERROR",
-          message: "There was a problem with uploading your image",
-        });
-        return;
-      }
-      // Add fields that are required for presigned post
-      const newFormData = new FormData();
-      Object.entries(presignedPost.fields).forEach(([field, value]) => {
-        newFormData.append(field, value);
-      });
-      // File must be last item that is appended to form
-      newFormData.append("file", file);
-      try {
-        const res = await fetch(presignedPost.url, {
-          method: "POST",
-          body: newFormData,
-        });
-        if (!res.ok) throw new Error("Unable to upload file");
-        snackbarDispatch({
-          type: "SUCCESS",
-          message: "Successfully create recipe",
-        });
-        navigateToRecipes();
-      } catch (e) {
-        snackbarDispatch({
-          type: "ERROR",
-          message: "There was a problem with uploading your image",
-        });
-      }
-    },
-  });
-  const snackbarDispatch = useSnackbarDispatch();
-  const createRecipe = methods.handleSubmit((data) => {
-    mutation.mutate(data);
-  });
-  const navigateToRecipes = () => router.push("/recipes");
-  if (isLoading || isError) {
-    return <LoaderSection centerFixed />;
-  }
-  return (
-    <form
-      className="m-auto grid w-full max-w-xl grid-cols-1 gap-5 pb-2 text-gray-500"
-      onSubmit={createRecipe}
-    >
-      <div>
-        <Button
-          intent="noBoarder"
-          type="button"
-          onClick={navigateToRecipes}
-          className="p-1"
-        >
-          Back
-        </Button>
-        <h2 className="text-2xl">Add Recipe</h2>
-      </div>
-      <SectionWrapper>
-        <NameDesImgSection
-          handleFileSelect={handleFileSelect}
-          handleFileDrop={handleFileDrop}
-          handleFileLoad={handleFileLoad}
-          removeFile={removeFile}
-          imgObjUrl={imgObjUrlRef.current}
-        />
-      </SectionWrapper>
-      <SectionWrapper>
-        <IngredientsSection />
-      </SectionWrapper>
-      <SectionWrapper>
-        <StepsSection />
-      </SectionWrapper>
-      <SectionWrapper>
-        <TimeSection />
-      </SectionWrapper>
-      <SectionWrapper>
-        <MealTypeSection mealTypes={mealTypesData || []} />
-      </SectionWrapper>
-      <SectionWrapper>
-        <NationalitySection nationalities={nationalitiesData || []} />
-      </SectionWrapper>
-      <SectionWrapper>
-        <CookingMethodsSection cookingMethods={cookingMethodsData || []} />
-      </SectionWrapper>
-      <Button>Create</Button>
-    </form>
   );
 };
 
@@ -397,7 +259,7 @@ const NameDesImgSection = ({
   return (
     <div className="grid grid-cols-1 gap-2 sm:h-56 sm:grid-cols-2">
       <div className="flex min-w-[50%] flex-1 shrink-0 flex-col gap-4">
-        <div>
+        <FormItem>
           <label className="block" htmlFor={id + "-name"}>
             Name
           </label>
@@ -409,7 +271,7 @@ const NameDesImgSection = ({
               className="inline-block w-full border-2 border-gray-500 p-1"
             />
           </FieldValidation>
-        </div>
+        </FormItem>
         <div className="flex h-full flex-col">
           <label className="block" htmlFor={id + "-description"}>
             Description
