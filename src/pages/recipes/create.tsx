@@ -273,14 +273,16 @@ const NameDesImgSection = ({
           </FieldValidation>
         </FormItem>
         <div className="flex h-full flex-col">
-          <label className="block" htmlFor={id + "-description"}>
-            Description
-          </label>
-          <Textarea
-            id={id + "-description"}
-            className="h-full resize-none border-2 border-gray-500 p-1"
-            {...register("description")}
-          />
+          <FormItem className="flex-1">
+            <label className="block" htmlFor={id + "-description"}>
+              Description
+            </label>
+            <Textarea
+              id={id + "-description"}
+              className="h-full resize-none border-2 border-gray-500 p-1"
+              {...register("description")}
+            />
+          </FormItem>
         </div>
       </div>
       {/* Wrapped outside to prevent image upload from shrinking if there's an error */}
@@ -304,7 +306,7 @@ const TimeSection = () => {
   const { register } = useFormContext<addRecipeWithMainImage>();
   return (
     <div className="flex gap-4">
-      <div className="flex-1">
+      <FormItem className="flex-1">
         <label htmlFor={id + "-prepTime"}>Prep Time</label>
         <input
           id={id + "-prepTime"}
@@ -312,8 +314,8 @@ const TimeSection = () => {
           {...register("prepTime")}
           className="inline-block w-full border-2 border-gray-500 p-1"
         />
-      </div>
-      <div className="flex-1">
+      </FormItem>
+      <FormItem className="flex-1">
         <label htmlFor={id + "-cookTime"}>Cook Time</label>
         <input
           id={id + "-cookTime"}
@@ -321,7 +323,7 @@ const TimeSection = () => {
           {...register("cookTime")}
           className="inline-block w-full border-2 border-gray-500 p-1"
         />
-      </div>
+      </FormItem>
     </div>
   );
 };
@@ -347,7 +349,7 @@ const IngredientsSection = () => {
   };
   return (
     <>
-      <h2>Add Ingredients</h2>
+      <h2 className="text-xl">Add Ingredients</h2>
       <p>
         Enter ingredients below. One ingredient per line and it should include
         the measurements. Add optional headers to group ingredients
@@ -487,7 +489,7 @@ const CookingMethodsSection = ({
   const fields = getValues("cookingMethods");
   return (
     <>
-      <h2>Add Cooking methods</h2>
+      <h2 className="text-xl">Add Cooking methods</h2>
       <p>Add optional cooking methods to filter meals easier in the future</p>
       <div className="flex items-stretch gap-2">
         <Combobox
@@ -523,7 +525,7 @@ const MealTypeSection = ({
   const fields = getValues("mealTypes");
   return (
     <>
-      <h2>Add Meal Types</h2>
+      <h2 className="text-xl">Add Meal Types</h2>
       <p>
         Add optional meal types to make filter by meals easier in the future
       </p>
@@ -561,7 +563,7 @@ const NationalitySection = ({
   const fields = getValues("nationalities");
   return (
     <>
-      <h2>Add Nationalities</h2>
+      <h2 className="text-xl">Add Nationalities</h2>
       <p>Add optional nationalities to filter by meals easier in the future</p>
       <div className="flex items-stretch gap-2">
         <Combobox
@@ -613,7 +615,7 @@ const StepsSection = () => {
   };
   return (
     <>
-      <h2>Add Steps</h2>
+      <h2 className="text-xl">Add Steps</h2>
       <p>
         Enter Steps below. One Step per line. Add optional headers to group
         steps
@@ -723,6 +725,7 @@ const DraggableInput = ({
     <div className="flex h-10 items-stretch">
       {canDrag && (
         <button
+          type="button"
           className="mr-2 touch-manipulation"
           {...attributes}
           {...listeners}
