@@ -337,7 +337,7 @@ const TimeSection = () => {
             aria-errormessage={getErrorMsg(errors.cookTime)}
             aria-invalid={hasError(errors.cookTime)}
             id={id + "-cookTime"}
-            type="text"
+            type="number"
             {...register("cookTime")}
             className="inline-block w-full border-2 border-gray-500 p-1"
           />
