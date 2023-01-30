@@ -1,3 +1,4 @@
+import { cva, VariantProps } from "class-variance-authority";
 import { AiOutlineInfoCircle } from "react-icons/ai";
 import { FieldError, MultipleFieldErrors } from "react-hook-form";
 
@@ -24,6 +25,15 @@ export function FieldValidation({
   );
 }
 
+export function hasError(error: FieldError | MultipleFieldErrors | undefined) {
+  return error?.message ? true : false;
+}
+
+export function getErrorMsg(error: FieldError | undefined) {
+  if (!error?.message) return;
+  return error.message;
+}
+
 export function ErrorBox({
   children,
 }: {
@@ -36,4 +46,31 @@ export function ErrorBox({
       {children}
     </div>
   );
+}
+
+type FormItem = Omit<
+  React.DetailedHTMLProps<
+    React.InputHTMLAttributes<HTMLInputElement>,
+    HTMLInputElement
+  >,
+  "size"
+> &
+  VariantProps<typeof formItem>;
+const formItem = cva("flex flex-col gap-2", {
+  variants: {
+    intent: {
+      primary: [""],
+    },
+  },
+  defaultVariants: {
+    intent: "primary",
+  },
+});
+
+export function FormItem({
+  children,
+  intent,
+  className,
+}: FormItem & { children: React.ReactNode }) {
+  return <div className={formItem({ className, intent })}>{children}</div>;
 }

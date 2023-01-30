@@ -2,6 +2,7 @@ import Image from "next/image";
 import { CgCloseO } from "react-icons/cg";
 import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/router";
+import { FormItem } from "./FieldValidation";
 
 export function ImageUpload({
   handleFilesSelect,
@@ -17,7 +18,7 @@ export function ImageUpload({
   removeFile: (src: string) => void;
 }) {
   return (
-    <div className="flex h-full flex-col">
+    <FormItem className="flex h-full flex-col">
       <label htmlFor="cover-photo">Upload Recipe Image</label>
       {!imgObjUrl ? (
         <div
@@ -50,6 +51,7 @@ export function ImageUpload({
                   id="file-upload"
                   name="file-upload"
                   type="file"
+                  accept="image/*"
                   multiple={false}
                   onChange={handleFilesSelect}
                   className="sr-only"
@@ -77,7 +79,7 @@ export function ImageUpload({
           />
         </div>
       )}
-    </div>
+    </FormItem>
   );
 }
 

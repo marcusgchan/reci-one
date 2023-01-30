@@ -47,7 +47,13 @@ import {
   FieldErrorsImpl,
   Merge,
 } from "react-hook-form";
-import { ErrorBox, FieldValidation } from "@/ui/FieldValidation";
+import {
+  ErrorBox,
+  FieldValidation,
+  FormItem,
+  getErrorMsg,
+  hasError,
+} from "@/ui/FieldValidation";
 import { ErrorMessage } from "@hookform/error-message";
 
 const Create: CustomReactFC = () => {
@@ -79,17 +85,6 @@ const Create: CustomReactFC = () => {
       nationalities: [],
     },
   });
-  return (
-    <section className="p-5 pb-10">
-      <FormProvider {...methods}>
-        <Form />
-      </FormProvider>
-    </section>
-  );
-};
-
-const Form = () => {
-  const methods = useFormContext<addRecipeWithMainImage>();
   const {
     mealTypesData,
     cookingMethodsData,
@@ -116,7 +111,11 @@ const Form = () => {
           type: undefined,
           size: undefined,
         } as unknown as addRecipeWithMainImage["imageMetadata"],
-        { shouldValidate: true, shouldDirty: true, shouldTouch: true }
+        {
+          shouldValidate: methods.formState.isSubmitted ? true : false,
+          shouldDirty: true,
+          shouldTouch: true,
+        }
       );
     }
   };
@@ -147,10 +146,11 @@ const Form = () => {
       // File must be last item that is appended to form
       newFormData.append("file", file);
       try {
-        await fetch(presignedPost.url, {
+        const res = await fetch(presignedPost.url, {
           method: "POST",
           body: newFormData,
         });
+        if (!res.ok) throw new Error("Unable to upload file");
         snackbarDispatch({
           type: "SUCCESS",
           message: "Successfully create recipe",
@@ -173,50 +173,54 @@ const Form = () => {
     return <LoaderSection centerFixed />;
   }
   return (
-    <form
-      className="m-auto grid w-full max-w-xl grid-cols-1 gap-5 pb-2 text-gray-500"
-      onSubmit={createRecipe}
-    >
-      <div>
-        <Button
-          intent="noBoarder"
-          type="button"
-          onClick={navigateToRecipes}
-          className="p-1"
+    <section className="p-5 pb-10">
+      <FormProvider {...methods}>
+        <form
+          className="m-auto grid w-full max-w-xl grid-cols-1 gap-5 pb-2 text-gray-500"
+          onSubmit={createRecipe}
         >
-          Back
-        </Button>
-        <h2 className="text-2xl">Add Recipe</h2>
-      </div>
-      <SectionWrapper>
-        <NameDesImgSection
-          handleFileSelect={handleFileSelect}
-          handleFileDrop={handleFileDrop}
-          handleFileLoad={handleFileLoad}
-          removeFile={removeFile}
-          imgObjUrl={imgObjUrlRef.current}
-        />
-      </SectionWrapper>
-      <SectionWrapper>
-        <IngredientsSection />
-      </SectionWrapper>
-      <SectionWrapper>
-        <StepsSection />
-      </SectionWrapper>
-      <SectionWrapper>
-        <TimeSection />
-      </SectionWrapper>
-      <SectionWrapper>
-        <MealTypeSection mealTypes={mealTypesData || []} />
-      </SectionWrapper>
-      <SectionWrapper>
-        <NationalitySection nationalities={nationalitiesData || []} />
-      </SectionWrapper>
-      <SectionWrapper>
-        <CookingMethodsSection cookingMethods={cookingMethodsData || []} />
-      </SectionWrapper>
-      <Button>Create</Button>
-    </form>
+          <div>
+            <Button
+              intent="noBoarder"
+              type="button"
+              onClick={navigateToRecipes}
+              className="p-1"
+            >
+              Back
+            </Button>
+            <h2 className="text-2xl">Add Recipe</h2>
+          </div>
+          <SectionWrapper>
+            <NameDesImgSection
+              handleFileSelect={handleFileSelect}
+              handleFileDrop={handleFileDrop}
+              handleFileLoad={handleFileLoad}
+              removeFile={removeFile}
+              imgObjUrl={imgObjUrlRef.current}
+            />
+          </SectionWrapper>
+          <SectionWrapper>
+            <IngredientsSection />
+          </SectionWrapper>
+          <SectionWrapper>
+            <StepsSection />
+          </SectionWrapper>
+          <SectionWrapper>
+            <TimeSection />
+          </SectionWrapper>
+          <SectionWrapper>
+            <MealTypeSection mealTypes={mealTypesData || []} />
+          </SectionWrapper>
+          <SectionWrapper>
+            <NationalitySection nationalities={nationalitiesData || []} />
+          </SectionWrapper>
+          <SectionWrapper>
+            <CookingMethodsSection cookingMethods={cookingMethodsData || []} />
+          </SectionWrapper>
+          <Button>Create</Button>
+        </form>
+      </FormProvider>
+    </section>
   );
 };
 
@@ -261,28 +265,32 @@ const NameDesImgSection = ({
   return (
     <div className="grid grid-cols-1 gap-2 sm:h-56 sm:grid-cols-2">
       <div className="flex min-w-[50%] flex-1 shrink-0 flex-col gap-4">
-        <div>
+        <FormItem>
           <label className="block" htmlFor={id + "-name"}>
             Name
           </label>
           <FieldValidation error={errors.name}>
             <Input
+              aria-invalid={hasError(errors.name)}
+              aria-errormessage={getErrorMsg(errors.name)}
               id={id + "-name"}
               type="text"
               {...register("name")}
               className="inline-block w-full border-2 border-gray-500 p-1"
             />
           </FieldValidation>
-        </div>
+        </FormItem>
         <div className="flex h-full flex-col">
-          <label className="block" htmlFor={id + "-description"}>
-            Description
-          </label>
-          <Textarea
-            id={id + "-description"}
-            className="h-full resize-none border-2 border-gray-500 p-1"
-            {...register("description")}
-          />
+          <FormItem className="flex-1">
+            <label className="block" htmlFor={id + "-description"}>
+              Description
+            </label>
+            <Textarea
+              id={id + "-description"}
+              className="h-full resize-none border-2 border-gray-500 p-1"
+              {...register("description")}
+            />
+          </FormItem>
         </div>
       </div>
       {/* Wrapped outside to prevent image upload from shrinking if there's an error */}
@@ -303,27 +311,38 @@ const NameDesImgSection = ({
 
 const TimeSection = () => {
   const id = useId();
-  const { register } = useFormContext<addRecipeWithMainImage>();
+  const {
+    register,
+    formState: { errors },
+  } = useFormContext<addRecipeWithMainImage>();
   return (
     <div className="flex gap-4">
-      <div className="flex-1">
-        <label htmlFor={id + "-prepTime"}>Prep Time</label>
-        <input
-          id={id + "-prepTime"}
-          type="text"
-          {...register("prepTime")}
-          className="inline-block w-full border-2 border-gray-500 p-1"
-        />
-      </div>
-      <div className="flex-1">
-        <label htmlFor={id + "-cookTime"}>Cook Time</label>
-        <input
-          id={id + "-cookTime"}
-          type="text"
-          {...register("cookTime")}
-          className="inline-block w-full border-2 border-gray-500 p-1"
-        />
-      </div>
+      <FormItem className="flex-1">
+        <label htmlFor={id + "-prepTime"}>Prep Time (Minutes)</label>
+        <FieldValidation error={errors.prepTime}>
+          <Input
+            aria-errormessage={getErrorMsg(errors.prepTime)}
+            aria-invalid={hasError(errors.prepTime)}
+            id={id + "-prepTime"}
+            type="number"
+            {...register("prepTime", { valueAsNumber: true })}
+            className="inline-block w-full border-2 border-gray-500 p-1"
+          />
+        </FieldValidation>
+      </FormItem>
+      <FormItem className="flex-1">
+        <label htmlFor={id + "-cookTime"}>Cook Time (Minutes)</label>
+        <FieldValidation error={errors.cookTime}>
+          <Input
+            aria-errormessage={getErrorMsg(errors.cookTime)}
+            aria-invalid={hasError(errors.cookTime)}
+            id={id + "-cookTime"}
+            type="number"
+            {...register("cookTime")}
+            className="inline-block w-full border-2 border-gray-500 p-1"
+          />
+        </FieldValidation>
+      </FormItem>
     </div>
   );
 };
@@ -349,7 +368,7 @@ const IngredientsSection = () => {
   };
   return (
     <>
-      <h2>Add Ingredients</h2>
+      <h2 className="text-xl">Add Ingredients</h2>
       <p>
         Enter ingredients below. One ingredient per line and it should include
         the measurements. Add optional headers to group ingredients
@@ -489,7 +508,7 @@ const CookingMethodsSection = ({
   const fields = getValues("cookingMethods");
   return (
     <>
-      <h2>Add Cooking methods</h2>
+      <h2 className="text-xl">Add Cooking methods</h2>
       <p>Add optional cooking methods to filter meals easier in the future</p>
       <div className="flex items-stretch gap-2">
         <Combobox
@@ -525,7 +544,7 @@ const MealTypeSection = ({
   const fields = getValues("mealTypes");
   return (
     <>
-      <h2>Add Meal Types</h2>
+      <h2 className="text-xl">Add Meal Types</h2>
       <p>
         Add optional meal types to make filter by meals easier in the future
       </p>
@@ -563,7 +582,7 @@ const NationalitySection = ({
   const fields = getValues("nationalities");
   return (
     <>
-      <h2>Add Nationalities</h2>
+      <h2 className="text-xl">Add Nationalities</h2>
       <p>Add optional nationalities to filter by meals easier in the future</p>
       <div className="flex items-stretch gap-2">
         <Combobox
@@ -615,7 +634,7 @@ const StepsSection = () => {
   };
   return (
     <>
-      <h2>Add Steps</h2>
+      <h2 className="text-xl">Add Steps</h2>
       <p>
         Enter Steps below. One Step per line. Add optional headers to group
         steps
@@ -725,6 +744,7 @@ const DraggableInput = ({
     <div className="flex h-10 items-stretch">
       {canDrag && (
         <button
+          type="button"
           className="mr-2 touch-manipulation"
           {...attributes}
           {...listeners}
@@ -735,6 +755,8 @@ const DraggableInput = ({
       )}
       <FieldValidation highlightOnly error={errors?.[type]?.[index]?.name}>
         <Input
+          aria-invalid={hasError(errors?.[type]?.[index]?.name)}
+          aria-errormessage={getErrorMsg(errors?.[type]?.[index]?.name)}
           placeholder={placeholder}
           disabled={canDrag}
           {...register(`${type}.${index}.name`)}
