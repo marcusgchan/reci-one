@@ -25,6 +25,17 @@ export function FieldValidation({
   );
 }
 
+export function hasError(error: FieldError | MultipleFieldErrors | undefined) {
+  return error?.message ? true : false;
+}
+
+export function getErrorMsg(
+  error: FieldError | undefined
+) {
+  if (!error?.message) return;
+  return error.message;
+}
+
 export function ErrorBox({
   children,
 }: {

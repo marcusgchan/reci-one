@@ -47,7 +47,13 @@ import {
   FieldErrorsImpl,
   Merge,
 } from "react-hook-form";
-import { ErrorBox, FieldValidation, FormItem } from "@/ui/FieldValidation";
+import {
+  ErrorBox,
+  FieldValidation,
+  FormItem,
+  getErrorMsg,
+  hasError,
+} from "@/ui/FieldValidation";
 import { ErrorMessage } from "@hookform/error-message";
 
 const Create: CustomReactFC = () => {
@@ -265,6 +271,8 @@ const NameDesImgSection = ({
           </label>
           <FieldValidation error={errors.name}>
             <Input
+              aria-invalid={hasError(errors.name)}
+              aria-errormessage={getErrorMsg(errors.name)}
               id={id + "-name"}
               type="text"
               {...register("name")}
@@ -303,26 +311,37 @@ const NameDesImgSection = ({
 
 const TimeSection = () => {
   const id = useId();
-  const { register } = useFormContext<addRecipeWithMainImage>();
+  const {
+    register,
+    formState: { errors },
+  } = useFormContext<addRecipeWithMainImage>();
   return (
     <div className="flex gap-4">
       <FormItem className="flex-1">
-        <label htmlFor={id + "-prepTime"}>Prep Time</label>
-        <input
-          id={id + "-prepTime"}
-          type="text"
-          {...register("prepTime")}
-          className="inline-block w-full border-2 border-gray-500 p-1"
-        />
+        <label htmlFor={id + "-prepTime"}>Prep Time (Minutes)</label>
+        <FieldValidation error={errors.prepTime}>
+          <Input
+            aria-errormessage={getErrorMsg(errors.prepTime)}
+            aria-invalid={hasError(errors.prepTime)}
+            id={id + "-prepTime"}
+            type="number"
+            {...register("prepTime", { valueAsNumber: true })}
+            className="inline-block w-full border-2 border-gray-500 p-1"
+          />
+        </FieldValidation>
       </FormItem>
       <FormItem className="flex-1">
-        <label htmlFor={id + "-cookTime"}>Cook Time</label>
-        <input
-          id={id + "-cookTime"}
-          type="text"
-          {...register("cookTime")}
-          className="inline-block w-full border-2 border-gray-500 p-1"
-        />
+        <label htmlFor={id + "-cookTime"}>Cook Time (Minutes)</label>
+        <FieldValidation error={errors.cookTime}>
+          <Input
+            aria-errormessage={getErrorMsg(errors.cookTime)}
+            aria-invalid={hasError(errors.cookTime)}
+            id={id + "-cookTime"}
+            type="text"
+            {...register("cookTime")}
+            className="inline-block w-full border-2 border-gray-500 p-1"
+          />
+        </FieldValidation>
       </FormItem>
     </div>
   );
@@ -736,6 +755,8 @@ const DraggableInput = ({
       )}
       <FieldValidation highlightOnly error={errors?.[type]?.[index]?.name}>
         <Input
+          aria-invalid={hasError(errors?.[type]?.[index]?.name)}
+          aria-errormessage={getErrorMsg(errors?.[type]?.[index]?.name)}
           placeholder={placeholder}
           disabled={canDrag}
           {...register(`${type}.${index}.name`)}
