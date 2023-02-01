@@ -45,8 +45,8 @@ export const addRecipeWithMainImagesSchema = z.object({
       isHeader: z.boolean(),
     })
     .array(),
-  prepTime: z.string().length(0).or(z.number()).or(z.nan()),
-  cookTime: z.string().length(0).or(z.number()).or(z.nan()),
+  prepTime: z.string().length(0).or(z.number().min(0)).or(z.nan()),
+  cookTime: z.string().length(0).or(z.number().min(0)).or(z.nan()),
   isPublic: z.boolean(),
   mealTypes: z
     .object({

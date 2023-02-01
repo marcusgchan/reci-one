@@ -177,6 +177,7 @@ const Create: CustomReactFC = () => {
       <FormProvider {...methods}>
         <form
           className="m-auto grid w-full max-w-xl grid-cols-1 gap-5 pb-2 text-gray-500"
+          noValidate
           onSubmit={createRecipe}
         >
           <div>
@@ -324,6 +325,7 @@ const TimeSection = () => {
             aria-errormessage={getErrorMsg(errors.prepTime)}
             aria-invalid={hasError(errors.prepTime)}
             id={id + "-prepTime"}
+            min={0}
             type="number"
             {...register("prepTime", { valueAsNumber: true })}
             className="inline-block w-full border-2 border-gray-500 p-1"
@@ -336,9 +338,10 @@ const TimeSection = () => {
           <Input
             aria-errormessage={getErrorMsg(errors.cookTime)}
             aria-invalid={hasError(errors.cookTime)}
+            min={0}
             id={id + "-cookTime"}
             type="number"
-            {...register("cookTime")}
+            {...register("cookTime", { valueAsNumber: true })}
             className="inline-block w-full border-2 border-gray-500 p-1"
           />
         </FieldValidation>
@@ -371,7 +374,7 @@ const IngredientsSection = () => {
       <h2 className="text-xl">Add Ingredients</h2>
       <p>
         Enter ingredients below. One ingredient per line and it should include
-        the measurements. Add optional headers to group ingredients
+        the measurements. Add optional headers to group ingredients.
       </p>
       <Button
         intent="noBoarder"
@@ -509,7 +512,7 @@ const CookingMethodsSection = ({
   return (
     <>
       <h2 className="text-xl">Add Cooking methods</h2>
-      <p>Add optional cooking methods to filter meals easier in the future</p>
+      <p>Add optional cooking methods to filter meals easier in the future.</p>
       <div className="flex items-stretch gap-2">
         <Combobox
           data={cookingMethods}
@@ -546,7 +549,7 @@ const MealTypeSection = ({
     <>
       <h2 className="text-xl">Add Meal Types</h2>
       <p>
-        Add optional meal types to make filter by meals easier in the future
+        Add optional meal types to make filter by meals easier in the future.
       </p>
       <div className="flex items-stretch gap-2">
         <Combobox
@@ -583,7 +586,7 @@ const NationalitySection = ({
   return (
     <>
       <h2 className="text-xl">Add Nationalities</h2>
-      <p>Add optional nationalities to filter by meals easier in the future</p>
+      <p>Add optional nationalities to filter by meals easier in the future.</p>
       <div className="flex items-stretch gap-2">
         <Combobox
           data={nationalities}
@@ -637,7 +640,7 @@ const StepsSection = () => {
       <h2 className="text-xl">Add Steps</h2>
       <p>
         Enter Steps below. One Step per line. Add optional headers to group
-        steps
+        steps.
       </p>
       <Button
         intent="noBoarder"
