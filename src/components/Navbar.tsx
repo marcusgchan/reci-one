@@ -5,7 +5,7 @@ import { CgClose } from "react-icons/cg";
 import { useRouter } from "next/router";
 import { Button } from "./ui/Button";
 
-const html = document.querySelector('html');
+const html = document.querySelector("html");
 
 export function NavBar() {
   return (
@@ -77,10 +77,10 @@ function MobileNav() {
       );
       animation.finished.then(() => {
         (navRef.current as HTMLElement).style.display = "none";
-        (html as HTMLHtmlElement).style.overflow = 'auto';
+        (html as HTMLHtmlElement).style.overflow = "auto";
       });
     } else {
-      (html as HTMLHtmlElement).style.overflow = 'hidden';
+      (html as HTMLHtmlElement).style.overflow = "hidden";
       (navRef.current as HTMLElement).style.display = "flex";
       animation = (navRef.current as HTMLElement).animate(
         [{ transform: `translateX(100%)` }, { transform: `translateX(0)` }],
