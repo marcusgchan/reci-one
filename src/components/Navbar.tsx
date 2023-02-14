@@ -5,8 +5,6 @@ import { CgClose } from "react-icons/cg";
 import { useRouter } from "next/router";
 import { Button } from "./ui/Button";
 
-const html = document.querySelector("html");
-
 export function NavBar() {
   return (
     <>
@@ -67,6 +65,7 @@ function MobileNav() {
   const navRef = useRef<HTMLElement>(null);
   const toggleMenu = () => {
     let animation: Animation | undefined;
+    const html = document.querySelector("html");
     if (isOpen) {
       animation = (navRef.current as HTMLElement).animate(
         [{ transform: `translateX(0)` }, { transform: `translateX(100%)` }],
