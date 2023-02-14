@@ -1,8 +1,9 @@
 import { useSession } from "next-auth/react";
-import React, { useLayoutEffect, useState } from "react";
+import React, { useRef, useState } from "react";
 import { FaBars } from "react-icons/fa";
 import { CgClose } from "react-icons/cg";
 import { useRouter } from "next/router";
+import { Button } from "./ui/Button";
 
 export function NavBar() {
   return (
@@ -61,74 +62,100 @@ function DesktopNav() {
 function MobileNav() {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
-  const toggleMenu = () => setIsOpen((io) => !io);
-  const navigate = (path: string) => {
-    if (router.pathname !== path) {
+  const navRef = useRef<HTMLElement>(null);
+  const toggleMenu = () => {
+    let animation: Animation | undefined;
+    const html = document.querySelector("html");
+    if (isOpen) {
+      animation = (navRef.current as HTMLElement).animate(
+        [{ transform: `translateX(0)` }, { transform: `translateX(100%)` }],
+        {
+          duration: 200,
+          fill: "forwards",
+        }
+      );
+      animation.finished.then(() => {
+        (navRef.current as HTMLElement).style.display = "none";
+        (html as HTMLHtmlElement).style.overflow = "auto";
+      });
+    } else {
+      (html as HTMLHtmlElement).style.overflow = "hidden";
+      (navRef.current as HTMLElement).style.display = "flex";
+      animation = (navRef.current as HTMLElement).animate(
+        [{ transform: `translateX(100%)` }, { transform: `translateX(0)` }],
+        { duration: 200, fill: "forwards" }
+      );
+    }
+    setIsOpen((io) => !io);
+    return animation as Animation;
+  };
+  const navigate = async (path: string) => {
+    if (isOpen && navRef.current && navRef.current.getAnimations()) {
+      const animation = toggleMenu();
+      await animation.finished;
+      router.push(path);
+    } else if (router.pathname !== path) {
       router.push(path);
     }
-    setIsOpen(false);
   };
-  // Remove scrollbar from mobile nav
-  // setInterval needs to match the transition time for the menu to full open b/c
-  // users will see content shift since hidden will remove the scrollbar which shifts content
-  useLayoutEffect(() => {
-    const body = document.querySelector("body");
-    if (!body) return;
-    let id: number;
-    if (isOpen) {
-      id = window.setTimeout(() => (body.style.overflow = "hidden"), 150);
-    } else {
-      body.style.overflow = "auto";
-    }
-    return () => clearTimeout(id);
-  });
   return (
-    <nav className="isolate mx-auto flex w-full justify-between text-gray-500 md:hidden">
+    <div className="isolate mx-auto flex w-full justify-between text-gray-500 md:hidden">
       <h1>
         <a tabIndex={0} className="text-3xl tracking-wider">
-          Reci<span className="text-accent-500 ">One</span>
+          Reci<span className="text-accent-500">One</span>
         </a>
       </h1>
-      <button onClick={toggleMenu}>
+      <button
+        onClick={toggleMenu}
+        aria-expanded={isOpen}
+        aria-controls="primary-navigation"
+      >
         <FaBars size="30" />
       </button>
-      <ul
+      <nav
+        ref={navRef}
         className={`${
           isOpen ? "translate-x-0" : "translate-x-full"
         } fixed inset-0 flex flex-col items-center justify-center gap-2 bg-secondary text-xl transition-transform`}
+        id="primary-navigation"
       >
-        <li className="absolute top-[15px] right-[13px] text-gray-500">
-          <button onClick={toggleMenu}>
-            <CgClose size={35} />
-          </button>
-        </li>
-        <li>
-          <button className="cursor-pointer">HOME</button>
-        </li>
-        <li>
-          <button className="cursor-pointer">FAVOURITES</button>
-        </li>
-        <li>
-          <button
-            className="cursor-pointer"
-            onClick={() => navigate("/recipes")}
-          >
-            RECIPES
-          </button>
-        </li>
-        <li>
-          <button className="cursor-pointer">NOTES</button>
-        </li>
-        <li>
-          <button
-            className="cursor-pointer"
-            onClick={() => navigate("/recipes/create")}
-          >
-            ADD RECIPE
-          </button>
-        </li>
-      </ul>
-    </nav>
+        <button
+          className="absolute top-[15px] right-[13px] text-gray-500"
+          onClick={toggleMenu}
+          aria-expanded={isOpen}
+          aria-controls="primary-navigation"
+        >
+          <CgClose size={35} />
+        </button>
+        <ul>
+          <li className="text-center">
+            <button className="cursor-pointer">HOME</button>
+          </li>
+          <li className="text-center">
+            <button className="cursor-pointer">FAVOURITES</button>
+          </li>
+          <li className="text-center">
+            <button
+              className="cursor-pointer"
+              onClick={() => navigate("/recipes")}
+            >
+              RECIPES
+            </button>
+          </li>
+          <li className="text-center">
+            <button className="cursor-pointer">NOTES</button>
+          </li>
+          <li className="text-center">
+            <button
+              className="cursor-pointer"
+              onClick={() => navigate("/recipes/create")}
+            >
+              ADD RECIPE
+            </button>
+          </li>
+        </ul>
+      </nav>
+    </div>
   );
 }
 
