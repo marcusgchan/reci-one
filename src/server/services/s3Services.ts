@@ -5,12 +5,12 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { env } from "src/server/env.mjs";
 import { config } from "src/server/config";
 import { TRPCError } from "@trpc/server";
-import { addRecipeWithMainImage } from "@/schemas/recipe";
+import { addRecipe } from "@/schemas/recipe";
 
 export const getUploadSignedUrl = async (
   userId: string,
   recipeId: string,
-  imageMetadata: addRecipeWithMainImage["imageMetadata"],
+  imageMetadata: addRecipe["imageMetadata"],
   roundedDate: string
 ) => {
   try {

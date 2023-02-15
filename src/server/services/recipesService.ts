@@ -1,11 +1,11 @@
 import { Recipe } from "@prisma/client";
-import { GetRecipesQuery, addRecipeWithMainImage } from "@/schemas/recipe";
+import { GetRecipesQuery, addRecipe } from "@/schemas/recipe";
 import { Context } from "src/server/trpc/router/context";
 
 export async function createRecipe(
   ctx: Context,
   userId: string,
-  input: addRecipeWithMainImage,
+  input: addRecipe,
   formattedSignedDate: string
 ) {
   // Unable to connect multiple on create b/c it requires recipeId

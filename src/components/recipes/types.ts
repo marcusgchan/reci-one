@@ -1,4 +1,3 @@
-import { addRecipeWithoutMainImage } from "@/schemas/recipe";
 import { CookingMethod, MealType, Nationality } from "@prisma/client";
 
 export type StringInputNames = "name" | "description";
@@ -8,7 +7,3 @@ export type DropdownListNames =
   | "nationalities"
   | "cookingMethods";
 export type DropdownListValues = MealType | CookingMethod | Nationality;
-export type ListInputFields = keyof Pick<
-  addRecipeWithoutMainImage,
-  "ingredients" | "steps"
->;
