@@ -174,6 +174,7 @@ const RecipeCard = ({
     >
       <div className="relative flex w-full basis-3/5">
         <Image
+          className="object-cover"
           priority={true}
           fill={true}
           loading="eager"
