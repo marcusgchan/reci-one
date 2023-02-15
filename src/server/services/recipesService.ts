@@ -1,5 +1,5 @@
 import { Recipe } from "@prisma/client";
-import { GetRecipesQuery, addRecipe } from "@/schemas/recipe";
+import { GetRecipe, addRecipe } from "@/schemas/recipe";
 import { Context } from "src/server/trpc/router/context";
 
 export async function createRecipe(
@@ -59,65 +59,46 @@ export async function createRecipe(
 export async function getRecipes(
   ctx: Context,
   userId: string | undefined,
-  input: GetRecipesQuery
+  input: GetRecipe
 ) {
-  const myRecipes = [] as Recipe[];
-  if (input.viewScope !== "PUBLIC" && userId) {
-    const recipes = await ctx.prisma.recipe.findMany({
-      where: {
-        authorId: userId, // Replace with "id of test user" if want seeded recipes
-        name: {
-          contains: input.search,
-        },
-        ingredients: {
-          none: {
-            OR: input.filters.ingredientsExclude.map((ingredient) => ({
-              name: { contains: ingredient },
-            })),
-          },
-        },
-        nationalities: {
-          none: {
-            nationalityId: { notIn: input.filters.nationalitiesExclude },
-          },
-        },
-        AND: input.filters.ingredientsInclude
-          .map((ingredient) => ({
-            ingredients: { some: { name: { contains: ingredient } } },
-          }))
-          .concat(
-            input.filters.nationalitiesInclude.map((nationality) => ({
-              ingredients: { some: { name: { contains: nationality } } },
-            }))
-          ),
-        // prepTime: {
-        //   gt: input.filters.prepTimeMin,
-        //   lt: input.filters.prepTimeMax,
-        // },
-        // cookTime: {
-        //   gt: input.filters.cookTimeMin,
-        //   lt: input.filters.cookTimeMax,
-        // },
+  const recipes = await ctx.prisma.recipe.findMany({
+    where: {
+      authorId: userId, // Replace with "id of test user" if want seeded recipes
+      name: {
+        contains: input.search,
       },
-    });
-    myRecipes.push(...recipes);
-  }
-  const publicRecipes = [] as Recipe[];
-  if (input.viewScope === "PUBLIC") {
-    publicRecipes.push(
-      ...(await ctx.prisma.recipe.findMany({
-        where: {
-          id: {
-            not: {
-              equals: userId,
-            },
-          },
-          isPublic: true,
+      ingredients: {
+        none: {
+          OR: input.filters.ingredientsExclude.map((ingredient) => ({
+            name: { contains: ingredient },
+          })),
         },
-      }))
-    );
-  }
-  return [...myRecipes, ...publicRecipes];
+      },
+      nationalities: {
+        none: {
+          nationalityId: { notIn: input.filters.nationalitiesExclude },
+        },
+      },
+      AND: input.filters.ingredientsInclude
+        .map((ingredient) => ({
+          ingredients: { some: { name: { contains: ingredient } } },
+        }))
+        .concat(
+          input.filters.nationalitiesInclude.map((nationality) => ({
+            ingredients: { some: { name: { contains: nationality } } },
+          }))
+        ),
+      // prepTime: {
+      //   gt: input.filters.prepTimeMin,
+      //   lt: input.filters.prepTimeMax,
+      // },
+      // cookTime: {
+      //   gt: input.filters.cookTimeMin,
+      //   lt: input.filters.cookTimeMax,
+      // },
+    },
+  });
+  return recipes;
 }
 
 export async function getRecipe(ctx: Context, recipeId: string) {
