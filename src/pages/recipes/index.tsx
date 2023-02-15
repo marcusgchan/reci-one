@@ -3,12 +3,11 @@ import { RouterOutputs, trpc } from "../../utils/trpc";
 import Image from "next/image";
 import { AiOutlineArrowUp, AiOutlineFilter } from "react-icons/ai";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { GetRecipesQuery, getRecipesSchema } from "@/schemas/recipe";
 import { useRouter } from "next/router";
 import { LoaderSection } from "@/components/LoaderSection";
 import { CustomReactFC } from "@/shared/types";
+import { GetRecipe } from "@/schemas/recipe";
+import { Input } from "@/ui/Input";
 
 type Recipes = RouterOutputs["recipes"]["getRecipes"];
 const scopes = ["PRIVATE", "PUBLIC", "ALL"] as const;
@@ -24,68 +23,68 @@ const Index: CustomReactFC = () => {
       setSharingScopeIndex(sharingScopeIndex + 1);
     }
   };
-  const { data, isLoading, isError, refetch, isFetching } =
-    trpc.recipes.getRecipes.useQuery(
-      {
-        search: "",
-        viewScope: scopes[sharingScopeIndex] || "PRIVATE",
-        filters: {
-          ingredientsInclude: [],
-          ingredientsExclude: [],
-          nationalitiesInclude: [],
-          nationalitiesExclude: [],
-          prepTimeMin: Number.MIN_VALUE,
-          prepTimeMax: Number.MAX_VALUE,
-          cookTimeMin: Number.MIN_VALUE,
-          cookTimeMax: Number.MAX_VALUE,
-          rating: 5,
-        },
-      },
-      { refetchOnWindowFocus: false }
-    );
-
+  const [searchFilters, setSearchFilters] = useState<GetRecipe>({
+    search: "",
+    filters: {
+      ingredientsInclude: [],
+      ingredientsExclude: [],
+      nationalitiesInclude: [],
+      nationalitiesExclude: [],
+      prepTimeMin: Number.MIN_VALUE,
+      prepTimeMax: Number.MAX_VALUE,
+      cookTimeMin: Number.MIN_VALUE,
+      cookTimeMax: Number.MAX_VALUE,
+      rating: 5,
+    },
+  });
+  const updateName = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchFilters((sf) => {
+      return { ...sf, search: e.target.value };
+    });
+  };
   const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<GetRecipesQuery>({ resolver: zodResolver(getRecipesSchema) });
-
-  const [parent] = useAutoAnimate<HTMLElement>(/* optional config */);
-
-  const onSubmit = (GetAllRecipesQuery: GetRecipesQuery) => {};
+    data: recipes,
+    isLoading,
+    isError,
+    refetch,
+    isFetching,
+  } = trpc.recipes.getRecipes.useQuery(searchFilters, {
+    refetchOnWindowFocus: false,
+  });
+  const onSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    refetch();
+  };
 
   if (isError) {
     return <h2>something went wrong</h2>;
-  }
-
-  if (isLoading || isFetching) {
-    return <LoaderSection centerFixed />;
   }
 
   return (
     <>
       {/* Mobile */}
       <section className="mx-auto grid h-full w-full grid-cols-1 gap-8 md:hidden">
-        <form
-          className="top-1 flex flex-col gap-3"
-          onSubmit={handleSubmit(onSubmit)}
-        >
-          <input
-            type="text"
-            {...register("search")}
-            className="border-3 border-primary p-1 tracking-wide"
-          />
-          <button className="border-3 border-primary p-2">SEARCH</button>
-          <button
-            onClick={toggleSharingScope}
-            className="self-end border-3 border-primary p-2"
-          >
-            {scopes[sharingScopeIndex]}
-          </button>
+        <form className="flex flex-col gap-3">
+          <div className="flex justify-between gap-2">
+            <Input
+              type="text"
+              value={searchFilters.search}
+              onChange={updateName}
+              className="flex-1 border-3 border-primary p-1 tracking-wide"
+            />
+            <button
+              onClick={toggleSharingScope}
+              className="self-end border-3 border-primary p-2"
+            >
+              {scopes[sharingScopeIndex]}
+            </button>
+          </div>
         </form>
-        <section className="grid grid-cols-1 gap-10 sm:grid-cols-2">
-          <Recipes data={data} />
-        </section>
+        <RecipesLoader
+          recipes={recipes}
+          isLoading={isLoading}
+          isFetching={isFetching}
+        />
         <button className="fixed bottom-3 left-1 rounded-full bg-accent-300 p-2">
           <AiOutlineArrowUp size={30} color="white" />
         </button>
@@ -97,15 +96,15 @@ const Index: CustomReactFC = () => {
       <section className="hidden h-full w-full flex-col gap-3 md:flex">
         <form
           className="mx-auto flex w-full max-w-7xl justify-between"
-          onSubmit={handleSubmit(onSubmit)}
+          onSubmit={onSearch}
         >
           <div className="flex gap-3">
             <input
               type="text"
-              {...register("search")}
+              value={searchFilters.search}
+              onChange={updateName}
               className="w-72 border-3 border-primary p-1 tracking-wide"
             />
-            <button className="border-3 border-primary p-2">SEARCH</button>
           </div>
           <div className="flex gap-2">
             <button
@@ -117,26 +116,42 @@ const Index: CustomReactFC = () => {
             <button className="border-3 border-primary p-2">FILTER</button>
           </div>
         </form>
-        <section
-          ref={parent}
-          className="mx-auto grid h-full w-full max-w-7xl auto-rows-min gap-10 overflow-auto md:grid-cols-3 lg:grid-cols-4"
-        >
-          <Recipes data={data} />
-        </section>
+        <RecipesLoader
+          recipes={recipes}
+          isLoading={isLoading}
+          isFetching={isFetching}
+        />
       </section>
     </>
   );
 };
 
-const Recipes = ({ data }: { data: Recipes | undefined }) => {
+const RecipesLoader = ({
+  recipes,
+  isLoading,
+  isFetching,
+}: {
+  recipes: Recipes | undefined;
+  isLoading: boolean;
+  isFetching: boolean;
+}) => {
+  if (!recipes || isLoading || isFetching) {
+    return <LoaderSection />;
+  }
+  return <Recipes recipes={recipes} />;
+};
+
+const Recipes = ({ recipes }: { recipes: Recipes }) => {
+  const [parent] = useAutoAnimate<HTMLElement>(/* optional config */);
   return (
-    <>
-      {data
-        ? data.map(({ id, name, mainImage }) => (
-            <RecipeCard key={id} id={id} name={name} src={mainImage} />
-          ))
-        : []}
-    </>
+    <section
+      ref={parent}
+      className="mx-auto grid h-full w-full max-w-7xl auto-rows-min grid-cols-1 gap-10 overflow-auto sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
+    >
+      {recipes.map(({ id, name, mainImage }) => (
+        <RecipeCard key={id} id={id} name={name} src={mainImage} />
+      ))}
+    </section>
   );
 };
 
@@ -159,10 +174,10 @@ const RecipeCard = ({
     >
       <div className="relative flex w-full basis-3/5">
         <Image
+          className="object-cover"
           priority={true}
-          layout="fill"
+          fill={true}
           loading="eager"
-          objectFit="cover"
           unoptimized
           alt={name}
           src={src}

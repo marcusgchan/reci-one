@@ -3,10 +3,7 @@ import React, { useId, useMemo } from "react";
 import { BiMinus } from "react-icons/bi";
 import { GrDrag } from "react-icons/gr";
 import { useDropdownQuery } from "@/components/recipes/useDropdownQuery";
-import {
-  addRecipeWithMainImage,
-  addRecipeWithMainImagesSchema,
-} from "@/schemas/recipe";
+import { addRecipe, addRecipeSchema } from "@/schemas/recipe";
 import { v4 as uuidv4 } from "uuid";
 import { trpc } from "@/utils/trpc";
 import { DndContext, closestCenter, DragEndEvent } from "@dnd-kit/core";
@@ -57,8 +54,8 @@ import {
 import { ErrorMessage } from "@hookform/error-message";
 
 const Create: CustomReactFC = () => {
-  const methods = useForm<addRecipeWithMainImage>({
-    resolver: zodResolver(addRecipeWithMainImagesSchema),
+  const methods = useForm<addRecipe>({
+    resolver: zodResolver(addRecipeSchema),
     defaultValues: {
       name: "",
       description: "",
@@ -110,7 +107,7 @@ const Create: CustomReactFC = () => {
           name: undefined,
           type: undefined,
           size: undefined,
-        } as unknown as addRecipeWithMainImage["imageMetadata"],
+        } as unknown as addRecipe["imageMetadata"],
         {
           shouldValidate: methods.formState.isSubmitted ? true : false,
           shouldDirty: true,
@@ -242,8 +239,8 @@ const NameDesImgSection = ({
   const {
     register,
     formState: { errors },
-  } = useFormContext<addRecipeWithMainImage>();
-  type imgMetadata = addRecipeWithMainImage["imageMetadata"];
+  } = useFormContext<addRecipe>();
+  type imgMetadata = addRecipe["imageMetadata"];
   function handleImageErrors(
     errors: Merge<FieldError, FieldErrorsImpl<imgMetadata>> | undefined
   ) {
@@ -315,7 +312,7 @@ const TimeSection = () => {
   const {
     register,
     formState: { errors },
-  } = useFormContext<addRecipeWithMainImage>();
+  } = useFormContext<addRecipe>();
   return (
     <div className="flex gap-4">
       <FormItem className="flex-1">
@@ -356,7 +353,7 @@ const IngredientsSection = () => {
     register,
     control,
     formState: { errors },
-  } = useFormContext<addRecipeWithMainImage>();
+  } = useFormContext<addRecipe>();
   const { fields, append, remove, swap } = useFieldArray({
     name: "ingredients",
     control,
@@ -501,9 +498,9 @@ const SortableItem = ({
 const CookingMethodsSection = ({
   cookingMethods,
 }: {
-  cookingMethods: addRecipeWithMainImage["cookingMethods"];
+  cookingMethods: addRecipe["cookingMethods"];
 }) => {
-  const { control, getValues } = useFormContext<addRecipeWithMainImage>();
+  const { control, getValues } = useFormContext<addRecipe>();
   const { append, remove } = useFieldArray({
     name: "cookingMethods",
     control,
@@ -537,9 +534,9 @@ const CookingMethodsSection = ({
 const MealTypeSection = ({
   mealTypes,
 }: {
-  mealTypes: addRecipeWithMainImage["mealTypes"];
+  mealTypes: addRecipe["mealTypes"];
 }) => {
-  const { control, getValues } = useFormContext<addRecipeWithMainImage>();
+  const { control, getValues } = useFormContext<addRecipe>();
   const { append, remove } = useFieldArray({
     name: "mealTypes",
     control,
@@ -575,9 +572,9 @@ const MealTypeSection = ({
 const NationalitySection = ({
   nationalities,
 }: {
-  nationalities: addRecipeWithMainImage["nationalities"];
+  nationalities: addRecipe["nationalities"];
 }) => {
-  const { control, getValues } = useFormContext<addRecipeWithMainImage>();
+  const { control, getValues } = useFormContext<addRecipe>();
   const { append, remove } = useFieldArray({
     name: "nationalities",
     control,
@@ -622,7 +619,7 @@ const StepsSection = () => {
     register,
     control,
     formState: { errors },
-  } = useFormContext<addRecipeWithMainImage>();
+  } = useFormContext<addRecipe>();
   const { fields, append, remove, swap } = useFieldArray({
     name: "steps",
     control,
@@ -736,13 +733,13 @@ const DraggableInput = ({
   placeholder: string;
   type: ListInputFields;
   index: number;
-  register: UseFormRegister<addRecipeWithMainImage>;
+  register: UseFormRegister<addRecipe>;
   remove: UseFieldArrayRemove;
 }) => {
   const { attributes, listeners, ref } = useSortableItemContext();
   const {
     formState: { errors },
-  } = useFormContext<addRecipeWithMainImage>();
+  } = useFormContext<addRecipe>();
   return (
     <div className="flex h-10 items-stretch">
       {canDrag && (

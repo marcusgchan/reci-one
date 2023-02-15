@@ -72,9 +72,9 @@ export function ImageUpload({
           </button>
           <Image
             src={imgObjUrl}
+            className="object-fill"
             onLoad={() => handleFileLoad(imgObjUrl)}
-            objectFit="cover"
-            layout="fill"
+            fill={true}
             alt="uploaded image"
           />
         </div>

@@ -2,7 +2,6 @@ import { z } from "zod";
 
 export const getRecipesSchema = z.object({
   search: z.string(),
-  viewScope: z.enum(["PUBLIC", "PRIVATE", "ALL"] as const),
   filters: z.object({
     ingredientsInclude: z.string().array(),
     ingredientsExclude: z.string().array(),
@@ -15,13 +14,13 @@ export const getRecipesSchema = z.object({
     rating: z.number().min(0).max(5),
   }),
 });
-export type GetRecipesQuery = z.infer<typeof getRecipesSchema>;
+export type GetRecipe = z.infer<typeof getRecipesSchema>;
 
 export const getRecipeSchema = z.object({
   recipeId: z.string(),
 });
 
-export const addRecipeWithMainImagesSchema = z.object({
+export const addRecipeSchema = z.object({
   name: z.string().min(1, "Name is required"),
   description: z.string(),
   imageMetadata: z.object({
@@ -67,13 +66,4 @@ export const addRecipeWithMainImagesSchema = z.object({
     })
     .array(),
 });
-export type addRecipeWithMainImage = z.infer<
-  typeof addRecipeWithMainImagesSchema
->;
-
-const addRecipeWithoutMainImageSchema = addRecipeWithMainImagesSchema.omit({
-  imageMetadata: true,
-});
-export type addRecipeWithoutMainImage = z.infer<
-  typeof addRecipeWithoutMainImageSchema
->;
+export type addRecipe = z.infer<typeof addRecipeSchema>;

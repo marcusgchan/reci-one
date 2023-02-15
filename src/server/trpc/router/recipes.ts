@@ -1,5 +1,5 @@
 import {
-  addRecipeWithMainImagesSchema,
+  addRecipeSchema,
   getRecipeSchema,
   getRecipesSchema,
 } from "@/schemas/recipe";
@@ -35,7 +35,7 @@ export const recipesRouter = router({
       return await getRecipe(ctx, input.recipeId);
     }),
   addRecipe: protectedProcedure
-    .input(addRecipeWithMainImagesSchema)
+    .input(addRecipeSchema)
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.session.user.id;
       const roundedDate = getFormattedUtcDate();
