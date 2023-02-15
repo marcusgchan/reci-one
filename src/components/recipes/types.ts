@@ -8,7 +8,4 @@ export type DropdownListNames =
   | "nationalities"
   | "cookingMethods";
 export type DropdownListValues = MealType | CookingMethod | Nationality;
-export type ListInputFields = keyof Pick<
-  addRecipe,
-  "ingredients" | "steps"
->;
+export type ListInputFields = keyof Pick<addRecipe, "ingredients" | "steps">;
