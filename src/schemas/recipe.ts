@@ -2,7 +2,6 @@ import { z } from "zod";
 
 export const getRecipesSchema = z.object({
   search: z.string(),
-  viewScope: z.enum(["PUBLIC", "PRIVATE", "ALL"] as const),
   filters: z.object({
     ingredientsInclude: z.string().array(),
     ingredientsExclude: z.string().array(),
@@ -15,7 +14,7 @@ export const getRecipesSchema = z.object({
     rating: z.number().min(0).max(5),
   }),
 });
-export type GetRecipesQuery = z.infer<typeof getRecipesSchema>;
+export type GetRecipe = z.infer<typeof getRecipesSchema>;
 
 export const getRecipeSchema = z.object({
   recipeId: z.string(),
@@ -67,7 +66,4 @@ export const addRecipeSchema = z.object({
     })
     .array(),
 });
-export type addRecipe = z.infer<
-  typeof addRecipeSchema
->;
-
+export type addRecipe = z.infer<typeof addRecipeSchema>;
