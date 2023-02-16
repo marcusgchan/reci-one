@@ -39,5 +39,5 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 
-# Google cloud auth
-keyfile.json
+# Flask server (parser)
+venv

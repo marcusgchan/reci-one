@@ -12,6 +12,13 @@ services:
     ports:
       - "3306:3306"
 
+  parser:
+    build: ./parser
+    ports:
+      - "8000:8000"
+    networks:
+      - reci-one
+
   minio:
     image: minio/minio
     command: minio server /data --console-address ":9001"
