@@ -94,13 +94,13 @@ function MobileNav() {
         onAnimationStart={() => {
           if (isOpen && navRef.current) {
             navRef.current.style.display = "flex";
-            (html as HTMLHtmlElement).style.overflow = 'hidden';
+            (html as HTMLHtmlElement).style.overflow = "hidden";
           }
         }}
         onAnimationComplete={() => {
           if (!isOpen && navRef.current) {
-            navRef.current.style.display = 'none';
-            (html as HTMLHtmlElement).style.overflow = 'auto';
+            navRef.current.style.display = "none";
+            (html as HTMLHtmlElement).style.overflow = "auto";
           }
         }}
         animate={isOpen ? "open" : "closed"}

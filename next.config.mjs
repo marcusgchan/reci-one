@@ -15,6 +15,6 @@ function defineNextConfig(config) {
 export default defineNextConfig({
   reactStrictMode: true,
   images: {
-    domains: ['localhost', env.BUCKET_DOMAIN],
+    domains: ["localhost", env.BUCKET_DOMAIN],
   },
 });

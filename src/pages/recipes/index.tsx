@@ -167,7 +167,7 @@ const RecipeCard = ({
   const router = useRouter();
   return (
     <button
-      className="mx-auto items-stretch flex aspect-[1/1.3] h-full w-full animate-fade-in-down flex-col gap-4"
+      className="mx-auto flex aspect-[1/1.3] h-full w-full animate-fade-in-down flex-col items-stretch gap-4"
       onClick={() => router.push(`/recipes/${id}`)}
     >
       <div className="relative flex w-full basis-3/5">
