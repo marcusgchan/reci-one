@@ -166,19 +166,15 @@ const RecipeCard = ({
 }) => {
   const router = useRouter();
   return (
-    <article
-      tabIndex={0}
-      role="button"
-      className="mx-auto flex aspect-[1/1.3] h-full w-full animate-fade-in-down flex-col gap-4"
+    <button
+      className="mx-auto items-stretch flex aspect-[1/1.3] h-full w-full animate-fade-in-down flex-col gap-4"
       onClick={() => router.push(`/recipes/${id}`)}
     >
       <div className="relative flex w-full basis-3/5">
         <Image
           className="object-cover"
-          priority={true}
           fill={true}
-          loading="eager"
-          unoptimized
+          loading="lazy"
           alt={name}
           src={src}
         />
@@ -186,7 +182,7 @@ const RecipeCard = ({
       <div className="flex flex-1 items-center justify-center bg-accent-400">
         <h2 className="font-medium tracking-wide text-secondary">{name}</h2>
       </div>
-    </article>
+    </button>
   );
 };
 
