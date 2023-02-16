@@ -3,7 +3,7 @@ import React, { useRef, useState } from "react";
 import { FaBars } from "react-icons/fa";
 import { CgClose } from "react-icons/cg";
 import { useRouter } from "next/router";
-import { Button } from "./ui/Button";
+import { motion } from "framer-motion";
 
 export function NavBar() {
   return (
@@ -63,36 +63,12 @@ function MobileNav() {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const navRef = useRef<HTMLElement>(null);
+  const html = document.querySelector("html");
   const toggleMenu = () => {
-    let animation: Animation | undefined;
-    const html = document.querySelector("html");
-    if (isOpen) {
-      animation = (navRef.current as HTMLElement).animate(
-        [{ transform: `translateX(0)` }, { transform: `translateX(100%)` }],
-        {
-          duration: 200,
-          fill: "forwards",
-        }
-      );
-      animation.finished.then(() => {
-        (navRef.current as HTMLElement).style.display = "none";
-        (html as HTMLHtmlElement).style.overflow = "auto";
-      });
-    } else {
-      (html as HTMLHtmlElement).style.overflow = "hidden";
-      (navRef.current as HTMLElement).style.display = "flex";
-      animation = (navRef.current as HTMLElement).animate(
-        [{ transform: `translateX(100%)` }, { transform: `translateX(0)` }],
-        { duration: 200, fill: "forwards" }
-      );
-    }
     setIsOpen((io) => !io);
-    return animation as Animation;
   };
   const navigate = async (path: string) => {
     if (isOpen && navRef.current && navRef.current.getAnimations()) {
-      const animation = toggleMenu();
-      await animation.finished;
       router.push(path);
     } else if (router.pathname !== path) {
       router.push(path);
@@ -112,12 +88,29 @@ function MobileNav() {
       >
         <FaBars size="30" />
       </button>
-      <nav
+
+      <motion.nav
         ref={navRef}
-        className={`${
-          isOpen ? "translate-x-0" : "translate-x-full"
-        } fixed inset-0 flex flex-col items-center justify-center gap-2 bg-secondary text-xl transition-transform`}
+        onAnimationStart={() => {
+          if (isOpen && navRef.current) {
+            navRef.current.style.display = "flex";
+            (html as HTMLHtmlElement).style.overflow = "hidden";
+          }
+        }}
+        onAnimationComplete={() => {
+          if (!isOpen && navRef.current) {
+            navRef.current.style.display = "none";
+            (html as HTMLHtmlElement).style.overflow = "auto";
+          }
+        }}
+        animate={isOpen ? "open" : "closed"}
+        variants={{
+          open: { opacity: 1, y: 0 },
+          closed: { opacity: 0, y: "-100%" },
+        }}
+        transition={{ type: "tween" }}
         id="primary-navigation"
+        className="fixed inset-0 hidden flex-col items-center justify-center gap-2 bg-secondary text-xl"
       >
         <button
           className="absolute top-[15px] right-[13px] text-gray-500"
@@ -154,7 +147,7 @@ function MobileNav() {
             </button>
           </li>
         </ul>
-      </nav>
+      </motion.nav>
     </div>
   );
 }
