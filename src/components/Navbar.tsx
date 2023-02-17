@@ -68,11 +68,10 @@ function MobileNav() {
     setIsOpen((io) => !io);
   };
   const navigate = async (path: string) => {
-    if (isOpen && navRef.current && navRef.current.getAnimations()) {
-      router.push(path);
-    } else if (router.pathname !== path) {
+    if (router.pathname !== path) {
       router.push(path);
     }
+    toggleMenu();
   };
   return (
     <div className="isolate mx-auto flex w-full justify-between text-gray-500 md:hidden">
