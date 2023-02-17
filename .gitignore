@@ -39,5 +39,4 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 
-# Google cloud auth
-keyfile.json
+venv
