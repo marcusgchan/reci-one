@@ -9,7 +9,7 @@ def create_app(test_config=None):
     app.config.from_mapping(
         SECRET_KEY='dev',
     )
-
+    app.debug = False
     # configure envs
     print(os.environ.get("TEST"))
 
