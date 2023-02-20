@@ -4,7 +4,7 @@
 - Currently, most features are still in development
 
 ## Tech Stack
-- This is an app bootstrapped according to Create T3 App [init.tips](https://create.t3.gg/), also known as the T3-Stack
+- This is an app bootstrapped according to [Create T3 App](https://create.t3.gg/), also known as the T3-Stack
 - T3-Stack: NextJs, Next Auth, Prisma, TailwindCSS
 - Images are stored in S3 in production and in a minIO container during local development
 - Using PlanetScale for production and MySQL docker image for local development
