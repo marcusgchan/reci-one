@@ -2,7 +2,6 @@ import { CustomReactFC } from "@/shared/types";
 import React, { useId, useMemo } from "react";
 import { BiMinus } from "react-icons/bi";
 import { GrDrag } from "react-icons/gr";
-import { useDropdownQuery } from "@/components/recipes/useDropdownQuery";
 import { addRecipe, addRecipeSchema } from "@/schemas/recipe";
 import { v4 as uuidv4 } from "uuid";
 import { trpc } from "@/utils/trpc";
@@ -20,7 +19,6 @@ import {
   DropdownListValues,
 } from "@/components/recipes/types";
 import { useRouter } from "next/router";
-import { LoaderSection } from "@/components/LoaderSection";
 import {
   SortableItemContext,
   useSortableItemContext,
@@ -82,13 +80,6 @@ const Create: CustomReactFC = () => {
       nationalities: [],
     },
   });
-  const {
-    mealTypesData,
-    cookingMethodsData,
-    nationalitiesData,
-    isError,
-    isLoading,
-  } = useDropdownQuery();
   const router = useRouter();
   const setFileMetadata = (file: File | undefined) => {
     if (file) {
@@ -164,11 +155,10 @@ const Create: CustomReactFC = () => {
   const snackbarDispatch = useSnackbarDispatch();
   const createRecipe = methods.handleSubmit((data) => {
     mutation.mutate(data);
+    removeFile(imgObjUrlRef.current ?? "");
+    mutation.reset();
   });
   const navigateToRecipes = () => router.push("/recipes");
-  if (isLoading || isError) {
-    return <LoaderSection centerFixed />;
-  }
   return (
     <section className="p-5 pb-10">
       <FormProvider {...methods}>
@@ -207,13 +197,13 @@ const Create: CustomReactFC = () => {
             <TimeSection />
           </SectionWrapper>
           <SectionWrapper>
-            <MealTypeSection mealTypes={mealTypesData || []} />
+            <MealTypeSection />
           </SectionWrapper>
           <SectionWrapper>
-            <NationalitySection nationalities={nationalitiesData || []} />
+            <NationalitySection />
           </SectionWrapper>
           <SectionWrapper>
-            <CookingMethodsSection cookingMethods={cookingMethodsData || []} />
+            <CookingMethodsSection />
           </SectionWrapper>
           <Button>Create</Button>
         </form>
@@ -255,9 +245,6 @@ const NameDesImgSection = ({
       return errors.size;
     }
     // Invalid file type
-    //if (errors.type) {
-    //return errors.type;
-    //}
     return errors.types;
   }
   return (
@@ -425,7 +412,7 @@ const IngredientsSection = () => {
       <div className="flex gap-2">
         <Button
           type="button"
-          onClick={(e) =>
+          onClick={() =>
             append({
               id: uuidv4(),
               name: "",
@@ -438,7 +425,7 @@ const IngredientsSection = () => {
         </Button>
         <Button
           type="button"
-          onClick={(e) =>
+          onClick={() =>
             append({
               id: uuidv4(),
               name: "",
@@ -495,11 +482,10 @@ const SortableItem = ({
   );
 };
 
-const CookingMethodsSection = ({
-  cookingMethods,
-}: {
-  cookingMethods: addRecipe["cookingMethods"];
-}) => {
+const CookingMethodsSection = () => {
+  const { data } = trpc.cookingMethods.getCookingMethods.useQuery(undefined, {
+    refetchOnWindowFocus: false,
+  });
   const { control, getValues } = useFormContext<addRecipe>();
   const { append, remove } = useFieldArray({
     name: "cookingMethods",
@@ -512,30 +498,24 @@ const CookingMethodsSection = ({
       <p>Add optional cooking methods to filter meals easier in the future.</p>
       <div className="flex items-stretch gap-2">
         <Combobox
-          data={cookingMethods}
+          data={data ?? []}
           handleAdd={(objToAdd: DropdownListValues) => append(objToAdd)}
           selectedData={fields}
         />
       </div>
       <ChipContainer>
         {fields.map(({ id, name }, index) => (
-          <Chip
-            key={id}
-            id={id}
-            data={name}
-            deleteChip={(id: string) => remove(index)}
-          />
+          <Chip key={id} id={id} data={name} deleteChip={() => remove(index)} />
         ))}
       </ChipContainer>
     </>
   );
 };
 
-const MealTypeSection = ({
-  mealTypes,
-}: {
-  mealTypes: addRecipe["mealTypes"];
-}) => {
+const MealTypeSection = () => {
+  const { data } = trpc.mealTypes.getMealTypes.useQuery(undefined, {
+    refetchOnWindowFocus: false,
+  });
   const { control, getValues } = useFormContext<addRecipe>();
   const { append, remove } = useFieldArray({
     name: "mealTypes",
@@ -550,30 +530,24 @@ const MealTypeSection = ({
       </p>
       <div className="flex items-stretch gap-2">
         <Combobox
-          data={mealTypes}
+          data={data ?? []}
           handleAdd={(objToAdd: DropdownListValues) => append(objToAdd)}
           selectedData={fields}
         />
       </div>
       <ChipContainer>
         {fields.map(({ id, name }, index) => (
-          <Chip
-            key={id}
-            id={id}
-            data={name}
-            deleteChip={(id: string) => remove(index)}
-          />
+          <Chip key={id} id={id} data={name} deleteChip={() => remove(index)} />
         ))}
       </ChipContainer>
     </>
   );
 };
 
-const NationalitySection = ({
-  nationalities,
-}: {
-  nationalities: addRecipe["nationalities"];
-}) => {
+const NationalitySection = () => {
+  const { data } = trpc.nationalities.getNationalities.useQuery(undefined, {
+    refetchOnWindowFocus: false,
+  });
   const { control, getValues } = useFormContext<addRecipe>();
   const { append, remove } = useFieldArray({
     name: "nationalities",
@@ -586,19 +560,14 @@ const NationalitySection = ({
       <p>Add optional nationalities to filter by meals easier in the future.</p>
       <div className="flex items-stretch gap-2">
         <Combobox
-          data={nationalities}
+          data={data ?? []}
           handleAdd={(objToAdd: DropdownListValues) => append(objToAdd)}
           selectedData={fields}
         />
       </div>
       <ChipContainer>
         {fields.map(({ id, name }, index) => (
-          <Chip
-            key={id}
-            id={id}
-            data={name}
-            deleteChip={(id: string) => remove(index)}
-          />
+          <Chip key={id} id={id} data={name} deleteChip={() => remove(index)} />
         ))}
       </ChipContainer>
     </>
@@ -690,7 +659,7 @@ const StepsSection = () => {
       <div className="flex gap-2">
         <Button
           type="button"
-          onClick={(e) =>
+          onClick={() =>
             append({
               id: uuidv4(),
               name: "",
@@ -703,7 +672,7 @@ const StepsSection = () => {
         </Button>
         <Button
           type="button"
-          onClick={(e) =>
+          onClick={() =>
             append({
               id: uuidv4(),
               name: "",

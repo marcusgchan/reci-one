@@ -11,7 +11,7 @@ export const useDropdownQuery = () => {
     data: mealTypesData,
     isError: mealTypeIsError,
     isLoading: mealTypeIsLoading,
-  } = trpc.mealTypes.getMealTypes.useQuery(undefined, QUERY_OPTIONS);
+  } = trpc.mealTypes.getMealTypes.useQuery(undefined, {});
   const {
     data: nationalitiesData,
     isError: nationalitiesIsError,

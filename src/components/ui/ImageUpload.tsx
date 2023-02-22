@@ -90,8 +90,7 @@ export function useImageUpload(
   const [file, setFile] = useState<File>();
   const formData = new FormData();
   const router = useRouter();
-  let imgObjUrlRef = useRef<string>();
-
+  const imgObjUrlRef = useRef<string>();
   if (file) {
     formData.append(`file`, file, file.name);
   }
@@ -106,7 +105,6 @@ export function useImageUpload(
   const handleFileDrop = (e: React.DragEvent) => {
     // Prevent file from opening
     e.preventDefault();
-
     const items = e.dataTransfer.items;
     if (items) {
       // Get first file that was uploaded
@@ -137,7 +135,6 @@ export function useImageUpload(
     router.events.on("beforeHistoryChange", handleRouteChange);
     return () => router.events.off("beforeHistoryChange", handleRouteChange);
   }, [router]);
-
   return {
     file,
     handleFileSelect,
