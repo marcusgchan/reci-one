@@ -125,7 +125,6 @@ const Create: CustomReactFC = () => {
         });
         return;
       }
-      console.log(presignedPost);
       // Add fields that are required for presigned post
       const newFormData = new FormData();
       Object.entries(presignedPost.fields).forEach(([field, value]) => {
