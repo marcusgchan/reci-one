@@ -4,8 +4,8 @@
 - Currently, most features are still in development
 
 ## Tech Stack
-- This is an app bootstrapped according to the [init.tips](https://init.tips) stack, also known as the T3-Stack
-- T3-Stack: React, React Query, Tailwind, tRPC, TypeScript, Zod, Prisma, NextAuth, NextJS, MySQL
+- This is an app bootstrapped according to [Create T3 App](https://create.t3.gg/), also known as the T3-Stack
+- T3-Stack: NextJs, Next Auth, tRPC, Prisma, TailwindCSS
 - Images are stored in S3 in production and in a minIO container during local development
 - Using PlanetScale for production and MySQL docker image for local development
 - Docker is used for the dev environment
