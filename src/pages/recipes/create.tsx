@@ -497,7 +497,11 @@ const CookingMethodsSection = () => {
       <div className="flex items-stretch gap-2">
         <Combobox
           data={data ?? []}
-          handleAdd={(objToAdd: DropdownListValues) => append(objToAdd)}
+          handleAdd={(objToAdd: DropdownListValues) => {
+            if (!fields.map(({id}) => id).includes(objToAdd.id)) {
+              append(objToAdd);
+            }
+          }}
           selectedData={fields}
         />
       </div>
@@ -529,7 +533,11 @@ const MealTypeSection = () => {
       <div className="flex items-stretch gap-2">
         <Combobox
           data={data ?? []}
-          handleAdd={(objToAdd: DropdownListValues) => append(objToAdd)}
+          handleAdd={(objToAdd: DropdownListValues) => {
+            if (!fields.map(({id}) => id).includes(objToAdd.id)) {
+              append(objToAdd);
+            }
+          }}
           selectedData={fields}
         />
       </div>
@@ -559,7 +567,11 @@ const NationalitySection = () => {
       <div className="flex items-stretch gap-2">
         <Combobox
           data={data ?? []}
-          handleAdd={(objToAdd: DropdownListValues) => append(objToAdd)}
+          handleAdd={(objToAdd: DropdownListValues) => {
+            if (!fields.map(({id}) => id).includes(objToAdd.id)) {
+              append(objToAdd);
+            }
+          }}
           selectedData={fields}
         />
       </div>

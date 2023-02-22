@@ -7,58 +7,47 @@ export async function createRecipe(
   input: addRecipe,
   formattedSignedDate: string
 ) {
-  console.log("before transaction");
-  try {
-    const recipe = await ctx.prisma.$transaction(async (tx) => {
-      // Unable to connect multiple on create b/c it requires recipeId
-      const recipe = await tx.recipe.create({
-        data: {
-          name: input.name,
-          mainImage: `${input.imageMetadata.name}-${formattedSignedDate}`,
-          description: input.description,
-          prepTime: input.prepTime || undefined,
-          cookTime: input.cookTime || undefined,
-          authorId: userId,
-          ingredients: {
-            createMany: {
-              data: input.ingredients.map(({ id, ...rest }) => rest),
-            },
-          },
-          steps: {
-            createMany: { data: input.steps.map(({ id, ...rest }) => rest) },
+  const recipe = await ctx.prisma.$transaction(async (tx) => {
+    // Unable to connect multiple on create b/c it requires recipeId
+    const recipe = await tx.recipe.create({
+      data: {
+        name: input.name,
+        mainImage: `${input.imageMetadata.name}-${formattedSignedDate}`,
+        description: input.description,
+        prepTime: input.prepTime || undefined,
+        cookTime: input.cookTime || undefined,
+        authorId: userId,
+        ingredients: {
+          createMany: {
+            data: input.ingredients.map(({ id, ...rest }) => rest),
           },
         },
-      });
-      await tx.nationalitiesOnRecipes.createMany({
-        data: input.nationalities.map((nationality) => ({
-          nationalityId: nationality.id,
-          recipeId: recipe.id,
-        })),
-      });
-      await tx.cookingMethodsOnRecipies.createMany({
-        data: input.cookingMethods.map((cookingMethods) => ({
-          cookingMethodId: cookingMethods.id,
-          recipeId: recipe.id,
-        })),
-      });
-      console.log(input);
-      console.log(await tx.mealType.findUnique({
-        where: {
-          id: input.mealTypes[0].id
-        }
-      }))
-      await tx.mealTypesOnRecipies.createMany({
-        data: input.mealTypes.map((mealTypes) => ({
-          mealTypeId: mealTypes.id,
-          recipeId: recipe.id,
-        })),
-      });
-      return recipe;
+        steps: {
+          createMany: { data: input.steps.map(({ id, ...rest }) => rest) },
+        },
+      },
+    });
+    await tx.nationalitiesOnRecipes.createMany({
+      data: input.nationalities.map((nationality) => ({
+        nationalityId: nationality.id,
+        recipeId: recipe.id,
+      })),
+    });
+    await tx.cookingMethodsOnRecipies.createMany({
+      data: input.cookingMethods.map((cookingMethods) => ({
+        cookingMethodId: cookingMethods.id,
+        recipeId: recipe.id,
+      })),
+    });
+    await tx.mealTypesOnRecipies.createMany({
+      data: input.mealTypes.map((mealTypes) => ({
+        mealTypeId: mealTypes.id,
+        recipeId: recipe.id,
+      })),
     });
     return recipe;
-  } catch (e) {
-    console.log(e);
-  }
+  });
+  return recipe;
 }
 
 export async function getRecipes(
@@ -79,11 +68,11 @@ export async function getRecipes(
           })),
         },
       },
-      nationalities: {
+      /*nationalities: {
         none: {
           nationalityId: { in: input.filters.nationalitiesExclude },
         },
-      },
+      },*/
       AND: input.filters.ingredientsInclude
         .map((ingredient) => ({
           ingredients: { some: { name: { contains: ingredient } } },
