@@ -88,12 +88,8 @@ export function useImageUpload(
   setFileMetadata: (file: File | undefined) => void
 ) {
   const [file, setFile] = useState<File>();
-  const formData = new FormData();
   const router = useRouter();
   const imgObjUrlRef = useRef<string>();
-  if (file) {
-    formData.append(`file`, file, file.name);
-  }
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const fileList = e.target.files;
     if (fileList && fileList[0]) {
@@ -139,7 +135,6 @@ export function useImageUpload(
     file,
     handleFileSelect,
     handleFileDrop,
-    formData,
     handleFileLoad,
     removeFile,
     imgObjUrlRef,

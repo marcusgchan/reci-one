@@ -5,6 +5,8 @@ import {
 } from "@/schemas/recipe";
 import { createRecipe, getRecipe, getRecipes } from "@/services/recipesService";
 import { getImageSignedUrl, getUploadSignedUrl } from "@/services/s3Services";
+import { TRPCClient } from "@trpc/client";
+import { TRPCError } from "@trpc/server";
 import { protectedProcedure, router } from "../trpc";
 
 export const recipesRouter = router({
@@ -40,6 +42,12 @@ export const recipesRouter = router({
       const userId = ctx.session.user.id;
       const roundedDate = getFormattedUtcDate();
       const recipe = await createRecipe(ctx, userId, input, roundedDate);
+      if (!recipe) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Unable to create Recipe",
+        });
+      }
       const signedUrl = await getUploadSignedUrl(
         userId,
         recipe.id,

@@ -108,16 +108,15 @@ const Create: CustomReactFC = () => {
     }
   };
   const {
+    file,
     handleFileSelect,
     handleFileDrop,
-    formData,
     imgObjUrlRef,
     handleFileLoad,
     removeFile,
   } = useImageUpload(setFileMetadata);
   const mutation = trpc.recipes.addRecipe.useMutation({
     async onSuccess(presignedPost) {
-      const file = formData.get("file");
       if (!file) {
         // error unable to upload file or user somehow removed img after upload
         snackbarDispatch({
@@ -155,7 +154,6 @@ const Create: CustomReactFC = () => {
   const snackbarDispatch = useSnackbarDispatch();
   const createRecipe = methods.handleSubmit((data) => {
     mutation.mutate(data);
-    removeFile(imgObjUrlRef.current ?? "");
     mutation.reset();
   });
   const navigateToRecipes = () => router.push("/recipes");

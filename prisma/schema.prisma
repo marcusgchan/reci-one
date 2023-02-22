@@ -3,13 +3,12 @@
 
 generator client {
   provider        = "prisma-client-js"
-  previewFeatures = ["referentialIntegrity", "extendedWhereUnique"]
+  previewFeatures = ["extendedWhereUnique"]
 }
 
 datasource db {
   provider             = "mysql" // NOTE: sqlite does not work with NextAuth.js
   url                  = env("DATABASE_URL")
-  referentialIntegrity = "prisma"
 }
 
 // Necessary for Next auth
