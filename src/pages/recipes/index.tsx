@@ -174,6 +174,7 @@ const RecipeCard = ({
         <Image
           className="object-cover"
           fill={true}
+          unoptimized
           loading="lazy"
           alt={name}
           src={src}

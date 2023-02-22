@@ -44,7 +44,6 @@ const Auth = ({
   componentAuth?: boolean;
 }) => {
   const { status } = useSession();
-  //const status = 'loading';
   if (status === "loading") {
     return (
       <div className="fixed inset-0 grid place-items-center">

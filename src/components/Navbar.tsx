@@ -66,6 +66,7 @@ function MobileNav() {
   const html = document.querySelector("html");
   const toggleMenu = () => {
     setIsOpen((io) => !io);
+    console.log(isOpen);
   };
   const navigate = async (path: string) => {
     if (router.pathname !== path) {
@@ -91,14 +92,13 @@ function MobileNav() {
       <motion.nav
         ref={navRef}
         onAnimationStart={() => {
+          // Animating opening state
           if (isOpen && navRef.current) {
             navRef.current.style.display = "flex";
             (html as HTMLHtmlElement).style.overflow = "hidden";
           }
-        }}
-        onAnimationComplete={() => {
-          if (!isOpen && navRef.current) {
-            navRef.current.style.display = "none";
+          // Closing state
+          else {
             (html as HTMLHtmlElement).style.overflow = "auto";
           }
         }}

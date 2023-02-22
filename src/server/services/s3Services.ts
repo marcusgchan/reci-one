@@ -19,7 +19,6 @@ export const getUploadSignedUrl = async (
       Bucket: env.BUCKET_NAME,
       Key: `${userId}/${recipeId}/${name}-${roundedDate}`,
       Expires: config.s3.presignedUrlDuration,
-
       Fields: {
         acl: "private",
         "Content-Type": type,

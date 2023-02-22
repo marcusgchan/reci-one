@@ -12,6 +12,17 @@ services:
     ports:
       - "3306:3306"
 
+  parser:
+    build: ./parser
+    environment:
+      FLASK_DEBUG: TRUE 
+    ports:
+      - "8000:8000"
+    volumes: 
+      - ./parser:/parser
+    networks:
+      - reci-one
+
   minio:
     image: minio/minio
     command: minio server /data --console-address ":9001"
