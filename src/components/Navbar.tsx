@@ -96,7 +96,7 @@ function MobileNav() {
           if (isOpen && navRef.current) {
             navRef.current.style.display = "flex";
             (html as HTMLHtmlElement).style.overflow = "hidden";
-          } 
+          }
           // Closing state
           else {
             (html as HTMLHtmlElement).style.overflow = "auto";

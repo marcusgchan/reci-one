@@ -498,7 +498,7 @@ const CookingMethodsSection = () => {
         <Combobox
           data={data ?? []}
           handleAdd={(objToAdd: DropdownListValues) => {
-            if (!fields.map(({id}) => id).includes(objToAdd.id)) {
+            if (!fields.map(({ id }) => id).includes(objToAdd.id)) {
               append(objToAdd);
             }
           }}
@@ -534,7 +534,7 @@ const MealTypeSection = () => {
         <Combobox
           data={data ?? []}
           handleAdd={(objToAdd: DropdownListValues) => {
-            if (!fields.map(({id}) => id).includes(objToAdd.id)) {
+            if (!fields.map(({ id }) => id).includes(objToAdd.id)) {
               append(objToAdd);
             }
           }}
@@ -568,7 +568,7 @@ const NationalitySection = () => {
         <Combobox
           data={data ?? []}
           handleAdd={(objToAdd: DropdownListValues) => {
-            if (!fields.map(({id}) => id).includes(objToAdd.id)) {
+            if (!fields.map(({ id }) => id).includes(objToAdd.id)) {
               append(objToAdd);
             }
           }}
