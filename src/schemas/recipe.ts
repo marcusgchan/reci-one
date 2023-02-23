@@ -31,7 +31,6 @@ export const addRecipeSchema = z.object({
   ingredients: z
     .object({
       id: z.string(),
-      order: z.number().int(),
       name: z.string().trim().min(1, { message: "Can't be empty string" }),
       isHeader: z.boolean(),
     })
@@ -39,7 +38,6 @@ export const addRecipeSchema = z.object({
   steps: z
     .object({
       id: z.string(),
-      order: z.number().int(),
       name: z.string().trim().min(1, { message: "Can't be empty string" }),
       isHeader: z.boolean(),
     })

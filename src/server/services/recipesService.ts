@@ -19,11 +19,19 @@ export async function createRecipe(
         authorId: userId,
         ingredients: {
           createMany: {
-            data: input.ingredients.map(({ id, ...rest }) => rest),
+            data: input.ingredients.map(({ id, ...rest }, i) => ({
+              ...rest,
+              order: i,
+            })),
           },
         },
         steps: {
-          createMany: { data: input.steps.map(({ id, ...rest }) => rest) },
+          createMany: {
+            data: input.steps.map(({ id, ...rest }, i) => ({
+              ...rest,
+              order: i,
+            })),
+          },
         },
       },
     });

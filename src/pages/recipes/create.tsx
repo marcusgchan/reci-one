@@ -7,6 +7,7 @@ import { v4 as uuidv4 } from "uuid";
 import { trpc } from "@/utils/trpc";
 import { DndContext, closestCenter, DragEndEvent } from "@dnd-kit/core";
 import {
+  arrayMove,
   SortableContext,
   useSortable,
   verticalListSortingStrategy,
@@ -63,14 +64,14 @@ const Create: CustomReactFC = () => {
         type: undefined,
       },
       ingredients: [
-        { id: uuidv4(), order: 0, name: "", isHeader: false },
-        { id: uuidv4(), order: 1, name: "", isHeader: false },
-        { id: uuidv4(), order: 2, name: "", isHeader: false },
+        { id: uuidv4(), name: "", isHeader: false },
+        { id: uuidv4(), name: "", isHeader: false },
+        { id: uuidv4(), name: "", isHeader: false },
       ],
       steps: [
-        { id: uuidv4(), order: 0, name: "", isHeader: false },
-        { id: uuidv4(), order: 1, name: "", isHeader: false },
-        { id: uuidv4(), order: 2, name: "", isHeader: false },
+        { id: uuidv4(), name: "", isHeader: false },
+        { id: uuidv4(), name: "", isHeader: false },
+        { id: uuidv4(), name: "", isHeader: false },
       ],
       prepTime: "",
       cookTime: "",
@@ -339,7 +340,7 @@ const IngredientsSection = () => {
     control,
     formState: { errors },
   } = useFormContext<addRecipe>();
-  const { fields, append, remove, swap } = useFieldArray({
+  const { fields, append, remove, move } = useFieldArray({
     name: "ingredients",
     control,
   });
@@ -348,7 +349,7 @@ const IngredientsSection = () => {
     if (active && over && active.id !== over!.id) {
       const oldIndex = fields.map(({ id }) => id).indexOf(active.id as string);
       const newIndex = fields.map(({ id }) => id).indexOf(over.id as string);
-      swap(oldIndex, newIndex);
+      move(oldIndex, newIndex);
     }
   };
   return (
@@ -599,7 +600,7 @@ const StepsSection = () => {
     control,
     formState: { errors },
   } = useFormContext<addRecipe>();
-  const { fields, append, remove, swap } = useFieldArray({
+  const { fields, append, remove, move } = useFieldArray({
     name: "steps",
     control,
   });
@@ -608,7 +609,7 @@ const StepsSection = () => {
     if (active && over && active.id !== over!.id) {
       const oldIndex = fields.map(({ id }) => id).indexOf(active.id as string);
       const newIndex = fields.map(({ id }) => id).indexOf(over.id as string);
-      swap(oldIndex, newIndex);
+      move(oldIndex, newIndex);
     }
   };
   return (
