@@ -7,7 +7,6 @@ import { v4 as uuidv4 } from "uuid";
 import { trpc } from "@/utils/trpc";
 import { DndContext, closestCenter, DragEndEvent } from "@dnd-kit/core";
 import {
-  arrayMove,
   SortableContext,
   useSortable,
   verticalListSortingStrategy,
@@ -415,7 +414,6 @@ const IngredientsSection = () => {
             append({
               id: uuidv4(),
               name: "",
-              order: fields.length,
               isHeader: false,
             })
           }
@@ -428,7 +426,6 @@ const IngredientsSection = () => {
             append({
               id: uuidv4(),
               name: "",
-              order: fields.length,
               isHeader: true,
             })
           }
@@ -674,7 +671,6 @@ const StepsSection = () => {
             append({
               id: uuidv4(),
               name: "",
-              order: fields.length,
               isHeader: false,
             })
           }
@@ -687,7 +683,6 @@ const StepsSection = () => {
             append({
               id: uuidv4(),
               name: "",
-              order: fields.length,
               isHeader: true,
             })
           }
