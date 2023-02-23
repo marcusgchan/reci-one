@@ -63,14 +63,14 @@ const Create: CustomReactFC = () => {
         type: undefined,
       },
       ingredients: [
-        { id: uuidv4(), order: 0, name: "", isHeader: false },
-        { id: uuidv4(), order: 1, name: "", isHeader: false },
-        { id: uuidv4(), order: 2, name: "", isHeader: false },
+        { id: uuidv4(), name: "", isHeader: false },
+        { id: uuidv4(), name: "", isHeader: false },
+        { id: uuidv4(), name: "", isHeader: false },
       ],
       steps: [
-        { id: uuidv4(), order: 0, name: "", isHeader: false },
-        { id: uuidv4(), order: 1, name: "", isHeader: false },
-        { id: uuidv4(), order: 2, name: "", isHeader: false },
+        { id: uuidv4(), name: "", isHeader: false },
+        { id: uuidv4(), name: "", isHeader: false },
+        { id: uuidv4(), name: "", isHeader: false },
       ],
       prepTime: "",
       cookTime: "",
@@ -339,7 +339,7 @@ const IngredientsSection = () => {
     control,
     formState: { errors },
   } = useFormContext<addRecipe>();
-  const { fields, append, remove, swap } = useFieldArray({
+  const { fields, append, remove, move } = useFieldArray({
     name: "ingredients",
     control,
   });
@@ -348,7 +348,7 @@ const IngredientsSection = () => {
     if (active && over && active.id !== over!.id) {
       const oldIndex = fields.map(({ id }) => id).indexOf(active.id as string);
       const newIndex = fields.map(({ id }) => id).indexOf(over.id as string);
-      swap(oldIndex, newIndex);
+      move(oldIndex, newIndex);
     }
   };
   return (
@@ -414,7 +414,6 @@ const IngredientsSection = () => {
             append({
               id: uuidv4(),
               name: "",
-              order: fields.length,
               isHeader: false,
             })
           }
@@ -427,7 +426,6 @@ const IngredientsSection = () => {
             append({
               id: uuidv4(),
               name: "",
-              order: fields.length,
               isHeader: true,
             })
           }
@@ -599,7 +597,7 @@ const StepsSection = () => {
     control,
     formState: { errors },
   } = useFormContext<addRecipe>();
-  const { fields, append, remove, swap } = useFieldArray({
+  const { fields, append, remove, move } = useFieldArray({
     name: "steps",
     control,
   });
@@ -608,7 +606,7 @@ const StepsSection = () => {
     if (active && over && active.id !== over!.id) {
       const oldIndex = fields.map(({ id }) => id).indexOf(active.id as string);
       const newIndex = fields.map(({ id }) => id).indexOf(over.id as string);
-      swap(oldIndex, newIndex);
+      move(oldIndex, newIndex);
     }
   };
   return (
@@ -673,7 +671,6 @@ const StepsSection = () => {
             append({
               id: uuidv4(),
               name: "",
-              order: fields.length,
               isHeader: false,
             })
           }
@@ -686,7 +683,6 @@ const StepsSection = () => {
             append({
               id: uuidv4(),
               name: "",
-              order: fields.length,
               isHeader: true,
             })
           }

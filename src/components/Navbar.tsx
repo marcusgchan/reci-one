@@ -24,9 +24,12 @@ function DesktopNav() {
   return (
     <nav className="hidden w-full max-w-7xl justify-between border-4 border-gray-500 p-2 px-3 text-2xl text-gray-500 md:flex">
       <h1>
-        <a className="cursor-pointer text-3xl tracking-wider">
+        <button
+          onClick={() => navigate("/recipes")}
+          className="cursor-pointer text-3xl tracking-wider"
+        >
           Reci<span className="text-accent-500 ">One</span>
-        </a>
+        </button>
       </h1>
       <ul className="flex min-w-0 gap-4 text-xl text-accent-500">
         <li className="grid place-items-center">
@@ -66,20 +69,27 @@ function MobileNav() {
   const html = document.querySelector("html");
   const toggleMenu = () => {
     setIsOpen((io) => !io);
-    console.log(isOpen);
   };
-  const navigate = async (path: string) => {
+  const navigate = async (
+    path: string,
+    config: { toggleNav: boolean } = { toggleNav: true }
+  ) => {
     if (router.pathname !== path) {
       router.push(path);
     }
-    toggleMenu();
+    if (config.toggleNav) {
+      toggleMenu();
+    }
   };
   return (
     <div className="isolate mx-auto flex w-full justify-between text-gray-500 md:hidden">
       <h1>
-        <a tabIndex={0} className="text-3xl tracking-wider">
+        <button
+          onClick={() => navigate("/recipes", { toggleNav: false })}
+          className="text-3xl tracking-wider"
+        >
           Reci<span className="text-accent-500">One</span>
-        </a>
+        </button>
       </h1>
       <button
         onClick={toggleMenu}

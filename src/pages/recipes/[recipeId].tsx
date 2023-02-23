@@ -10,5 +10,5 @@ export default function Recipe() {
   if (isLoading) {
     return <Loader />;
   }
-  return <div> {JSON.stringify(data)} </div>;
+  return <div>Unfinished</div>;
 }
