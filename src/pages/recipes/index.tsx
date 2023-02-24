@@ -80,11 +80,7 @@ const Index: CustomReactFC = () => {
             </button>
           </div>
         </form>
-        <RecipesLoader
-          recipes={recipes}
-          isLoading={isLoading}
-          isFetching={isFetching}
-        />
+        <RecipesLoader recipes={recipes} isLoading={isLoading} />
         <button className="fixed bottom-3 left-1 rounded-full bg-accent-300 p-2">
           <AiOutlineArrowUp size={30} color="white" />
         </button>
@@ -116,11 +112,7 @@ const Index: CustomReactFC = () => {
             <button className="border-3 border-primary p-2">FILTER</button>
           </div>
         </form>
-        <RecipesLoader
-          recipes={recipes}
-          isLoading={isLoading}
-          isFetching={isFetching}
-        />
+        <RecipesLoader recipes={recipes} isLoading={isLoading} />
       </section>
     </>
   );
@@ -129,13 +121,11 @@ const Index: CustomReactFC = () => {
 const RecipesLoader = ({
   recipes,
   isLoading,
-  isFetching,
 }: {
   recipes: Recipes | undefined;
   isLoading: boolean;
-  isFetching: boolean;
 }) => {
-  if (!recipes || isLoading || isFetching) {
+  if (!recipes || isLoading) {
     return <LoaderSection />;
   }
   return <Recipes recipes={recipes} />;
@@ -146,7 +136,7 @@ const Recipes = ({ recipes }: { recipes: Recipes }) => {
   return (
     <section
       ref={parent}
-      className="mx-auto grid h-full w-full max-w-7xl auto-rows-min grid-cols-1 gap-10 overflow-auto sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
+      className="mx-auto grid h-full w-full max-w-7xl auto-rows-min grid-cols-1 gap-10 overflow-visible sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
     >
       {recipes.map(({ id, name, mainImage }) => (
         <RecipeCard key={id} id={id} name={name} src={mainImage} />
