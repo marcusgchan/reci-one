@@ -32,7 +32,7 @@ export function Combobox<T extends { name: string; id: string }>({
       onChange={(e: T) => {
         if (multiple) {
           setQuery("");
-          setCurrentlySelectedOption('');
+          setCurrentlySelectedOption("");
           handleAdd(e);
           return;
         }
