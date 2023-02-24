@@ -9,6 +9,7 @@ generator client {
 datasource db {
   provider             = "mysql" // NOTE: sqlite does not work with NextAuth.js
   url                  = env("DATABASE_URL")
+  relationMode = "prisma"
 }
 
 // Necessary for Next auth

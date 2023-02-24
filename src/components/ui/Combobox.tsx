@@ -31,8 +31,12 @@ export function Combobox<T extends { name: string; id: string }>({
       value={currentlySelectedOption}
       onChange={(e: T) => {
         if (multiple) {
-          setCurrentlySelectedOption("");
+          setQuery("");
+          setCurrentlySelectedOption('');
+          handleAdd(e);
+          return;
         }
+        setCurrentlySelectedOption(e);
         handleAdd(e);
       }}
     >
@@ -69,7 +73,7 @@ export function Combobox<T extends { name: string; id: string }>({
                       <span
                         className={classNames(
                           "block truncate",
-                          selected && "font-semibold"
+                          !multiple && selected && "font-semibold"
                         )}
                       >
                         {data.name}
@@ -84,7 +88,9 @@ export function Combobox<T extends { name: string; id: string }>({
                             active ? "text-white" : "text-accent-400"
                           )}
                         >
-                          <CheckIcon className="h-5 w-5" aria-hidden="true" />
+                          {((!multiple && selected) || multiple) && (
+                            <CheckIcon className="h-5 w-5" aria-hidden="true" />
+                          )}
                         </span>
                       )}
                     </>
