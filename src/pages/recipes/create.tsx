@@ -1,5 +1,5 @@
 import { CustomReactFC } from "@/shared/types";
-import React, { useId, useMemo } from "react";
+import React, { useId, useMemo, useState } from "react";
 import { BiMinus } from "react-icons/bi";
 import { GrDrag } from "react-icons/gr";
 import { addRecipe, addRecipeSchema } from "@/schemas/recipe";
@@ -52,6 +52,36 @@ import {
 import { ErrorMessage } from "@hookform/error-message";
 
 const Create: CustomReactFC = () => {
+  const [shouldParse, setShouldParse] = useState<boolean | undefined>();
+  if (shouldParse === undefined) {
+    return (
+      <div className="flex justify-center">
+        <div className="flex flex-col gap-4 rounded border-4 border-gray-400 p-8">
+          <h1>Do you want to parse a recipe from another site?</h1>
+          <ul className="flex justify-center gap-4">
+            <li>
+              <Button onClick={() => setShouldParse(true)} className="w-[50px]">
+                Yes
+              </Button>
+            </li>
+            <li>
+              <Button
+                onClick={() => setShouldParse(false)}
+                className="w-[50px]"
+              >
+                No
+              </Button>
+            </li>
+          </ul>
+        </div>
+      </div>
+    );
+  }
+  // Future: handle loading states with useQuery and pass default values down
+  return <RecipeForm />;
+};
+
+const RecipeForm = () => {
   const methods = useForm<addRecipe>({
     resolver: zodResolver(addRecipeSchema),
     defaultValues: {
