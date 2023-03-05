@@ -65,3 +65,7 @@ export const addRecipeSchema = z.object({
     .array(),
 });
 export type addRecipe = z.infer<typeof addRecipeSchema>;
+
+export const parseRecipeSchema = z.object({
+  url: z.string().url()
+})

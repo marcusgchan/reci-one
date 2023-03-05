@@ -2,10 +2,10 @@ import {
   addRecipeSchema,
   getRecipeSchema,
   getRecipesSchema,
+  parseRecipeSchema
 } from "@/schemas/recipe";
 import { createRecipe, getRecipe, getRecipes } from "@/services/recipesService";
 import { getImageSignedUrl, getUploadSignedUrl } from "@/services/s3Services";
-import { TRPCClient } from "@trpc/client";
 import { TRPCError } from "@trpc/server";
 import { protectedProcedure, router } from "../trpc";
 
@@ -56,6 +56,22 @@ export const recipesRouter = router({
       );
       return signedUrl;
     }),
+    parseRecipe: protectedProcedure
+      .input(parseRecipeSchema)
+      .query(async ({ ctx, input }) => {
+        // Remember to add secret key after for auth 
+        try {
+          const res = await fetch("http://localhost:8000/hello", {
+            body: input.toString()
+          })
+          const recipe = await res.json();
+          console.log(recipe);
+        } catch (e) {
+          console.log(e);  
+        }
+
+        return "test";
+      })
 });
 
 // Create a date that will be appended to the end
