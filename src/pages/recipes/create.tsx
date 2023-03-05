@@ -51,28 +51,44 @@ import {
 } from "@/ui/FieldValidation";
 import { ErrorMessage } from "@hookform/error-message";
 
+type FormStage = 1 | 2 | 3;
+
 const Create: CustomReactFC = () => {
-  const [shouldParse, setShouldParse] = useState<boolean | undefined>();
-  if (shouldParse === undefined) {
+  const [formStage, setFormStage] = useState<FormStage>(1);
+  const parseRecipe = () => {
+    setFormStage(3);
+  }
+  if (formStage === 1) {
     return (
       <div className="flex justify-center">
-        <div className="flex flex-col gap-4 rounded border-4 border-gray-400 p-8">
+        <div className="flex flex-col gap-4 rounded border-4 border-gray-400 p-8 w-full max-w-md">
           <h1>Do you want to parse a recipe from another site?</h1>
           <ul className="flex justify-center gap-4">
             <li>
-              <Button onClick={() => setShouldParse(true)} className="w-[50px]">
+              <Button onClick={() => setFormStage(2)} className="w-[50px]">
                 Yes
               </Button>
             </li>
             <li>
-              <Button
-                onClick={() => setShouldParse(false)}
-                className="w-[50px]"
-              >
+              <Button onClick={() => setFormStage(3)} className="w-[50px]">
                 No
               </Button>
             </li>
           </ul>
+        </div>
+      </div>
+    );
+  }
+  if (formStage === 2) {
+    return (
+      <div className="flex justify-center">
+        <div className="flex flex-col gap-4 rounded border-4 border-gray-400 p-8 w-full max-w-md">
+          <h1>Enter a recipe website URL to parse</h1>
+          <Input />
+          <div className="flex gap-2 justify-end">
+            <Button onClick={() => setFormStage(1)}>Back</Button>
+            <Button onClick={parseRecipe}>Parse</Button>
+          </div>
         </div>
       </div>
     );
