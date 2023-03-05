@@ -56,9 +56,10 @@ type FormStage = 1 | 2 | 3;
 const Create: CustomReactFC = () => {
   const [formStage, setFormStage] = useState<FormStage>(1);
   const [url, setUrl] = useState<string>("");
-  const { refetch, data, isFetching, isError } = trpc.recipes.parseRecipe.useQuery({ url }, { enabled: false });
+  const { refetch, data, isFetching, isError } =
+    trpc.recipes.parseRecipe.useQuery({ url }, { enabled: false });
   const parseRecipe = () => {
-    refetch()
+    refetch();
     //setFormStage(3);
   };
   if (formStage === 1) {

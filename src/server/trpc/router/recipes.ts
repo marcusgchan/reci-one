@@ -66,12 +66,11 @@ export const recipesRouter = router({
           {
             headers: {
               Authorization: "secretee",
-              eee: 'test'
-
-            }
+              eee: "test",
+            },
           }
         );
-        const recipe = await res.json() as unknown;
+        const recipe = (await res.json()) as unknown;
         console.log(recipe);
       } catch (e) {
         console.log(e);
