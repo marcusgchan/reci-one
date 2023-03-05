@@ -1,34 +1,29 @@
 import os
+import logging
+from recipe_scrapers import scrape_me
 
-from flask import Flask
+from flask import Flask, request
 
 
 def create_app(test_config=None):
     # create and configure the app
     app = Flask(__name__, instance_relative_config=True)
+    logger = logging.getLogger(__name__)
+
     app.config.from_mapping(
         SECRET_KEY='dev',
     )
-    app.debug = False
     # configure envs
-    print(os.environ.get("TEST"))
+    #print(os.environ.get("TEST"))
 
-    if test_config is None:
-        # load the instance config, if it exists, when not testing
-        app.config.from_pyfile('config.py', silent=True)
-    else:
-        # load the test config if passed in
-        app.config.from_mapping(test_config)
-
-    # ensure the instance folder exists
-    try:
-        os.makedirs(app.instance_path)
-    except OSError:
-        pass
-
-    # a simple page that says hello
-    @app.route('/hello')
+    @app.route('/parse', methods=["GET"])
     def hello():
-        return {"test": "test"}
+        url = request.args.get("url")
+        secret = request.headers.get("Authorization")
+        if url:
+            scraper = scrape_me(url, wild_mode=True)
+            logger.debug(scraper.title())
+            return scraper.to_json()
+        return "Invalid url", 400
 
     return app

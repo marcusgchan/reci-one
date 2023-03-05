@@ -2,7 +2,7 @@ import {
   addRecipeSchema,
   getRecipeSchema,
   getRecipesSchema,
-  parseRecipeSchema
+  parseRecipeSchema,
 } from "@/schemas/recipe";
 import { createRecipe, getRecipe, getRecipes } from "@/services/recipesService";
 import { getImageSignedUrl, getUploadSignedUrl } from "@/services/s3Services";
@@ -56,22 +56,29 @@ export const recipesRouter = router({
       );
       return signedUrl;
     }),
-    parseRecipe: protectedProcedure
-      .input(parseRecipeSchema)
-      .query(async ({ ctx, input }) => {
-        // Remember to add secret key after for auth 
-        try {
-          const res = await fetch("http://localhost:8000/hello", {
-            body: input.toString()
-          })
-          const recipe = await res.json();
-          console.log(recipe);
-        } catch (e) {
-          console.log(e);  
-        }
+  parseRecipe: protectedProcedure
+    .input(parseRecipeSchema)
+    .query(async ({ input }) => {
+      // Remember to add secret key after for auth
+      try {
+        const res = await fetch(
+          `http://localhost:8000/parse?url=${encodeURIComponent(input.url)}`,
+          {
+            headers: {
+              Authorization: "secretee",
+              eee: 'test'
 
-        return "test";
-      })
+            }
+          }
+        );
+        const recipe = await res.json() as unknown;
+        console.log(recipe);
+      } catch (e) {
+        console.log(e);
+      }
+
+      return "test";
+    }),
 });
 
 // Create a date that will be appended to the end
