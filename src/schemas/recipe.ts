@@ -27,7 +27,7 @@ export const addRecipeSchema = z.object({
     name: z.string({ required_error: "Image is required" }),
     type: z.string({ invalid_type_error: "Image format not supported" }),
     size: z.number({ invalid_type_error: "Image too big" }),
-  }),
+  }).or(z.string().url()),
   ingredients: z
     .object({
       id: z.string(),

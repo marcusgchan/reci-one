@@ -1,8 +1,11 @@
 import os
 import logging
 from recipe_scrapers import scrape_me
+from dotenv import load_dotenv
 
 from flask import Flask, request
+
+load_dotenv()
 
 
 def create_app(test_config=None):
@@ -14,16 +17,22 @@ def create_app(test_config=None):
         SECRET_KEY='dev',
     )
     # configure envs
-    #print(os.environ.get("TEST"))
+    # print(os.environ.get("TEST"))
+    password = os.environ.get("PARSER_SECRET")
 
     @app.route('/parse', methods=["GET"])
     def hello():
-        url = request.args.get("url")
         secret = request.headers.get("Authorization")
+        if password != secret:
+            return "Unauthorized", 401
+        url = request.args.get("url")
         if url:
-            scraper = scrape_me(url, wild_mode=True)
-            logger.debug(scraper.title())
-            return scraper.to_json()
+            try:
+                scraper = scrape_me(url, wild_mode=True)
+                logger.debug(scraper.title())
+                return scraper.to_json()
+            except Exception:
+                return "Unable to scrape", 500
         return "Invalid url", 400
 
     return app

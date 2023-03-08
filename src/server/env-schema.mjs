@@ -18,4 +18,5 @@ export const envSchema = z.object({
   BUCKET_DOMAIN: z.string(),
   ACCESS_KEY_ID: z.string(),
   SECRET_ACCESS_KEY: z.string(),
+  PARSER_SECRET: z.string(),
 });

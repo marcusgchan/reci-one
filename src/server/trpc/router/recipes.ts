@@ -6,8 +6,11 @@ import {
 } from "@/schemas/recipe";
 import { createRecipe, getRecipe, getRecipes } from "@/services/recipesService";
 import { getImageSignedUrl, getUploadSignedUrl } from "@/services/s3Services";
+import { ParsedRecipe } from "@/shared/types";
 import { TRPCError } from "@trpc/server";
+import { env } from "src/server/env.mjs";
 import { protectedProcedure, router } from "../trpc";
+import { v4 as uuidv4 } from "uuid";
 
 export const recipesRouter = router({
   getRecipes: protectedProcedure
@@ -59,24 +62,45 @@ export const recipesRouter = router({
   parseRecipe: protectedProcedure
     .input(parseRecipeSchema)
     .query(async ({ input }) => {
-      // Remember to add secret key after for auth
       try {
         const res = await fetch(
           `http://localhost:8000/parse?url=${encodeURIComponent(input.url)}`,
           {
             headers: {
-              Authorization: "secretee",
-              eee: "test",
+              Authorization: env.PARSER_SECRET,
             },
           }
         );
-        const recipe = (await res.json()) as unknown;
-        console.log(recipe);
+        if (!res.ok) throw new Error("Unable to parse recipe");
+        const recipe = (await res.json()) as ParsedRecipe;
+        return {
+          name: recipe.title,
+          description: recipe.description,
+          imageMetadata: recipe.image,
+          ingredients: recipe.ingredients.map((ingredient) => ({
+            id: uuidv4(),
+            name: ingredient,
+            isHeader: false,
+          })),
+          steps: recipe.instructions_list.map((step) => ({
+            id: uuidv4(),
+            name: step,
+            isHeader: false,
+          })),
+          prepTime: recipe.prep_time,
+          cookTime: recipe.cook_time,
+          isPublic: false,
+          cookingMethods: [],
+          mealTypes: [],
+          nationalities: [],
+        };
       } catch (e) {
         console.log(e);
+        throw new TRPCError({
+          message: "Unable to parse recipe",
+          code: "INTERNAL_SERVER_ERROR",
+        });
       }
-
-      return "test";
     }),
 });
 

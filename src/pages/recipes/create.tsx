@@ -4,7 +4,7 @@ import { BiMinus } from "react-icons/bi";
 import { GrDrag } from "react-icons/gr";
 import { addRecipe, addRecipeSchema } from "@/schemas/recipe";
 import { v4 as uuidv4 } from "uuid";
-import { trpc } from "@/utils/trpc";
+import { RouterOutputs, trpc } from "@/utils/trpc";
 import { DndContext, closestCenter, DragEndEvent } from "@dnd-kit/core";
 import {
   SortableContext,
@@ -56,12 +56,21 @@ type FormStage = 1 | 2 | 3;
 const Create: CustomReactFC = () => {
   const [formStage, setFormStage] = useState<FormStage>(1);
   const [url, setUrl] = useState<string>("");
-  const { refetch, data, isFetching, isError } =
-    trpc.recipes.parseRecipe.useQuery({ url }, { enabled: false });
-  const parseRecipe = () => {
-    refetch();
-    //setFormStage(3);
-  };
+  const snackbarDispatch = useSnackbarDispatch();
+  const { refetch, data } = trpc.recipes.parseRecipe.useQuery(
+    { url },
+    {
+      enabled: false,
+      retry: false,
+      onSuccess() {
+        setFormStage(3);
+      },
+      onError(error) {
+        snackbarDispatch({ type: "ERROR", message: error.message });
+      },
+    }
+  );
+  const parseRecipe = () => refetch();
   if (formStage === 1) {
     return (
       <div className="flex justify-center">
@@ -83,7 +92,7 @@ const Create: CustomReactFC = () => {
       </div>
     );
   }
-  if (formStage === 2) {
+  if (formStage === 2 || !data) {
     return (
       <div className="flex justify-center">
         <div className="flex w-full max-w-md flex-col gap-4 rounded border-4 border-gray-400 p-8">
@@ -97,14 +106,19 @@ const Create: CustomReactFC = () => {
       </div>
     );
   }
-  // Future: handle loading states with useQuery and pass default values down
-  return <RecipeForm />;
+  return <RecipeForm initialData={data} />;
 };
 
-const RecipeForm = () => {
+type RecipeFormData = RouterOutputs["recipes"]["parseRecipe"] | undefined;
+
+const RecipeForm = ({
+  initialData,
+}: {
+  initialData: RecipeFormData | undefined;
+}) => {
   const methods = useForm<addRecipe>({
     resolver: zodResolver(addRecipeSchema),
-    defaultValues: {
+    defaultValues: initialData || {
       name: "",
       description: "",
       imageMetadata: {
@@ -277,10 +291,11 @@ const NameDesImgSection = ({
   const {
     register,
     formState: { errors },
+    getValues,
   } = useFormContext<addRecipe>();
-  type imgMetadata = addRecipe["imageMetadata"];
+  type imgMetadata = Exclude<addRecipe["imageMetadata"], string>;
   function handleImageErrors(
-    errors: Merge<FieldError, FieldErrorsImpl<imgMetadata>> | undefined
+    errors: Merge<FieldError, FieldErrorsImpl<Required<imgMetadata>>> | undefined
   ) {
     if (!errors) return;
     // File doesn't exist
@@ -295,6 +310,8 @@ const NameDesImgSection = ({
     // Invalid file type
     return errors.types;
   }
+  const image = getValues("imageMetadata");
+  let isUrl = typeof image === "string";
   return (
     <div className="grid grid-cols-1 gap-2 sm:h-56 sm:grid-cols-2">
       <div className="flex min-w-[50%] flex-1 shrink-0 flex-col gap-4">
@@ -329,13 +346,14 @@ const NameDesImgSection = ({
       {/* Wrapped outside to prevent image upload from shrinking if there's an error */}
       <div className="h-60 sm:h-full">
         <FieldValidation error={handleImageErrors(errors.imageMetadata)}>
+          {image ? <img className="object-cover h-full w-full" src={image as string} /> : 
           <ImageUpload
             handleFileLoad={handleFileLoad}
             removeFile={removeFile}
             handleFilesSelect={handleFileSelect}
             handleFileDrop={handleFileDrop}
             imgObjUrl={imgObjUrl}
-          />
+          />}
         </FieldValidation>
       </div>
     </div>
