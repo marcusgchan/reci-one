@@ -74,25 +74,31 @@ export const recipesRouter = router({
         if (!res.ok) throw new Error("Unable to parse recipe");
         const recipe = (await res.json()) as ParsedRecipe;
         return {
-          name: recipe.title,
-          description: recipe.description,
-          imageMetadata: recipe.image,
-          ingredients: recipe.ingredients.map((ingredient) => ({
-            id: uuidv4(),
-            name: ingredient,
-            isHeader: false,
-          })),
-          steps: recipe.instructions_list.map((step) => ({
-            id: uuidv4(),
-            name: step,
-            isHeader: false,
-          })),
-          prepTime: recipe.prep_time,
-          cookTime: recipe.cook_time,
-          isPublic: false,
-          cookingMethods: [],
-          mealTypes: [],
-          nationalities: [],
+          siteInfo: {
+            url: recipe.host,
+            author: recipe.author,
+          },
+          initialData: {
+            name: recipe.title,
+            description: recipe.description,
+            imageMetadata: recipe.image,
+            ingredients: recipe.ingredients.map((ingredient) => ({
+              id: uuidv4(),
+              name: ingredient,
+              isHeader: false,
+            })),
+            steps: recipe.instructions_list.map((step) => ({
+              id: uuidv4(),
+              name: step,
+              isHeader: false,
+            })),
+            prepTime: recipe.prep_time,
+            cookTime: recipe.cook_time,
+            isPublic: false,
+            cookingMethods: [],
+            mealTypes: [],
+            nationalities: [],
+          }
         };
       } catch (e) {
         console.log(e);

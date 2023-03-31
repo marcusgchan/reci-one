@@ -92,7 +92,7 @@ const Create: CustomReactFC = () => {
       </div>
     );
   }
-  if (formStage === 2 || !data) {
+  if (formStage === 2) {
     return (
       <div className="flex justify-center">
         <div className="flex w-full max-w-md flex-col gap-4 rounded border-4 border-gray-400 p-8">
@@ -109,16 +109,18 @@ const Create: CustomReactFC = () => {
   return <RecipeForm initialData={data} />;
 };
 
-type RecipeFormData = RouterOutputs["recipes"]["parseRecipe"] | undefined;
+type RecipeFormData =
+  | RouterOutputs["recipes"]["parseRecipe"]
+  | undefined;
 
 const RecipeForm = ({
-  initialData,
+  initialData: data,
 }: {
   initialData: RecipeFormData | undefined;
 }) => {
   const methods = useForm<addRecipe>({
     resolver: zodResolver(addRecipeSchema),
-    defaultValues: initialData || {
+    defaultValues: data?.initialData || {
       name: "",
       description: "",
       imageMetadata: {
@@ -295,7 +297,9 @@ const NameDesImgSection = ({
   } = useFormContext<addRecipe>();
   type imgMetadata = Exclude<addRecipe["imageMetadata"], string>;
   function handleImageErrors(
-    errors: Merge<FieldError, FieldErrorsImpl<Required<imgMetadata>>> | undefined
+    errors:
+      | Merge<FieldError, FieldErrorsImpl<Required<imgMetadata>>>
+      | undefined
   ) {
     if (!errors) return;
     // File doesn't exist
@@ -313,7 +317,7 @@ const NameDesImgSection = ({
   const image = getValues("imageMetadata");
   let isUrl = typeof image === "string";
   return (
-    <div className="grid grid-cols-1 gap-2 sm:h-56 sm:grid-cols-2">
+    <div className="grid grid-cols-1 gap-2 min-h-[250px] sm:grid-cols-2">
       <div className="flex min-w-[50%] flex-1 shrink-0 flex-col gap-4">
         <FormItem>
           <label className="block" htmlFor={id + "-name"}>
@@ -337,7 +341,7 @@ const NameDesImgSection = ({
             </label>
             <Textarea
               id={id + "-description"}
-              className="h-full resize-none border-2 border-gray-500 p-1"
+              className="h-full min-h-[100px] resize-none border-2 border-gray-500 p-1"
               {...register("description")}
             />
           </FormItem>
@@ -346,14 +350,17 @@ const NameDesImgSection = ({
       {/* Wrapped outside to prevent image upload from shrinking if there's an error */}
       <div className="h-60 sm:h-full">
         <FieldValidation error={handleImageErrors(errors.imageMetadata)}>
-          {image ? <img className="object-cover h-full w-full" src={image as string} /> : 
-          <ImageUpload
-            handleFileLoad={handleFileLoad}
-            removeFile={removeFile}
-            handleFilesSelect={handleFileSelect}
-            handleFileDrop={handleFileDrop}
-            imgObjUrl={imgObjUrl}
-          />}
+          {isUrl ? (
+            <img className="h-full w-full object-cover" src={image as string} />
+          ) : (
+            <ImageUpload
+              handleFileLoad={handleFileLoad}
+              removeFile={removeFile}
+              handleFilesSelect={handleFileSelect}
+              handleFileDrop={handleFileDrop}
+              imgObjUrl={imgObjUrl}
+            />
+          )}
         </FieldValidation>
       </div>
     </div>
