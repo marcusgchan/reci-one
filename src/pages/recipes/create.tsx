@@ -66,14 +66,14 @@ const Create: CustomReactFC = () => {
         setFormStage(3);
       },
       onError(error) {
-        snackbarDispatch({ type: "ERROR", message: error.message });
+        snackbarDispatch({ type: "ERROR", message: "Sorry! Unable to parse this recipe :(" });
       },
     }
   );
   const parseRecipe = () => refetch();
   if (formStage === 1) {
     return (
-      <div className="flex justify-center">
+      <div className="flex justify-center mt-10 text-gray-500">
         <div className="flex w-full max-w-md flex-col gap-4 rounded border-4 border-gray-400 p-8">
           <h1>Do you want to parse a recipe from another site?</h1>
           <ul className="flex justify-center gap-4">
@@ -94,7 +94,7 @@ const Create: CustomReactFC = () => {
   }
   if (formStage === 2) {
     return (
-      <div className="flex justify-center">
+      <div className="flex justify-center mt-10 text-gray-500">
         <div className="flex w-full max-w-md flex-col gap-4 rounded border-4 border-gray-400 p-8">
           <h1>Enter a recipe website URL to parse</h1>
           <Input value={url} onChange={(e) => setUrl(e.target.value)} />
