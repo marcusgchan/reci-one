@@ -34,7 +34,16 @@ export const recipesRouter = router({
   getRecipe: protectedProcedure
     .input(getRecipeSchema)
     .query(async ({ ctx, input }) => {
-      return await getRecipe(ctx, input.recipeId);
+      const recipe = await getRecipe(ctx, input.recipeId);
+      const roundedDate = getFormattedUtcDate();
+      const signedUrl = await getImageSignedUrl(
+        recipe!.authorId,
+        recipe!.id,
+        recipe!.mainImage,
+        roundedDate
+      ).catch(() => "");
+      recipe!.mainImage = signedUrl;
+      return recipe;
     }),
   addRecipe: protectedProcedure
     .input(addRecipeSchema)

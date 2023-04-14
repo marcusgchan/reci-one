@@ -112,6 +112,7 @@ export async function getRecipe(ctx: Context, recipeId: string) {
       nationalities: true,
       mealTypes: true,
       steps: true,
+      author: true,
     },
   });
 }
