@@ -2,7 +2,7 @@ import { CustomReactFC } from "@/shared/types";
 import React, { useId, useMemo, useState } from "react";
 import { BiMinus } from "react-icons/bi";
 import { GrDrag } from "react-icons/gr";
-import { addRecipe, addRecipeSchema } from "@/schemas/recipe";
+import { formAddRecipe, addRecipeSchema, formAddRecipeSchema } from "@/schemas/recipe";
 import { v4 as uuidv4 } from "uuid";
 import { RouterOutputs, trpc } from "@/utils/trpc";
 import { DndContext, closestCenter, DragEndEvent } from "@dnd-kit/core";
@@ -119,8 +119,8 @@ const RecipeForm = ({
 }: {
   initialData: RecipeFormData | undefined;
 }) => {
-  const methods = useForm<addRecipe>({
-    resolver: zodResolver(addRecipeSchema),
+  const methods = useForm<formAddRecipe>({
+    resolver: zodResolver(formAddRecipeSchema),
     defaultValues: data?.initialData || {
       name: "",
       description: "",
@@ -165,7 +165,7 @@ const RecipeForm = ({
           name: undefined,
           type: undefined,
           size: undefined,
-        } as unknown as addRecipe["imageMetadata"],
+        } as unknown as formAddRecipe["imageMetadata"],
         {
           shouldValidate: methods.formState.isSubmitted ? true : false,
           shouldDirty: true,
@@ -302,8 +302,8 @@ const NameDesImgSection = ({
     register,
     formState: { errors },
     getValues,
-  } = useFormContext<addRecipe>();
-  type imgMetadata = Exclude<addRecipe["imageMetadata"], string>;
+  } = useFormContext<formAddRecipe>();
+  type imgMetadata = Exclude<formAddRecipe["imageMetadata"], string>;
   function handleImageErrors(
     errors:
       | Merge<FieldError, FieldErrorsImpl<Required<imgMetadata>>>
@@ -380,7 +380,7 @@ const TimeSection = () => {
   const {
     register,
     formState: { errors },
-  } = useFormContext<addRecipe>();
+  } = useFormContext<formAddRecipe>();
   return (
     <div className="flex gap-4">
       <FormItem className="flex-1">
@@ -421,7 +421,7 @@ const IngredientsSection = () => {
     register,
     control,
     formState: { errors },
-  } = useFormContext<addRecipe>();
+  } = useFormContext<formAddRecipe>();
   const { fields, append, remove, move } = useFieldArray({
     name: "ingredients",
     control,
@@ -565,7 +565,7 @@ const CookingMethodsSection = () => {
   const { data } = trpc.cookingMethods.getCookingMethods.useQuery(undefined, {
     refetchOnWindowFocus: false,
   });
-  const { control, getValues } = useFormContext<addRecipe>();
+  const { control, getValues } = useFormContext<formAddRecipe>();
   const { append, remove } = useFieldArray({
     name: "cookingMethods",
     control,
@@ -599,7 +599,7 @@ const MealTypeSection = () => {
   const { data } = trpc.mealTypes.getMealTypes.useQuery(undefined, {
     refetchOnWindowFocus: false,
   });
-  const { control, getValues } = useFormContext<addRecipe>();
+  const { control, getValues } = useFormContext<formAddRecipe>();
   const { append, remove } = useFieldArray({
     name: "mealTypes",
     control,
@@ -635,7 +635,7 @@ const NationalitySection = () => {
   const { data } = trpc.nationalities.getNationalities.useQuery(undefined, {
     refetchOnWindowFocus: false,
   });
-  const { control, getValues } = useFormContext<addRecipe>();
+  const { control, getValues } = useFormContext<formAddRecipe>();
   const { append, remove } = useFieldArray({
     name: "nationalities",
     control,
@@ -679,7 +679,7 @@ const StepsSection = () => {
     register,
     control,
     formState: { errors },
-  } = useFormContext<addRecipe>();
+  } = useFormContext<formAddRecipe>();
   const { fields, append, remove, move } = useFieldArray({
     name: "steps",
     control,
@@ -791,13 +791,13 @@ const DraggableInput = ({
   placeholder: string;
   type: ListInputFields;
   index: number;
-  register: UseFormRegister<addRecipe>;
+  register: UseFormRegister<formAddRecipe>;
   remove: UseFieldArrayRemove;
 }) => {
   const { attributes, listeners, ref } = useSortableItemContext();
   const {
     formState: { errors },
-  } = useFormContext<addRecipe>();
+  } = useFormContext<formAddRecipe>();
   return (
     <div className="flex h-10 items-stretch">
       {canDrag && (
