@@ -20,14 +20,9 @@ export const getRecipeSchema = z.object({
   recipeId: z.string(),
 });
 
-export const addRecipeSchema = z.object({
+const baseAddRecipeSchema = z.object({
   name: z.string().min(1, "Name is required"),
   description: z.string(),
-  imageMetadata: z.object({
-    name: z.string({ required_error: "Image is required" }),
-    type: z.string({ invalid_type_error: "Image format not supported" }),
-    size: z.number({ invalid_type_error: "Image too big" }),
-  }).or(z.string().url()),
   ingredients: z
     .object({
       id: z.string(),
@@ -63,9 +58,26 @@ export const addRecipeSchema = z.object({
       name: z.string(),
     })
     .array(),
-});
-export type addRecipe = z.infer<typeof addRecipeSchema>;
+})
 
-export const parseRecipeSchema = z.object({
-  url: z.string().url(),
-});
+export const addRecipeSchema = baseAddRecipeSchema.extend({
+  imageMetadata: z.object({
+    name: z.string({ required_error: "Image is required" }),
+    type: z.string({ invalid_type_error: "Image format not supported" }),
+    size: z.number({ invalid_type_error: "Image too big" }),
+  }),
+}) 
+
+export const parsedAddRecipeSchema = baseAddRecipeSchema.extend({
+  urlSource: z.string().url(), 
+  urlSourceImage: z.string().url(),
+}) 
+
+export const formAddRecipeSchema = baseAddRecipeSchema.extend({
+  imageMetadata: z.object({
+    name: z.string({ required_error: "Image is required" }),
+    type: z.string({ invalid_type_error: "Image format not supported" }),
+    size: z.number({ invalid_type_error: "Image too big" }),
+  }).or(z.string()),
+}) 
+export type formAddRecipe = z.infer<typeof formAddRecipeSchema>;

@@ -2,7 +2,7 @@ import {
   addRecipeSchema,
   getRecipeSchema,
   getRecipesSchema,
-  parseRecipeSchema,
+  parsedAddRecipeSchema,
 } from "@/schemas/recipe";
 import { createRecipe, getRecipe, getRecipes } from "@/services/recipesService";
 import { getImageSignedUrl, getUploadSignedUrl } from "@/services/s3Services";
@@ -11,6 +11,7 @@ import { TRPCError } from "@trpc/server";
 import { env } from "src/server/env.mjs";
 import { protectedProcedure, router } from "../trpc";
 import { v4 as uuidv4 } from "uuid";
+import z from "zod";
 
 export const recipesRouter = router({
   getRecipes: protectedProcedure
@@ -40,7 +41,7 @@ export const recipesRouter = router({
       return await getRecipe(ctx, input.recipeId);
     }),
   addRecipe: protectedProcedure
-    .input(addRecipeSchema)
+    .input(addRecipeSchema.merge(parsedAddRecipeSchema))
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.session.user.id;
       const roundedDate = getFormattedUtcDate();
@@ -60,7 +61,7 @@ export const recipesRouter = router({
       return signedUrl;
     }),
   parseRecipe: protectedProcedure
-    .input(parseRecipeSchema)
+    .input(z.object({ url: z.string() }))
     .query(async ({ input }) => {
       try {
         const res = await fetch(

@@ -66,14 +66,17 @@ const Create: CustomReactFC = () => {
         setFormStage(3);
       },
       onError(error) {
-        snackbarDispatch({ type: "ERROR", message: "Sorry! Unable to parse this recipe :(" });
+        snackbarDispatch({
+          type: "ERROR",
+          message: "Sorry! Unable to parse this recipe :(",
+        });
       },
     }
   );
   const parseRecipe = () => refetch();
   if (formStage === 1) {
     return (
-      <div className="flex justify-center mt-10 text-gray-500">
+      <div className="mt-10 flex justify-center text-gray-500">
         <div className="flex w-full max-w-md flex-col gap-4 rounded border-4 border-gray-400 p-8">
           <h1>Do you want to parse a recipe from another site?</h1>
           <ul className="flex justify-center gap-4">
@@ -94,7 +97,7 @@ const Create: CustomReactFC = () => {
   }
   if (formStage === 2) {
     return (
-      <div className="flex justify-center mt-10 text-gray-500">
+      <div className="mt-10 flex justify-center text-gray-500">
         <div className="flex w-full max-w-md flex-col gap-4 rounded border-4 border-gray-400 p-8">
           <h1>Enter a recipe website URL to parse</h1>
           <Input value={url} onChange={(e) => setUrl(e.target.value)} />
@@ -109,9 +112,7 @@ const Create: CustomReactFC = () => {
   return <RecipeForm initialData={data} />;
 };
 
-type RecipeFormData =
-  | RouterOutputs["recipes"]["parseRecipe"]
-  | undefined;
+type RecipeFormData = RouterOutputs["recipes"]["parseRecipe"] | undefined;
 
 const RecipeForm = ({
   initialData: data,
@@ -191,6 +192,14 @@ const RecipeForm = ({
         });
         return;
       }
+      if (!presignedPost) {
+        snackbarDispatch({
+          type: "SUCCESS",
+          message: "Successfully create recipe",
+        });
+        navigateToRecipes();
+        return;
+      }
       // Add fields that are required for presigned post
       const newFormData = new FormData();
       Object.entries(presignedPost.fields).forEach(([field, value]) => {
@@ -220,7 +229,6 @@ const RecipeForm = ({
   const snackbarDispatch = useSnackbarDispatch();
   const createRecipe = methods.handleSubmit((data) => {
     mutation.mutate(data);
-    mutation.reset();
   });
   const navigateToRecipes = () => router.push("/recipes");
   return (
@@ -269,7 +277,7 @@ const RecipeForm = ({
           <SectionWrapper>
             <CookingMethodsSection />
           </SectionWrapper>
-          <Button>Create</Button>
+          <Button disabled={mutation.isLoading}>Create</Button>
         </form>
       </FormProvider>
     </section>
@@ -317,7 +325,7 @@ const NameDesImgSection = ({
   const image = getValues("imageMetadata");
   let isUrl = typeof image === "string";
   return (
-    <div className="grid grid-cols-1 gap-2 min-h-[250px] sm:grid-cols-2">
+    <div className="grid min-h-[250px] grid-cols-1 gap-2 sm:grid-cols-2">
       <div className="flex min-w-[50%] flex-1 shrink-0 flex-col gap-4">
         <FormItem>
           <label className="block" htmlFor={id + "-name"}>
