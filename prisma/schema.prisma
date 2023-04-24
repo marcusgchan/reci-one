@@ -7,8 +7,8 @@ generator client {
 }
 
 datasource db {
-  provider             = "mysql" // NOTE: sqlite does not work with NextAuth.js
-  url                  = env("DATABASE_URL")
+  provider     = "mysql" // NOTE: sqlite does not work with NextAuth.js
+  url          = env("DATABASE_URL")
   relationMode = "prisma"
 }
 
@@ -72,13 +72,12 @@ model Recipe {
   prepTime    Decimal?
   cookTime    Decimal?
   isPublic    Boolean  @default(false)
-  mainImage   String   @db.VarChar(127)
 
+  images         RecipeImage[] // TODO: Change to image
   ingredients    Ingredient[]
   steps          Step[]
   mealTypes      MealTypesOnRecipies[]
   cookingMethods CookingMethodsOnRecipies[]
-  images         Image[]
   comments       Comment[]
   nationalities  NationalitiesOnRecipes[]
 
@@ -86,6 +85,35 @@ model Recipe {
   author   User   @relation(fields: [authorId], references: [id])
 
   @@map("recipes")
+}
+
+model RecipeImage {
+  id String @id @default(cuid())
+
+  recipeId      String
+  recipe        Recipe         @relation(fields: [recipeId], references: [id])
+  uploadedImage UploadedImage?
+  parsedImage   ParsedImage?
+
+  @@map("recipe_images")
+}
+
+model UploadedImage {
+  key String
+
+  recipeImageId String      @id @unique
+  recipeImage   RecipeImage @relation(fields: [recipeImageId], references: [id])
+
+  @@map("uploaded_images")
+}
+
+model ParsedImage {
+  url String
+
+  recipeImageId String      @id @unique
+  recipeImage   RecipeImage @relation(fields: [recipeImageId], references: [id])
+
+  @@map("parsed_images")
 }
 
 model Step {
@@ -161,16 +189,6 @@ model MealType {
   recipies MealTypesOnRecipies[]
 
   @@map("meal_types")
-}
-
-model Image {
-  id   String @id @default(cuid())
-  name String @db.VarChar(127)
-
-  recipeId String @db.VarChar(255)
-  recipe   Recipe @relation(fields: [recipeId], references: [id])
-
-  @@map("images")
 }
 
 model Nationality {

@@ -1,4 +1,4 @@
-import { GetRecipe, addRecipe } from "@/schemas/recipe";
+import { GetRecipe, addRecipe, addParsedRecipe } from "@/schemas/recipe";
 import { Context } from "src/server/trpc/router/context";
 
 export async function createRecipe(
@@ -12,7 +12,73 @@ export async function createRecipe(
     const recipe = await tx.recipe.create({
       data: {
         name: input.name,
-        mainImage: `${input.imageMetadata.name}-${formattedSignedDate}`,
+        images: {
+          create: {
+            uploadedImage: {
+              create: {
+                key: `${input.imageMetadata.name}-${formattedSignedDate}`,
+              },
+            },
+          },
+        },
+        description: input.description,
+        prepTime: input.prepTime || undefined,
+        cookTime: input.cookTime || undefined,
+        authorId: userId,
+        ingredients: {
+          createMany: {
+            data: input.ingredients.map(({ id, ...rest }, i) => ({
+              ...rest,
+              order: i,
+            })),
+          },
+        },
+        steps: {
+          createMany: {
+            data: input.steps.map(({ id, ...rest }, i) => ({
+              ...rest,
+              order: i,
+            })),
+          },
+        },
+      },
+    });
+    await tx.nationalitiesOnRecipes.createMany({
+      data: input.nationalities.map((nationality) => ({
+        nationalityId: nationality.id,
+        recipeId: recipe.id,
+      })),
+    });
+    await tx.cookingMethodsOnRecipies.createMany({
+      data: input.cookingMethods.map((cookingMethods) => ({
+        cookingMethodId: cookingMethods.id,
+        recipeId: recipe.id,
+      })),
+    });
+    await tx.mealTypesOnRecipies.createMany({
+      data: input.mealTypes.map((mealTypes) => ({
+        mealTypeId: mealTypes.id,
+        recipeId: recipe.id,
+      })),
+    });
+    return recipe;
+  });
+  return recipe;
+}
+
+export async function createParsedRecipe(
+  ctx: Context,
+  userId: string,
+  input: addParsedRecipe
+) {
+  const recipe = await ctx.prisma.$transaction(async (tx) => {
+    // Unable to connect multiple on create b/c it requires recipeId
+    const recipe = await tx.recipe.create({
+      data: {
+        name: input.name,
+        images: {
+          create: { parsedImage: { create: { url: input.urlSourceImage } } },
+        },
         description: input.description,
         prepTime: input.prepTime || undefined,
         cookTime: input.cookTime || undefined,
@@ -64,6 +130,7 @@ export async function getRecipes(
   input: GetRecipe
 ) {
   const recipes = await ctx.prisma.recipe.findMany({
+    select: { images: {include: {parsedImage: true, uploadedImage: true}}},
     where: {
       authorId: userId, // Replace with "id of test user" if want seeded recipes
       name: {

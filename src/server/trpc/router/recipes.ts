@@ -2,7 +2,7 @@ import {
   addRecipeSchema,
   getRecipeSchema,
   getRecipesSchema,
-  parsedAddRecipeSchema,
+  addParsedRecipeSchema,
 } from "@/schemas/recipe";
 import { createRecipe, getRecipe, getRecipes } from "@/services/recipesService";
 import { getImageSignedUrl, getUploadSignedUrl } from "@/services/s3Services";
@@ -21,18 +21,20 @@ export const recipesRouter = router({
       const recipes = await getRecipes(ctx, userId, input);
       const roundedDate = getFormattedUtcDate();
       const signedUrls = await Promise.all(
-        recipes.map((recipe) =>
-          getImageSignedUrl(
+        recipes.map((recipe) => {
+          if (recipe.images) {
+          }
+         /* getImageSignedUrl(
             recipe.authorId,
             recipe.id,
-            recipe.mainImage,
+            recipe.images,
             roundedDate
-          ).catch(() => "")
-        )
+          ).catch(() => ""); */
+        })
       );
-      recipes.forEach(
+      /*recipes.forEach(
         (recipe, i) => (recipe.mainImage = signedUrls[i] as string)
-      );
+      );*/
       return recipes;
     }),
   getRecipe: protectedProcedure
@@ -41,7 +43,7 @@ export const recipesRouter = router({
       return await getRecipe(ctx, input.recipeId);
     }),
   addRecipe: protectedProcedure
-    .input(addRecipeSchema.merge(parsedAddRecipeSchema))
+    .input(addRecipeSchema)
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.session.user.id;
       const roundedDate = getFormattedUtcDate();
@@ -60,6 +62,9 @@ export const recipesRouter = router({
       );
       return signedUrl;
     }),
+  addParsedRecipe: protectedProcedure
+    .input(addParsedRecipeSchema)
+    .mutation(({ ctx, input }) => {}),
   parseRecipe: protectedProcedure
     .input(z.object({ url: z.string() }))
     .query(async ({ input }) => {
@@ -99,7 +104,7 @@ export const recipesRouter = router({
             cookingMethods: [],
             mealTypes: [],
             nationalities: [],
-          }
+          },
         };
       } catch (e) {
         console.log(e);
