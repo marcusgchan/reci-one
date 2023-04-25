@@ -72,8 +72,9 @@ model Recipe {
   prepTime    Decimal?
   cookTime    Decimal?
   isPublic    Boolean  @default(false)
+  isParsed    Boolean
 
-  images         RecipeImage[] // TODO: Change to image
+  images         RecipeImage[]
   ingredients    Ingredient[]
   steps          Step[]
   mealTypes      MealTypesOnRecipies[]
