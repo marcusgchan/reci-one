@@ -28,6 +28,7 @@ model Account {
   session_state     String?
   user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@index([userId])
   @@unique([provider, providerAccountId])
   @@map("accounts")
 }
@@ -39,6 +40,7 @@ model Session {
   expires      DateTime
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@index([userId])
   @@map("sessions")
 }
 
@@ -85,6 +87,7 @@ model Recipe {
   authorId String @db.VarChar(255)
   author   User   @relation(fields: [authorId], references: [id])
 
+  @@index([authorId])
   @@map("recipes")
 }
 
@@ -96,6 +99,7 @@ model RecipeImage {
   uploadedImage UploadedImage?
   parsedImage   ParsedImage?
 
+  @@index([recipeId])
   @@map("recipe_images")
 }
 
@@ -125,6 +129,7 @@ model Step {
   recipeId String @db.VarChar(255)
   recipe   Recipe @relation(fields: [recipeId], references: [id])
 
+  @@index([recipeId])
   @@id([order, recipeId])
   @@map("steps")
 }
@@ -137,6 +142,7 @@ model Ingredient {
   recipeId String @db.VarChar(255)
   recipe   Recipe @relation(fields: [recipeId], references: [id])
 
+  @@index([recipeId])
   @@id([order, recipeId])
   @@map("ingredients")
 }
@@ -155,6 +161,8 @@ model CookingMethodsOnRecipies {
   Recipe          Recipe        @relation(fields: [recipeId], references: [id])
   recipeId        String
 
+  @@index([recipeId])
+  @@index([cookingMethodId])
   @@id([cookingMethodId, recipeId])
   @@map("cooking_methods_on_recipies")
 }
@@ -170,7 +178,9 @@ model Comment {
 
   recipeId String @db.VarChar(255)
   recipe   Recipe @relation(fields: [recipeId], references: [id])
-
+  
+  @@index([recipeId])
+  @@index([authorId])
   @@map("comments")
 }
 
@@ -181,6 +191,8 @@ model MealTypesOnRecipies {
   recipeId   String
 
   @@id([mealTypeId, recipeId])
+  @@index([mealTypeId])
+  @@index([recipeId])
   @@map("meal_types_on_recipies")
 }
 
@@ -207,5 +219,7 @@ model NationalitiesOnRecipes {
   recipeId      String
 
   @@id([nationalityId, recipeId])
+  @@index([nationalityId])
+  @@index([recipeId])
   @@map("nationalities_on_recipies")
 }
