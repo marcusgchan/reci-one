@@ -12,6 +12,7 @@ export async function createRecipe(
     const recipe = await tx.recipe.create({
       data: {
         name: input.name,
+        isParsed: false,
         images: {
           create: {
             uploadedImage: {
@@ -79,6 +80,7 @@ export async function createParsedRecipe(
         images: {
           create: { parsedImage: { create: { url: input.urlSourceImage } } },
         },
+        isParsed: true,
         description: input.description,
         prepTime: input.prepTime || undefined,
         cookTime: input.cookTime || undefined,
@@ -130,7 +132,7 @@ export async function getRecipes(
   input: GetRecipe
 ) {
   const recipes = await ctx.prisma.recipe.findMany({
-    select: { images: {include: {parsedImage: true, uploadedImage: true}}},
+    select: { images: {include: {parsedImage: true, uploadedImage: true}}, id: true, name: true},
     where: {
       authorId: userId, // Replace with "id of test user" if want seeded recipes
       name: {

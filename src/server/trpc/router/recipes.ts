@@ -20,22 +20,24 @@ export const recipesRouter = router({
       const userId = ctx.session?.user?.id;
       const recipes = await getRecipes(ctx, userId, input);
       const roundedDate = getFormattedUtcDate();
-      const signedUrls = await Promise.all(
-        recipes.map((recipe) => {
-          if (recipe.images) {
+      const formattedRecipes = recipes.map(async (recipe) => {
+        const urlPromises = recipe.images.map((image) => {
+          if (image.parsedImage) {
+            return Promise.resolve(image.parsedImage.url);
+          } else if (image.uploadedImage) {
+            return getImageSignedUrl(
+              userId,
+              recipe.id,
+              image.uploadedImage.key,
+              roundedDate
+            ).catch(() => "");
           }
-         /* getImageSignedUrl(
-            recipe.authorId,
-            recipe.id,
-            recipe.images,
-            roundedDate
-          ).catch(() => ""); */
-        })
-      );
-      /*recipes.forEach(
-        (recipe, i) => (recipe.mainImage = signedUrls[i] as string)
-      );*/
-      return recipes;
+          // No image for some reason (shouldn't happen)
+          return Promise.resolve("");
+        });
+        return { ...recipe, images: await Promise.all(urlPromises) };
+      });
+      return formattedRecipes;
     }),
   getRecipe: protectedProcedure
     .input(getRecipeSchema)
