@@ -200,15 +200,3 @@ export const saveUploadedImageToDatabase = async (
     where: { id: recipeId, authorId: userId },
   });
 };
-
-export const saveParsedImageToDatabase = async (
-  ctx: Context,
-  userId: string,
-  recipeId: string,
-  url: string
-) => {
-  await ctx.prisma.recipe.update({
-    data: { images: { create: { parsedImage: { create: { url } } } } },
-    where: { id: recipeId, authorId: userId },
-  });
-};
