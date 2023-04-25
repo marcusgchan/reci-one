@@ -132,7 +132,11 @@ export async function getRecipes(
   input: GetRecipe
 ) {
   const recipes = await ctx.prisma.recipe.findMany({
-    select: { images: {include: {parsedImage: true, uploadedImage: true}}, id: true, name: true},
+    select: {
+      images: { include: { parsedImage: true, uploadedImage: true } },
+      id: true,
+      name: true,
+    },
     where: {
       authorId: userId, // Replace with "id of test user" if want seeded recipes
       name: {
@@ -185,14 +189,26 @@ export async function getRecipe(ctx: Context, recipeId: string) {
   });
 }
 
-export const saveMainImageNameToDatabase = async (
+export const saveUploadedImageToDatabase = async (
   ctx: Context,
   userId: string,
   recipeId: string,
-  imageName: string
+  key: string
 ) => {
   await ctx.prisma.recipe.update({
-    data: { mainImage: imageName },
+    data: { images: { create: { uploadedImage: { create: { key } } } } },
+    where: { id: recipeId, authorId: userId },
+  });
+};
+
+export const saveParsedImageToDatabase = async (
+  ctx: Context,
+  userId: string,
+  recipeId: string,
+  url: string
+) => {
+  await ctx.prisma.recipe.update({
+    data: { images: { create: { parsedImage: { create: { url } } } } },
     where: { id: recipeId, authorId: userId },
   });
 };
