@@ -119,6 +119,8 @@ const RecipeForm = ({
 }: {
   initialData: RecipeFormData | undefined;
 }) => {
+  // TODO: 
+  // - Created selector for image to decide if url or uploaded
   const methods = useForm<formAddRecipe>({
     resolver: zodResolver(formAddRecipeSchema),
     defaultValues: data?.initialData || {

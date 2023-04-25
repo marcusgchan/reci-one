@@ -4,7 +4,7 @@ import {
   getRecipesSchema,
   addParsedRecipeSchema,
 } from "@/schemas/recipe";
-import { createRecipe, getRecipe, getRecipes } from "@/services/recipesService";
+import { createParsedRecipe, createRecipe, getRecipe, getRecipes } from "@/services/recipesService";
 import { getImageSignedUrl, getUploadSignedUrl } from "@/services/s3Services";
 import { ParsedRecipe } from "@/shared/types";
 import { TRPCError } from "@trpc/server";
@@ -66,7 +66,11 @@ export const recipesRouter = router({
     }),
   addParsedRecipe: protectedProcedure
     .input(addParsedRecipeSchema)
-    .mutation(({ ctx, input }) => {}),
+    .mutation(async ({ ctx, input }) => {
+      const userId = ctx.session.user.id;
+      const recipe = await createParsedRecipe(ctx, userId, input);
+      return recipe;
+    }),
   parseRecipe: protectedProcedure
     .input(z.object({ url: z.string() }))
     .query(async ({ input }) => {
