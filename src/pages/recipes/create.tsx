@@ -369,7 +369,7 @@ const NameDesImgSection = ({
           </div>
         </div>
         {/* Wrapped outside to prevent image upload from shrinking if there's an error */}
-        <div className="h-full min-h-[20rem]  md:min-h-[15rem]">
+        <div className="h-full min-h-[20rem] md:min-h-[15rem]">
           <FieldValidation
             error={handleImageErrors(
               uploadErrors.imageMetadata,
