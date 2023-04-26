@@ -303,7 +303,6 @@ const NameDesImgSection = ({
   const {
     register,
     formState: { errors: uploadErrors },
-    getValues,
     control,
   } = useFormContext<formAddRecipe>();
   type imgMetadata = Exclude<formAddRecipe["imageMetadata"], string>;
@@ -317,10 +316,10 @@ const NameDesImgSection = ({
     if (!uploadErrors && !urlErrors) {
       console.log("choose one");
     }
-    //console.log(uploadErrors, urlErrors);
+    console.log(uploadErrors, urlErrors);
     // File doesn't exist
     // Name must exist if the file is uploaded to browser
-    if (uploadErrors?.name) {
+    if (uploadErrors?.message) {
       return uploadErrors.name;
     }
     // File too big

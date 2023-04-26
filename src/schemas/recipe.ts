@@ -86,8 +86,23 @@ export const addRecipeFormSchema = baseAddRecipeSchema
       })
       .optional(),
   })
-  .refine((val) => val.urlSourceImage?.length || val.imageMetadata, {
-    path: [ "imageMetadata"],
-    message: "Either a url or uploaded image is required",
-  });
+  .refine(
+    (val) => {
+      console.log(val)
+      if (val.urlSourceImage?.length && val.imageMetadata) {
+        return false;
+      } else if (!val.urlSourceImage?.length && !val.imageMetadata) {
+        return false;
+      }
+      return true;
+    },
+    (val) => {
+      if (val.urlSourceImage?.length && val.imageMetadata) {
+        return { message: "Choose between a url or uploaded image. Not both" };
+      } else if (!val.urlSourceImage?.length && !val.imageMetadata) {
+        return { message: "Either a url or uploaded image is required" };
+      }
+      return {};
+    }
+  );
 export type formAddRecipe = z.infer<typeof addRecipeFormSchema>;
