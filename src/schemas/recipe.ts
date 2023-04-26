@@ -75,11 +75,4 @@ export const addParsedRecipeSchema = baseAddRecipeSchema.extend({
 }) 
 export type addParsedRecipe = z.infer<typeof addParsedRecipeSchema>;
 
-export const formAddRecipeSchema = baseAddRecipeSchema.extend({
-  imageMetadata: z.object({
-    name: z.string({ required_error: "Image is required" }),
-    type: z.string({ invalid_type_error: "Image format not supported" }),
-    size: z.number({ invalid_type_error: "Image too big" }),
-  }).or(z.string()),
-}) 
-export type formAddRecipe = z.infer<typeof formAddRecipeSchema>;
+export type formAddRecipe = addRecipe & Pick<addParsedRecipe, "urlSourceImage">

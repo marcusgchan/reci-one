@@ -1,8 +1,8 @@
 import { CustomReactFC } from "@/shared/types";
-import React, { useId, useMemo, useState } from "react";
+import React, { SetStateAction, useId, useMemo, useState } from "react";
 import { BiMinus } from "react-icons/bi";
 import { GrDrag } from "react-icons/gr";
-import { formAddRecipe, addRecipeSchema, formAddRecipeSchema } from "@/schemas/recipe";
+import { formAddRecipe, addRecipeSchema } from "@/schemas/recipe";
 import { v4 as uuidv4 } from "uuid";
 import { RouterOutputs, trpc } from "@/utils/trpc";
 import { DndContext, closestCenter, DragEndEvent } from "@dnd-kit/core";
@@ -50,6 +50,7 @@ import {
   hasError,
 } from "@/ui/FieldValidation";
 import { ErrorMessage } from "@hookform/error-message";
+import { Switch } from "@headlessui/react";
 
 type FormStage = 1 | 2 | 3;
 
@@ -119,10 +120,11 @@ const RecipeForm = ({
 }: {
   initialData: RecipeFormData | undefined;
 }) => {
-  // TODO: 
-  // - Created selector for image to decide if url or uploaded
+  const [isUploadedImage, setIsUploadedImage] = useState(
+    (data?.initialData && data.initialData.urlSourceImage.length == 0) ?? false
+  );
   const methods = useForm<formAddRecipe>({
-    resolver: zodResolver(formAddRecipeSchema),
+    resolver: zodResolver(addRecipeSchema),
     defaultValues: data?.initialData || {
       name: "",
       description: "",
@@ -131,6 +133,7 @@ const RecipeForm = ({
         size: undefined,
         type: undefined,
       },
+      urlSourceImage: "",
       ingredients: [
         { id: uuidv4(), name: "", isHeader: false },
         { id: uuidv4(), name: "", isHeader: false },
@@ -259,6 +262,8 @@ const RecipeForm = ({
               handleFileLoad={handleFileLoad}
               removeFile={removeFile}
               imgObjUrl={imgObjUrlRef.current}
+              isUploadedImage={isUploadedImage}
+              setIsUploadedImage={setIsUploadedImage}
             />
           </SectionWrapper>
           <SectionWrapper>
@@ -292,12 +297,16 @@ const NameDesImgSection = ({
   imgObjUrl,
   handleFileLoad,
   removeFile,
+  isUploadedImage,
+  setIsUploadedImage,
 }: {
   handleFileSelect: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleFileDrop: (e: React.DragEvent) => void;
   imgObjUrl: undefined | string;
   handleFileLoad: (src: string) => void;
   removeFile: (src: string) => void;
+  isUploadedImage: boolean;
+  setIsUploadedImage: React.Dispatch<SetStateAction<boolean>>;
 }) => {
   const id = useId();
   const {
@@ -324,58 +333,89 @@ const NameDesImgSection = ({
     // Invalid file type
     return errors.types;
   }
-  const image = getValues("imageMetadata");
-  let isUrl = typeof image === "string";
+  const imageMetadata = getValues("imageMetadata");
+  const urlSourceImage = getValues("urlSourceImage");
+  console.log(urlSourceImage);
   return (
-    <div className="grid min-h-[250px] grid-cols-1 gap-2 sm:grid-cols-2">
-      <div className="flex min-w-[50%] flex-1 shrink-0 flex-col gap-4">
-        <FormItem>
-          <label className="block" htmlFor={id + "-name"}>
-            Name
-          </label>
-          <FieldValidation error={errors.name}>
-            <Input
-              aria-invalid={hasError(errors.name)}
-              aria-errormessage={getErrorMsg(errors.name)}
-              id={id + "-name"}
-              type="text"
-              {...register("name")}
-              className="inline-block w-full border-2 border-gray-500 p-1"
-            />
-          </FieldValidation>
-        </FormItem>
-        <div className="flex h-full flex-col">
-          <FormItem className="flex-1">
-            <label className="block" htmlFor={id + "-description"}>
-              Description
+    <div className="flex flex-col gap-2">
+      <div className="grid min-h-[250px] grid-cols-1 gap-2 sm:grid-cols-2">
+        <div className="flex min-w-[50%] flex-1 shrink-0 flex-col gap-4">
+          <FormItem>
+            <label className="block" htmlFor={id + "-name"}>
+              Name
             </label>
-            <Textarea
-              id={id + "-description"}
-              className="h-full min-h-[100px] resize-none border-2 border-gray-500 p-1"
-              {...register("description")}
-            />
+            <FieldValidation error={errors.name}>
+              <Input
+                aria-invalid={hasError(errors.name)}
+                aria-errormessage={getErrorMsg(errors.name)}
+                id={id + "-name"}
+                type="text"
+                {...register("name")}
+                className="inline-block w-full border-2 border-gray-500 p-1"
+              />
+            </FieldValidation>
           </FormItem>
+          <div className="flex h-full flex-col">
+            <FormItem className="flex-1">
+              <label className="block" htmlFor={id + "-description"}>
+                Description
+              </label>
+              <Textarea
+                id={id + "-description"}
+                className="h-full min-h-[200px] resize-none border-2 border-gray-500 p-1"
+                {...register("description")}
+              />
+            </FormItem>
+          </div>
+        </div>
+        {/* Wrapped outside to prevent image upload from shrinking if there's an error */}
+        <div className="h-full">
+          <FieldValidation error={handleImageErrors(errors.imageMetadata)}>
+            {isUploadedImage ? (
+              <ImageUpload
+                handleFileLoad={handleFileLoad}
+                removeFile={removeFile}
+                handleFilesSelect={handleFileSelect}
+                handleFileDrop={handleFileDrop}
+                imgObjUrl={imgObjUrl}
+              />
+            ) : (
+              <img
+                className="h-full w-full object-cover"
+                src={urlSourceImage}
+              />
+            )}
+          </FieldValidation>
         </div>
       </div>
-      {/* Wrapped outside to prevent image upload from shrinking if there's an error */}
-      <div className="h-60 sm:h-full">
-        <FieldValidation error={handleImageErrors(errors.imageMetadata)}>
-          {isUrl ? (
-            <img className="h-full w-full object-cover" src={image as string} />
-          ) : (
-            <ImageUpload
-              handleFileLoad={handleFileLoad}
-              removeFile={removeFile}
-              handleFilesSelect={handleFileSelect}
-              handleFileDrop={handleFileDrop}
-              imgObjUrl={imgObjUrl}
-            />
+      <div className="ml-auto flex items-center gap-1">
+        Image Link
+        <Switch
+          checked={isUploadedImage}
+          onChange={setIsUploadedImage}
+          className={classNames(
+            isUploadedImage ? "bg-indigo-600" : "bg-gray-200",
+            "relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2"
           )}
-        </FieldValidation>
+        >
+          <span className="sr-only">Use setting</span>
+          <span
+            aria-hidden="true"
+            className={classNames(
+              isUploadedImage ? "translate-x-5" : "translate-x-0",
+              "pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
+            )}
+          />
+        </Switch>
+        Upload Image
       </div>
     </div>
   );
 };
+
+function classNames(...classes: string[]) {
+  return classes.filter(Boolean).join(" ");
+}
 
 const TimeSection = () => {
   const id = useId();

@@ -4,7 +4,12 @@ import {
   getRecipesSchema,
   addParsedRecipeSchema,
 } from "@/schemas/recipe";
-import { createParsedRecipe, createRecipe, getRecipe, getRecipes } from "@/services/recipesService";
+import {
+  createParsedRecipe,
+  createRecipe,
+  getRecipe,
+  getRecipes,
+} from "@/services/recipesService";
 import { getImageSignedUrl, getUploadSignedUrl } from "@/services/s3Services";
 import { ParsedRecipe } from "@/shared/types";
 import { TRPCError } from "@trpc/server";
@@ -93,7 +98,12 @@ export const recipesRouter = router({
           initialData: {
             name: recipe.title,
             description: recipe.description,
-            imageMetadata: recipe.image,
+            imageMetadata: {
+              size: undefined,
+              type: undefined,
+              name: undefined,
+            },
+            urlSourceImage: recipe.image,
             ingredients: recipe.ingredients.map((ingredient) => ({
               id: uuidv4(),
               name: ingredient,
