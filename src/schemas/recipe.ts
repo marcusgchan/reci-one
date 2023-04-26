@@ -58,7 +58,7 @@ const baseAddRecipeSchema = z.object({
       name: z.string(),
     })
     .array(),
-})
+});
 
 export const addRecipeSchema = baseAddRecipeSchema.extend({
   imageMetadata: z.object({
@@ -66,13 +66,28 @@ export const addRecipeSchema = baseAddRecipeSchema.extend({
     type: z.string({ invalid_type_error: "Image format not supported" }),
     size: z.number({ invalid_type_error: "Image too big" }),
   }),
-}) 
+});
 export type addRecipe = z.infer<typeof addRecipeSchema>;
 
 export const addParsedRecipeSchema = baseAddRecipeSchema.extend({
-  urlSource: z.string().url(), 
+  urlSource: z.string().url(),
   urlSourceImage: z.string().url(),
-}) 
+});
 export type addParsedRecipe = z.infer<typeof addParsedRecipeSchema>;
 
-export type formAddRecipe = addRecipe & Pick<addParsedRecipe, "urlSourceImage">
+export const addRecipeFormSchema = baseAddRecipeSchema
+  .extend({
+    urlSourceImage: z.string().url().optional(),
+    imageMetadata: z
+      .object({
+        name: z.string({ required_error: "Image is required" }),
+        type: z.string({ invalid_type_error: "Image format not supported" }),
+        size: z.number({ invalid_type_error: "Image too big" }),
+      })
+      .optional(),
+  })
+  .refine((val) => val.urlSourceImage?.length || val.imageMetadata, {
+    path: [ "imageMetadata"],
+    message: "Either a url or uploaded image is required",
+  });
+export type formAddRecipe = z.infer<typeof addRecipeFormSchema>;

@@ -98,12 +98,8 @@ export const recipesRouter = router({
           initialData: {
             name: recipe.title,
             description: recipe.description,
-            imageMetadata: {
-              size: undefined,
-              type: undefined,
-              name: undefined,
-            },
             urlSourceImage: recipe.image,
+            imageMetadata: undefined,
             ingredients: recipe.ingredients.map((ingredient) => ({
               id: uuidv4(),
               name: ingredient,

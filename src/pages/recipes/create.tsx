@@ -2,7 +2,11 @@ import { CustomReactFC } from "@/shared/types";
 import React, { SetStateAction, useId, useMemo, useState } from "react";
 import { BiMinus } from "react-icons/bi";
 import { GrDrag } from "react-icons/gr";
-import { formAddRecipe, addRecipeSchema } from "@/schemas/recipe";
+import {
+  formAddRecipe,
+  addRecipeSchema,
+  addRecipeFormSchema,
+} from "@/schemas/recipe";
 import { v4 as uuidv4 } from "uuid";
 import { RouterOutputs, trpc } from "@/utils/trpc";
 import { DndContext, closestCenter, DragEndEvent } from "@dnd-kit/core";
@@ -41,6 +45,7 @@ import {
   FieldError,
   FieldErrorsImpl,
   Merge,
+  useWatch,
 } from "react-hook-form";
 import {
   ErrorBox,
@@ -121,19 +126,15 @@ const RecipeForm = ({
   initialData: RecipeFormData | undefined;
 }) => {
   const [isUploadedImage, setIsUploadedImage] = useState(
-    (data?.initialData && data.initialData.urlSourceImage.length == 0) ?? false
+    (data?.initialData && data.initialData.urlSourceImage.length == 0) ?? true
   );
   const methods = useForm<formAddRecipe>({
-    resolver: zodResolver(addRecipeSchema),
+    resolver: zodResolver(addRecipeFormSchema),
     defaultValues: data?.initialData || {
       name: "",
       description: "",
-      imageMetadata: {
-        name: undefined,
-        size: undefined,
-        type: undefined,
-      },
       urlSourceImage: "",
+      imageMetadata: undefined,
       ingredients: [
         { id: uuidv4(), name: "", isHeader: false },
         { id: uuidv4(), name: "", isHeader: false },
@@ -161,22 +162,11 @@ const RecipeForm = ({
         { shouldValidate: true, shouldDirty: true, shouldTouch: true }
       );
     } else {
-      // Workaround b/c resetField('imageMetadeta) resets the field visually but isn't
-      // in the control state (control > formValues > imageMetadata)
-      // This results in incorrect validation (adding image and removing then submitting wouldn't show error)
-      methods.setValue(
-        "imageMetadata",
-        {
-          name: undefined,
-          type: undefined,
-          size: undefined,
-        } as unknown as formAddRecipe["imageMetadata"],
-        {
-          shouldValidate: methods.formState.isSubmitted ? true : false,
-          shouldDirty: true,
-          shouldTouch: true,
-        }
-      );
+      methods.setValue("imageMetadata", undefined, {
+        shouldValidate: methods.formState.isSubmitted ? true : false,
+        shouldDirty: true,
+        shouldTouch: true,
+      });
     }
   };
   const {
@@ -236,6 +226,7 @@ const RecipeForm = ({
     mutation.mutate(data);
   });
   const navigateToRecipes = () => router.push("/recipes");
+  console.log(methods.formState.errors);
   return (
     <section className="p-5 pb-10">
       <FormProvider {...methods}>
@@ -311,31 +302,40 @@ const NameDesImgSection = ({
   const id = useId();
   const {
     register,
-    formState: { errors },
+    formState: { errors: uploadErrors },
     getValues,
+    control,
   } = useFormContext<formAddRecipe>();
   type imgMetadata = Exclude<formAddRecipe["imageMetadata"], string>;
   function handleImageErrors(
-    errors:
-      | Merge<FieldError, FieldErrorsImpl<Required<imgMetadata>>>
-      | undefined
+    uploadErrors:
+      | Merge<FieldError, FieldErrorsImpl<NonNullable<imgMetadata>> | undefined>
+      | undefined,
+    urlErrors: FieldError | undefined
   ) {
-    if (!errors) return;
+    if ((!uploadErrors && urlErrors) || (uploadErrors && !urlErrors)) return;
+    if (!uploadErrors && !urlErrors) {
+      console.log("choose one");
+    }
+    //console.log(uploadErrors, urlErrors);
     // File doesn't exist
     // Name must exist if the file is uploaded to browser
-    if (errors.name) {
-      return errors.name;
+    if (uploadErrors?.name) {
+      return uploadErrors.name;
     }
     // File too big
-    if (errors.size) {
-      return errors.size;
+    if (uploadErrors?.size) {
+      return uploadErrors.size;
     }
-    // Invalid file type
-    return errors.types;
+
+    if (uploadErrors?.type) {
+      // Invalid file type
+      return uploadErrors.types;
+    }
+
+    return urlErrors;
   }
-  const imageMetadata = getValues("imageMetadata");
-  const urlSourceImage = getValues("urlSourceImage");
-  console.log(urlSourceImage);
+  const urlSourceImage = useWatch({ control, name: "urlSourceImage" });
   return (
     <div className="flex flex-col gap-2">
       <div className="grid min-h-[250px] grid-cols-1 gap-2 sm:grid-cols-2">
@@ -344,10 +344,10 @@ const NameDesImgSection = ({
             <label className="block" htmlFor={id + "-name"}>
               Name
             </label>
-            <FieldValidation error={errors.name}>
+            <FieldValidation error={uploadErrors.name}>
               <Input
-                aria-invalid={hasError(errors.name)}
-                aria-errormessage={getErrorMsg(errors.name)}
+                aria-invalid={hasError(uploadErrors.name)}
+                aria-errormessage={getErrorMsg(uploadErrors.name)}
                 id={id + "-name"}
                 type="text"
                 {...register("name")}
@@ -369,8 +369,13 @@ const NameDesImgSection = ({
           </div>
         </div>
         {/* Wrapped outside to prevent image upload from shrinking if there's an error */}
-        <div className="h-full">
-          <FieldValidation error={handleImageErrors(errors.imageMetadata)}>
+        <div className="h-full min-h-[20rem]  md:min-h-[15rem]">
+          <FieldValidation
+            error={handleImageErrors(
+              uploadErrors.imageMetadata,
+              uploadErrors.urlSourceImage
+            )}
+          >
             {isUploadedImage ? (
               <ImageUpload
                 handleFileLoad={handleFileLoad}
@@ -380,34 +385,48 @@ const NameDesImgSection = ({
                 imgObjUrl={imgObjUrl}
               />
             ) : (
-              <img
-                className="h-full w-full object-cover"
-                src={urlSourceImage}
-              />
+              <div className="relative h-full w-full">
+                <img
+                  className="absolute h-full w-full object-cover"
+                  src={urlSourceImage}
+                />
+              </div>
             )}
           </FieldValidation>
         </div>
       </div>
-      <div className="ml-auto flex items-center gap-1">
-        Image Link
-        <Switch
-          checked={isUploadedImage}
-          onChange={setIsUploadedImage}
-          className={classNames(
-            isUploadedImage ? "bg-indigo-600" : "bg-gray-200",
-            "relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2"
-          )}
-        >
-          <span className="sr-only">Use setting</span>
-          <span
-            aria-hidden="true"
+      <div className="flex flex-col gap-2">
+        <div className="ml-auto flex items-center gap-2 self-start">
+          <span className="whitespace-nowrap">Image Link</span>
+          <Switch
+            checked={isUploadedImage}
+            onChange={setIsUploadedImage}
             className={classNames(
-              isUploadedImage ? "translate-x-5" : "translate-x-0",
-              "pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
+              isUploadedImage ? "bg-accent-500" : "bg-gray-200",
+              "relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-accent-500 focus:ring-offset-2"
             )}
-          />
-        </Switch>
-        Upload Image
+          >
+            <span className="sr-only">Use setting</span>
+            <span
+              aria-hidden="true"
+              className={classNames(
+                isUploadedImage ? "translate-x-5" : "translate-x-0",
+                "pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
+              )}
+            />
+          </Switch>
+          <span className="whitespace-nowrap">Upload Image</span>
+        </div>
+        {!isUploadedImage && (
+          <FormItem>
+            <label htmlFor={id + "-url"}>Url</label>
+            <Input
+              className="w-full"
+              id={id + "-url"}
+              {...register("urlSourceImage")}
+            />
+          </FormItem>
+        )}
       </div>
     </div>
   );
