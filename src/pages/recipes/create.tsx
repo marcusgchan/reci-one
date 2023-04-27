@@ -133,8 +133,10 @@ const RecipeForm = ({
     defaultValues: data?.initialData || {
       name: "",
       description: "",
-      urlSourceImage: "",
-      imageMetadata: undefined,
+      image: {
+        urlSourceImage: "",
+        imageMetadata: undefined,
+      },
       ingredients: [
         { id: uuidv4(), name: "", isHeader: false },
         { id: uuidv4(), name: "", isHeader: false },
@@ -157,12 +159,12 @@ const RecipeForm = ({
   const setFileMetadata = (file: File | undefined) => {
     if (file) {
       methods.setValue(
-        "imageMetadata",
+        "image.imageMetadata",
         { name: file.name, type: file.type, size: file.size },
         { shouldValidate: true, shouldDirty: true, shouldTouch: true }
       );
     } else {
-      methods.setValue("imageMetadata", undefined, {
+      methods.setValue("image.imageMetadata", undefined, {
         shouldValidate: methods.formState.isSubmitted ? true : false,
         shouldDirty: true,
         shouldTouch: true,
@@ -282,6 +284,10 @@ const RecipeForm = ({
   );
 };
 
+type imgMetadata = NonNullable<
+  Exclude<formAddRecipe["image"]["imageMetadata"], string>
+>;
+
 const NameDesImgSection = ({
   handleFileSelect,
   handleFileDrop,
@@ -302,21 +308,13 @@ const NameDesImgSection = ({
   const id = useId();
   const {
     register,
-    formState: { errors: uploadErrors },
+    formState: { errors: imageErrors },
     control,
   } = useFormContext<formAddRecipe>();
-  type imgMetadata = Exclude<formAddRecipe["imageMetadata"], string>;
   function handleImageErrors(
-    uploadErrors:
-      | Merge<FieldError, FieldErrorsImpl<NonNullable<imgMetadata>> | undefined>
-      | undefined,
-    urlErrors: FieldError | undefined
+    uploadErrors: Merge<FieldError, FieldErrorsImpl<imgMetadata>> | undefined
   ) {
-    if ((!uploadErrors && urlErrors) || (uploadErrors && !urlErrors)) return;
-    if (!uploadErrors && !urlErrors) {
-      console.log("choose one");
-    }
-    console.log(uploadErrors, urlErrors);
+    if (!uploadErrors) return;
     // File doesn't exist
     // Name must exist if the file is uploaded to browser
     if (uploadErrors?.message) {
@@ -331,10 +329,9 @@ const NameDesImgSection = ({
       // Invalid file type
       return uploadErrors.types;
     }
-
-    return urlErrors;
   }
-  const urlSourceImage = useWatch({ control, name: "urlSourceImage" });
+  const urlSourceImage = useWatch({ control, name: "image.urlSourceImage" });
+  console.log(control._formValues);
   return (
     <div className="flex flex-col gap-2">
       <div className="grid min-h-[250px] grid-cols-1 gap-2 sm:grid-cols-2">
@@ -343,10 +340,10 @@ const NameDesImgSection = ({
             <label className="block" htmlFor={id + "-name"}>
               Name
             </label>
-            <FieldValidation error={uploadErrors.name}>
+            <FieldValidation error={imageErrors.name}>
               <Input
-                aria-invalid={hasError(uploadErrors.name)}
-                aria-errormessage={getErrorMsg(uploadErrors.name)}
+                aria-invalid={hasError(imageErrors.name)}
+                aria-errormessage={getErrorMsg(imageErrors.name)}
                 id={id + "-name"}
                 type="text"
                 {...register("name")}
@@ -370,10 +367,7 @@ const NameDesImgSection = ({
         {/* Wrapped outside to prevent image upload from shrinking if there's an error */}
         <div className="h-full min-h-[20rem] md:min-h-[15rem]">
           <FieldValidation
-            error={handleImageErrors(
-              uploadErrors.imageMetadata,
-              uploadErrors.urlSourceImage
-            )}
+            error={handleImageErrors(imageErrors.image?.imageMetadata)}
           >
             {isUploadedImage ? (
               <ImageUpload
@@ -386,7 +380,9 @@ const NameDesImgSection = ({
             ) : (
               <div className="relative h-full w-full">
                 <img
-                  className="absolute h-full w-full object-cover"
+                  className={`absolute h-full w-full rounded-md border-2 border-dashed object-cover ${
+                    urlSourceImage ? "border-transparent" : ""
+                  }`}
                   src={urlSourceImage}
                 />
               </div>
@@ -418,12 +414,18 @@ const NameDesImgSection = ({
         </div>
         {!isUploadedImage && (
           <FormItem>
-            <label htmlFor={id + "-url"}>Url</label>
-            <Input
-              className="w-full"
-              id={id + "-url"}
-              {...register("urlSourceImage")}
-            />
+            <label htmlFor={id + "-url"}>Image Url</label>
+            <FieldValidation error={imageErrors.image?.urlSourceImage}>
+              <Input
+                className="w-full"
+                aria-errormessage={getErrorMsg(
+                  imageErrors.image?.urlSourceImage
+                )}
+                aria-invalid={hasError(imageErrors.image?.urlSourceImage)}
+                id={id + "-url"}
+                {...register("image.urlSourceImage")}
+              />
+            </FieldValidation>
           </FormItem>
         )}
       </div>

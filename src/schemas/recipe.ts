@@ -1,3 +1,4 @@
+import { config } from "src/server/config";
 import { z } from "zod";
 
 export const getRecipesSchema = z.object({
@@ -77,30 +78,37 @@ export type addParsedRecipe = z.infer<typeof addParsedRecipeSchema>;
 
 export const addRecipeFormSchema = baseAddRecipeSchema
   .extend({
-    urlSourceImage: z.string().url().optional(),
-    imageMetadata: z
-      .object({
-        name: z.string({ required_error: "Image is required" }),
-        type: z.string({ invalid_type_error: "Image format not supported" }),
-        size: z.number({ invalid_type_error: "Image too big" }),
-      })
-      .optional(),
+    image: z.object({
+      urlSourceImage: z.literal("").or(z.string().url()),
+      imageMetadata: z
+        .object({
+          name: z.string(),
+          type: z.string().regex(/^image\//, { message: "Image format not supported" }),
+          size: z.number().max(config.s3.maxFileSize, { message: "Image must be less than 10mb"}),
+        })
+        .optional(),
+    }),
   })
   .refine(
     (val) => {
-      console.log(val)
-      if (val.urlSourceImage?.length && val.imageMetadata) {
+      if (val.image.urlSourceImage?.length && val.image.imageMetadata) {
         return false;
-      } else if (!val.urlSourceImage?.length && !val.imageMetadata) {
+      } else if (
+        !val.image.urlSourceImage?.length &&
+        !val.image.imageMetadata
+      ) {
         return false;
       }
       return true;
     },
     (val) => {
-      if (val.urlSourceImage?.length && val.imageMetadata) {
-        return { message: "Choose between a url or uploaded image. Not both" };
-      } else if (!val.urlSourceImage?.length && !val.imageMetadata) {
-        return { message: "Either a url or uploaded image is required" };
+      if (val.image.urlSourceImage?.length && val.image.imageMetadata) {
+        return { path: ["image"], message: "Choose between a url or uploaded image. Not both" };
+      } else if (
+        !val.image.urlSourceImage?.length &&
+        !val.image.imageMetadata
+      ) {
+        return { path: ["image"], message: "Either a url or uploaded image is required" };
       }
       return {};
     }
