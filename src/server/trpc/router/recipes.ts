@@ -47,7 +47,7 @@ export const recipesRouter = router({
     .input(getRecipeSchema)
     .query(async ({ ctx, input }) => {
       return await getRecipe(ctx, input.recipeId);
-      /*const urlPromises = recipe.images.map((image) => {
+      /*
           if (image.parsedImage) {
             return Promise.resolve(image.parsedImage.url);
           } else if (image.uploadedImage) {
