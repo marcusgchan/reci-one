@@ -21,6 +21,8 @@ env:
   GITHUB_CLIENT_SECRET: ${{ secrets.NEXTAUTH_GITHUB_CLIENT_SECRET }}
   ACCESS_KEY_ID: ${{ secrets.ACCESS_KEY_ID }}
   SECRET_ACCESS_KEY: ${{ secrets.SECRET_ACCESS_KEY }}
+  PARSER_SECRET: ${{ secrets.PARSER_SECRET }}
+  PARSER_URL: ${{ secrets.PARSER_URL }}
 
 jobs:
   format_and_lint:
