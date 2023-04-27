@@ -1,0 +1,16 @@
+{
+  "name": "reci-one-monorepo",
+  "version": "1.0.0",
+  "description": "- A recipe cookbook web app for add, viewing, deleting recipes - Store recipes from other recipe websites by URL - Currently, most features are still in development",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/marcusgchan/reci-one.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/marcusgchan/reci-one/issues"
+  },
+  "homepage": "https://github.com/marcusgchan/reci-one#readme"
+}

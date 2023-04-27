@@ -47,3 +47,6 @@ yarn-error.log*
 /parser/dist/
 /parser/build/
 *.egg-info/
+
+.nx/installation
+.nx/cache
