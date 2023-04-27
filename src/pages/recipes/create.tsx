@@ -1,12 +1,14 @@
 import { CustomReactFC } from "@/shared/types";
-import React, { SetStateAction, useId, useMemo, useState } from "react";
+import React, {
+  SetStateAction,
+  useEffect,
+  useId,
+  useMemo,
+  useState,
+} from "react";
 import { BiMinus } from "react-icons/bi";
 import { GrDrag } from "react-icons/gr";
-import {
-  formAddRecipe,
-  addRecipeSchema,
-  addRecipeFormSchema,
-} from "@/schemas/recipe";
+import { formAddRecipe, addRecipeFormSchema } from "@/schemas/recipe";
 import { v4 as uuidv4 } from "uuid";
 import { RouterOutputs, trpc } from "@/utils/trpc";
 import { DndContext, closestCenter, DragEndEvent } from "@dnd-kit/core";
@@ -71,7 +73,7 @@ const Create: CustomReactFC = () => {
       onSuccess() {
         setFormStage(3);
       },
-      onError(error) {
+      onError() {
         snackbarDispatch({
           type: "ERROR",
           message: "Sorry! Unable to parse this recipe :(",
@@ -125,9 +127,9 @@ const RecipeForm = ({
 }: {
   initialData: RecipeFormData | undefined;
 }) => {
-  const [isUploadedImage, setIsUploadedImage] = useState(
-    (data?.initialData && data.initialData.urlSourceImage.length == 0) ?? true
-  );
+  const usingUploadedImage =
+    (data?.initialData && data.initialData.urlSourceImage.length == 0) ?? true;
+  const [isUploadedImage, setIsUploadedImage] = useState(usingUploadedImage);
   const methods = useForm<formAddRecipe>({
     resolver: zodResolver(addRecipeFormSchema),
     defaultValues: data?.initialData || {
@@ -160,12 +162,16 @@ const RecipeForm = ({
     if (file) {
       methods.setValue(
         "image.imageMetadata",
-        { name: file.name, type: file.type, size: file.size },
+        {
+          name: file.name,
+          type: file.type,
+          size: file.size,
+        },
         { shouldValidate: true, shouldDirty: true, shouldTouch: true }
       );
     } else {
       methods.setValue("image.imageMetadata", undefined, {
-        shouldValidate: methods.formState.isSubmitted ? true : false,
+        shouldValidate: true,
         shouldDirty: true,
         shouldTouch: true,
       });
@@ -179,7 +185,7 @@ const RecipeForm = ({
     handleFileLoad,
     removeFile,
   } = useImageUpload(setFileMetadata);
-  const mutation = trpc.recipes.addRecipe.useMutation({
+  const addRecipeMutation = trpc.recipes.addRecipe.useMutation({
     async onSuccess(presignedPost) {
       if (!file) {
         // error unable to upload file or user somehow removed img after upload
@@ -223,12 +229,25 @@ const RecipeForm = ({
       }
     },
   });
+  const addParsedRecipeMutation = trpc.recipes.addParsedRecipe.useMutation();
   const snackbarDispatch = useSnackbarDispatch();
-  const createRecipe = methods.handleSubmit((data) => {
-    mutation.mutate(data);
+  const createRecipe = methods.handleSubmit((validData) => {
+    if (usingUploadedImage && validData.image.imageMetadata) {
+      const formattedData = {
+        ...validData,
+        imageMetadata: validData.image.imageMetadata,
+      };
+      addRecipeMutation.mutate(formattedData);
+    } else if (data?.siteInfo.url) {
+      const formattedData = {
+        ...validData,
+        urlSourceImage: validData.image.urlSourceImage,
+        urlSource: data?.siteInfo.url,
+      };
+      addParsedRecipeMutation.mutate(formattedData);
+    }
   });
   const navigateToRecipes = () => router.push("/recipes");
-  console.log(methods.formState.errors);
   return (
     <section className="p-5 pb-10">
       <FormProvider {...methods}>
@@ -277,7 +296,7 @@ const RecipeForm = ({
           <SectionWrapper>
             <CookingMethodsSection />
           </SectionWrapper>
-          <Button disabled={mutation.isLoading}>Create</Button>
+          <Button disabled={addRecipeMutation.isLoading}>Create</Button>
         </form>
       </FormProvider>
     </section>
@@ -308,7 +327,7 @@ const NameDesImgSection = ({
   const id = useId();
   const {
     register,
-    formState: { errors: imageErrors },
+    formState: { errors, submitCount },
     control,
   } = useFormContext<formAddRecipe>();
   function handleImageErrors(
@@ -324,14 +343,25 @@ const NameDesImgSection = ({
     if (uploadErrors?.size) {
       return uploadErrors.size;
     }
-
     if (uploadErrors?.type) {
       // Invalid file type
       return uploadErrors.types;
     }
   }
   const urlSourceImage = useWatch({ control, name: "image.urlSourceImage" });
-  console.log(control._formValues);
+  const imageMetadata = useWatch({ control, name: "image.imageMetadata" });
+  const [imageErrorMessage, setImageErrorMessage] = useState("");
+  useEffect(() => {
+    if (urlSourceImage.length && imageMetadata && submitCount) {
+      setImageErrorMessage(
+        "Either enter an image url or upload an image. Not both"
+      );
+    } else if (!urlSourceImage.length && !imageMetadata && submitCount) {
+      setImageErrorMessage("Enter an image url or upload an image");
+    } else {
+      setImageErrorMessage("");
+    }
+  }, [urlSourceImage, imageMetadata]);
   return (
     <div className="flex flex-col gap-2">
       <div className="grid min-h-[250px] grid-cols-1 gap-2 sm:grid-cols-2">
@@ -340,10 +370,10 @@ const NameDesImgSection = ({
             <label className="block" htmlFor={id + "-name"}>
               Name
             </label>
-            <FieldValidation error={imageErrors.name}>
+            <FieldValidation error={errors.name}>
               <Input
-                aria-invalid={hasError(imageErrors.name)}
-                aria-errormessage={getErrorMsg(imageErrors.name)}
+                aria-invalid={hasError(errors.name)}
+                aria-errormessage={getErrorMsg(errors.name)}
                 id={id + "-name"}
                 type="text"
                 {...register("name")}
@@ -367,7 +397,7 @@ const NameDesImgSection = ({
         {/* Wrapped outside to prevent image upload from shrinking if there's an error */}
         <div className="h-full min-h-[20rem] md:min-h-[15rem]">
           <FieldValidation
-            error={handleImageErrors(imageErrors.image?.imageMetadata)}
+            error={handleImageErrors(errors.image?.imageMetadata)}
           >
             {isUploadedImage ? (
               <ImageUpload
@@ -415,18 +445,19 @@ const NameDesImgSection = ({
         {!isUploadedImage && (
           <FormItem>
             <label htmlFor={id + "-url"}>Image Url</label>
-            <FieldValidation error={imageErrors.image?.urlSourceImage}>
+            <FieldValidation error={errors.image?.urlSourceImage}>
               <Input
                 className="w-full"
-                aria-errormessage={getErrorMsg(
-                  imageErrors.image?.urlSourceImage
-                )}
-                aria-invalid={hasError(imageErrors.image?.urlSourceImage)}
+                aria-errormessage={getErrorMsg(errors.image?.urlSourceImage)}
+                aria-invalid={hasError(errors.image?.urlSourceImage)}
                 id={id + "-url"}
                 {...register("image.urlSourceImage")}
               />
             </FieldValidation>
           </FormItem>
+        )}
+        {imageErrorMessage.length > 0 && (
+          <ErrorBox>{imageErrorMessage}</ErrorBox>
         )}
       </div>
     </div>

@@ -83,34 +83,14 @@ export const addRecipeFormSchema = baseAddRecipeSchema
       imageMetadata: z
         .object({
           name: z.string(),
-          type: z.string().regex(/^image\//, { message: "Image format not supported" }),
-          size: z.number().max(config.s3.maxFileSize, { message: "Image must be less than 10mb"}),
+          type: z
+            .string()
+            .regex(/^image\//, { message: "Image format not supported" }),
+          size: z.number().max(config.s3.maxFileSize, {
+            message: "Image must be less than 10mb",
+          }),
         })
         .optional(),
     }),
   })
-  .refine(
-    (val) => {
-      if (val.image.urlSourceImage?.length && val.image.imageMetadata) {
-        return false;
-      } else if (
-        !val.image.urlSourceImage?.length &&
-        !val.image.imageMetadata
-      ) {
-        return false;
-      }
-      return true;
-    },
-    (val) => {
-      if (val.image.urlSourceImage?.length && val.image.imageMetadata) {
-        return { path: ["image"], message: "Choose between a url or uploaded image. Not both" };
-      } else if (
-        !val.image.urlSourceImage?.length &&
-        !val.image.imageMetadata
-      ) {
-        return { path: ["image"], message: "Either a url or uploaded image is required" };
-      }
-      return {};
-    }
-  );
 export type formAddRecipe = z.infer<typeof addRecipeFormSchema>;
