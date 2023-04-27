@@ -371,7 +371,7 @@ const NameDesImgSection = ({
     } else {
       setImageErrorMessage("");
     }
-  }, [urlSourceImage, imageMetadata]);
+  }, [urlSourceImage, imageMetadata, submitCount]);
   return (
     <div className="flex flex-col gap-2">
       <div className="grid min-h-[250px] grid-cols-1 gap-2 sm:grid-cols-2">
@@ -424,6 +424,7 @@ const NameDesImgSection = ({
                     urlSourceImage ? "border-transparent" : ""
                   }`}
                   src={urlSourceImage}
+                  alt="recipe image"
                 />
               </div>
             )}
