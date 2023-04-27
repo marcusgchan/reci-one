@@ -229,16 +229,25 @@ const RecipeForm = ({
       }
     },
   });
-  const addParsedRecipeMutation = trpc.recipes.addParsedRecipe.useMutation();
+  const addParsedRecipeMutation = trpc.recipes.addParsedRecipe.useMutation({
+    onSuccess() {
+      snackbarDispatch({
+        type: "SUCCESS",
+        message: "Successfully create recipe",
+      });
+      navigateToRecipes();
+    },
+  });
   const snackbarDispatch = useSnackbarDispatch();
   const createRecipe = methods.handleSubmit((validData) => {
     if (usingUploadedImage && validData.image.imageMetadata) {
       const formattedData = {
         ...validData,
         imageMetadata: validData.image.imageMetadata,
+        urlSource: data?.siteInfo.url,
       };
       addRecipeMutation.mutate(formattedData);
-    } else if (data?.siteInfo.url) {
+    } else {
       const formattedData = {
         ...validData,
         urlSourceImage: validData.image.urlSourceImage,

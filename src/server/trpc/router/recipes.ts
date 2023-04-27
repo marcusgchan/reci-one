@@ -2,7 +2,7 @@ import {
   addRecipeSchema,
   getRecipeSchema,
   getRecipesSchema,
-  addParsedRecipeSchema,
+  addUrlImageRecipeSchema,
 } from "@/schemas/recipe";
 import {
   createParsedRecipe,
@@ -26,7 +26,28 @@ export const recipesRouter = router({
       const recipes = await getRecipes(ctx, userId, input);
       const roundedDate = getFormattedUtcDate();
       const formattedRecipes = recipes.map(async (recipe) => {
-        const urlPromises = recipe.images.map((image) => {
+        if (recipe.images[0]?.parsedImage) {
+          const url = recipe.images[0].parsedImage.url;
+          return { ...recipe, image: url };
+        } else if (recipe.images[0]?.uploadedImage) {
+          const url = await getImageSignedUrl(
+            userId,
+            recipe.id,
+            recipe.images[0].uploadedImage.key,
+            roundedDate
+          );
+          return { ...recipe, image: url };
+        }
+        // Shouldn't reach this point since image is required
+        return { ...recipe, image: "" };
+      });
+      return await Promise.all(formattedRecipes);
+    }),
+  getRecipe: protectedProcedure
+    .input(getRecipeSchema)
+    .query(async ({ ctx, input }) => {
+      return await getRecipe(ctx, input.recipeId);
+      /*const urlPromises = recipe.images.map((image) => {
           if (image.parsedImage) {
             return Promise.resolve(image.parsedImage.url);
           } else if (image.uploadedImage) {
@@ -40,14 +61,7 @@ export const recipesRouter = router({
           // No image for some reason (shouldn't happen)
           return Promise.resolve("");
         });
-        return { ...recipe, images: await Promise.all(urlPromises) };
-      });
-      return formattedRecipes;
-    }),
-  getRecipe: protectedProcedure
-    .input(getRecipeSchema)
-    .query(async ({ ctx, input }) => {
-      return await getRecipe(ctx, input.recipeId);
+        return { ...recipe, images: await Promise.all(urlPromises) };*/
     }),
   addRecipe: protectedProcedure
     .input(addRecipeSchema)
@@ -70,7 +84,7 @@ export const recipesRouter = router({
       return signedUrl;
     }),
   addParsedRecipe: protectedProcedure
-    .input(addParsedRecipeSchema)
+    .input(addUrlImageRecipeSchema)
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.session.user.id;
       const recipe = await createParsedRecipe(ctx, userId, input);

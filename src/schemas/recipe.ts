@@ -59,6 +59,7 @@ const baseAddRecipeSchema = z.object({
       name: z.string(),
     })
     .array(),
+  urlSource: z.string().url().optional(),
 });
 
 export const addRecipeSchema = baseAddRecipeSchema.extend({
@@ -70,11 +71,11 @@ export const addRecipeSchema = baseAddRecipeSchema.extend({
 });
 export type addRecipe = z.infer<typeof addRecipeSchema>;
 
-export const addParsedRecipeSchema = baseAddRecipeSchema.extend({
-  urlSource: z.string().url(),
+export const addUrlImageRecipeSchema = baseAddRecipeSchema.extend({
+
   urlSourceImage: z.string().url(),
 });
-export type addParsedRecipe = z.infer<typeof addParsedRecipeSchema>;
+export type addParsedRecipe = z.infer<typeof addUrlImageRecipeSchema>;
 
 export const addRecipeFormSchema = baseAddRecipeSchema
   .extend({
