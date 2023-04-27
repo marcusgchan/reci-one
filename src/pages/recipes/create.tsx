@@ -128,7 +128,8 @@ const RecipeForm = ({
   initialData: RecipeFormData | undefined;
 }) => {
   const usingUploadedImage =
-    (data?.initialData && data.initialData.image.urlSourceImage.length == 0) ?? true;
+    (data?.initialData && data.initialData.image.urlSourceImage.length == 0) ??
+    true;
   const [isUploadedImage, setIsUploadedImage] = useState(usingUploadedImage);
   const methods = useForm<formAddRecipe>({
     resolver: zodResolver(addRecipeFormSchema),

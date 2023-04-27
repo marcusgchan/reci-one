@@ -72,26 +72,24 @@ export const addRecipeSchema = baseAddRecipeSchema.extend({
 export type addRecipe = z.infer<typeof addRecipeSchema>;
 
 export const addUrlImageRecipeSchema = baseAddRecipeSchema.extend({
-
   urlSourceImage: z.string().url(),
 });
 export type addParsedRecipe = z.infer<typeof addUrlImageRecipeSchema>;
 
-export const addRecipeFormSchema = baseAddRecipeSchema
-  .extend({
-    image: z.object({
-      urlSourceImage: z.literal("").or(z.string().url()),
-      imageMetadata: z
-        .object({
-          name: z.string(),
-          type: z
-            .string()
-            .regex(/^image\//, { message: "Image format not supported" }),
-          size: z.number().max(config.s3.maxFileSize, {
-            message: "Image must be less than 10mb",
-          }),
-        })
-        .optional(),
-    }),
-  })
+export const addRecipeFormSchema = baseAddRecipeSchema.extend({
+  image: z.object({
+    urlSourceImage: z.literal("").or(z.string().url()),
+    imageMetadata: z
+      .object({
+        name: z.string(),
+        type: z
+          .string()
+          .regex(/^image\//, { message: "Image format not supported" }),
+        size: z.number().max(config.s3.maxFileSize, {
+          message: "Image must be less than 10mb",
+        }),
+      })
+      .optional(),
+  }),
+});
 export type formAddRecipe = z.infer<typeof addRecipeFormSchema>;
