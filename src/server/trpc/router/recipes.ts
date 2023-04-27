@@ -95,7 +95,7 @@ export const recipesRouter = router({
     .query(async ({ input }) => {
       try {
         const res = await fetch(
-          `http://localhost:8000/parse?url=${encodeURIComponent(input.url)}`,
+          `http://${env.PARSER_URL}/parse?url=${encodeURIComponent(input.url)}`,
           {
             headers: {
               Authorization: env.PARSER_SECRET,
@@ -106,14 +106,16 @@ export const recipesRouter = router({
         const recipe = (await res.json()) as ParsedRecipe;
         return {
           siteInfo: {
-            url: recipe.host,
+            url: input.url,
             author: recipe.author,
           },
           initialData: {
             name: recipe.title,
             description: recipe.description,
-            urlSourceImage: recipe.image,
-            imageMetadata: undefined,
+            image: {
+              urlSourceImage: recipe.image,
+              imageMetadata: undefined,
+            },
             ingredients: recipe.ingredients.map((ingredient) => ({
               id: uuidv4(),
               name: ingredient,

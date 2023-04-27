@@ -19,4 +19,5 @@ export const envSchema = z.object({
   ACCESS_KEY_ID: z.string(),
   SECRET_ACCESS_KEY: z.string(),
   PARSER_SECRET: z.string(),
+  PARSER_URL: z.string().url(),
 });

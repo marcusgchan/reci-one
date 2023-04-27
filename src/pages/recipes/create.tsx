@@ -128,7 +128,7 @@ const RecipeForm = ({
   initialData: RecipeFormData | undefined;
 }) => {
   const usingUploadedImage =
-    (data?.initialData && data.initialData.urlSourceImage.length == 0) ?? true;
+    (data?.initialData && data.initialData.image.urlSourceImage.length == 0) ?? true;
   const [isUploadedImage, setIsUploadedImage] = useState(usingUploadedImage);
   const methods = useForm<formAddRecipe>({
     resolver: zodResolver(addRecipeFormSchema),
@@ -240,7 +240,7 @@ const RecipeForm = ({
   });
   const snackbarDispatch = useSnackbarDispatch();
   const createRecipe = methods.handleSubmit((validData) => {
-    if (usingUploadedImage && validData.image.imageMetadata) {
+    if (isUploadedImage && validData.image.imageMetadata) {
       const formattedData = {
         ...validData,
         imageMetadata: validData.image.imageMetadata,
