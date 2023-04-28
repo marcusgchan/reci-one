@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "- A recipe cookbook web app for add, viewing, deleting recipes - Store recipes from other recipe websites by URL - Currently, most features are still in development",
   "main": "index.js",
+  "workspaces": [
+    "next"
+  ],
   "scripts": {
     "dev": "cd next && next dev",
     "build": "cd next && next build",
@@ -28,5 +31,8 @@
   },
   "nx": {
     "targets": {}
+  },
+  "dependencies": {
+    "@prisma/client": "^4.13.0"
   }
 }
