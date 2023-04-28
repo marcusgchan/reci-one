@@ -4,7 +4,13 @@
   "description": "- A recipe cookbook web app for add, viewing, deleting recipes - Store recipes from other recipe websites by URL - Currently, most features are still in development",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "cd next && next dev",
+    "build": "cd next && next build",
+    "start": "cd next && next start",
+    "format:write": "cd next && npx prettier --write '**/*.{ts,tsx,js,mjs,css,json}'",
+    "format:check": "cd next && npx prettier --check '**/*.{ts,tsx,js,mjs,css,json}'",
+    "lint": "cd next && npx eslint '**/*.{ts,tsx,js,mjs}'",
+    "postinstall": "cd next && prisma generate"
   },
   "repository": {
     "type": "git",
@@ -17,7 +23,7 @@
   },
   "homepage": "https://github.com/marcusgchan/reci-one#readme",
   "devDependencies": {
-    "nx": "16.0.0",
+    "nx": "^16.0.0",
     "nx-cloud": "latest"
   },
   "nx": {
