@@ -66,7 +66,7 @@ export function ImageUpload({
         <div className="relative h-full">
           <button
             onClick={() => removeFile(imgObjUrl)}
-            className="absolute right-0 top-0 z-10 translate-x-1/2 -translate-y-1/2 rounded-full bg-white text-gray-400 outline-offset-2 transition-transform hover:scale-110 focus:scale-110"
+            className="absolute right-0 top-0 z-10 -translate-y-1/2 translate-x-1/2 rounded-full bg-white text-gray-400 outline-offset-2 transition-transform hover:scale-110 focus:scale-110"
           >
             <CgCloseO size={25} />
           </button>

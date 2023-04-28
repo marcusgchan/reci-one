@@ -122,7 +122,7 @@ function MobileNav() {
         className="fixed inset-0 hidden flex-col items-center justify-center gap-2 bg-secondary text-xl"
       >
         <button
-          className="absolute top-[15px] right-[13px] text-gray-500"
+          className="absolute right-[13px] top-[15px] text-gray-500"
           onClick={toggleMenu}
           aria-expanded={isOpen}
           aria-controls="primary-navigation"
