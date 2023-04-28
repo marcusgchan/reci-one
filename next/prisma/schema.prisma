@@ -1,0 +1,225 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["extendedWhereUnique"]
+}
+
+datasource db {
+  provider     = "mysql" // NOTE: sqlite does not work with NextAuth.js
+  url          = env("DATABASE_URL")
+  relationMode = "prisma"
+}
+
+// Necessary for Next auth
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("sessions")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  accounts      Account[]
+  sessions      Session[]
+  comments      Comment[]
+  recipes       Recipe[]
+
+  @@map("users")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+model Recipe {
+  id          String   @id @default(cuid())
+  name        String
+  description String
+  prepTime    Decimal?
+  cookTime    Decimal?
+  isPublic    Boolean  @default(false)
+  isParsed    Boolean
+
+  images         RecipeImage[]
+  ingredients    Ingredient[]
+  steps          Step[]
+  mealTypes      MealTypesOnRecipies[]
+  cookingMethods CookingMethodsOnRecipies[]
+  comments       Comment[]
+  nationalities  NationalitiesOnRecipes[]
+
+  authorId String @db.VarChar(255)
+  author   User   @relation(fields: [authorId], references: [id])
+
+  @@index([authorId])
+  @@map("recipes")
+}
+
+model RecipeImage {
+  id String @id @default(cuid())
+
+  recipeId      String
+  recipe        Recipe         @relation(fields: [recipeId], references: [id])
+  uploadedImage UploadedImage?
+  parsedImage   ParsedImage?
+
+  @@index([recipeId])
+  @@map("recipe_images")
+}
+
+model UploadedImage {
+  key String
+
+  recipeImageId String      @id @unique
+  recipeImage   RecipeImage @relation(fields: [recipeImageId], references: [id])
+
+  @@map("uploaded_images")
+}
+
+model ParsedImage {
+  url String
+
+  recipeImageId String      @id @unique
+  recipeImage   RecipeImage @relation(fields: [recipeImageId], references: [id])
+
+  @@map("parsed_images")
+}
+
+model Step {
+  order    Int
+  name     String  @db.VarChar(1000)
+  isHeader Boolean @default(false)
+
+  recipeId String @db.VarChar(255)
+  recipe   Recipe @relation(fields: [recipeId], references: [id])
+
+  @@index([recipeId])
+  @@id([order, recipeId])
+  @@map("steps")
+}
+
+model Ingredient {
+  order    Int
+  name     String
+  isHeader Boolean @default(false)
+
+  recipeId String @db.VarChar(255)
+  recipe   Recipe @relation(fields: [recipeId], references: [id])
+
+  @@index([recipeId])
+  @@id([order, recipeId])
+  @@map("ingredients")
+}
+
+model CookingMethod {
+  id       String                     @id @default(cuid())
+  name     String                     @unique @db.VarChar(255)
+  recipies CookingMethodsOnRecipies[]
+
+  @@map("cooking_methods")
+}
+
+model CookingMethodsOnRecipies {
+  cookingMethod   CookingMethod @relation(fields: [cookingMethodId], references: [id])
+  cookingMethodId String
+  Recipe          Recipe        @relation(fields: [recipeId], references: [id])
+  recipeId        String
+
+  @@index([recipeId])
+  @@index([cookingMethodId])
+  @@id([cookingMethodId, recipeId])
+  @@map("cooking_methods_on_recipies")
+}
+
+model Comment {
+  id          String   @id @default(cuid())
+  description String   @db.VarChar(1000)
+  dateCreated DateTime @default(now())
+  rating      Decimal
+
+  authorId String @db.VarChar(255)
+  author   User   @relation(fields: [authorId], references: [id])
+
+  recipeId String @db.VarChar(255)
+  recipe   Recipe @relation(fields: [recipeId], references: [id])
+  
+  @@index([recipeId])
+  @@index([authorId])
+  @@map("comments")
+}
+
+model MealTypesOnRecipies {
+  mealType   MealType @relation(fields: [mealTypeId], references: [id])
+  mealTypeId String
+  recipe     Recipe   @relation(fields: [recipeId], references: [id])
+  recipeId   String
+
+  @@id([mealTypeId, recipeId])
+  @@index([mealTypeId])
+  @@index([recipeId])
+  @@map("meal_types_on_recipies")
+}
+
+model MealType {
+  id       String                @id @default(cuid())
+  name     String                @unique
+  recipies MealTypesOnRecipies[]
+
+  @@map("meal_types")
+}
+
+model Nationality {
+  id       String                   @id @default(cuid())
+  name     String                   @unique
+  recipies NationalitiesOnRecipes[]
+
+  @@map("nationalities")
+}
+
+model NationalitiesOnRecipes {
+  nationality   Nationality @relation(fields: [nationalityId], references: [id])
+  nationalityId String
+  recipe        Recipe      @relation(fields: [recipeId], references: [id])
+  recipeId      String
+
+  @@id([nationalityId, recipeId])
+  @@index([nationalityId])
+  @@index([recipeId])
+  @@map("nationalities_on_recipies")
+}

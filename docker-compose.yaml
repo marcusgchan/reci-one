@@ -4,6 +4,8 @@ services:
   db:
     image: mysql:8.0.30
     restart: always
+    env_file:
+      - ./next/.env
     environment:
       - MYSQL_DATABASE=recipe-db
       - MYSQL_ROOT_PASSWORD=${MY_SQL_ROOT_PASSWORD}
@@ -26,6 +28,8 @@ services:
   minio:
     image: minio/minio
     command: minio server /data --console-address ":9001"
+    env_file:
+      - ./next/.env
     ports:
       - "9000:9000"
       - "9001:9001"
@@ -45,6 +49,8 @@ services:
 
   createbuckets:
     image: minio/mc
+    env_file:
+      - ./next/.env
     depends_on:
       minio:
         condition: service_healthy
