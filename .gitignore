@@ -33,10 +33,10 @@ yarn-error.log*
 *.tsbuildinfo
 
 # Flask server (parser)
-/parser/venv/
+venv
 
-/parser/*.pyc
-/parser/__pycache__/
+*.pyc
+__pycache__
 
 /parser/instance/
 

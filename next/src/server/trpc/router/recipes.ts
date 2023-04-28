@@ -102,6 +102,7 @@ export const recipesRouter = router({
             },
           }
         );
+        console.log(res);
         if (!res.ok) throw new Error("Unable to parse recipe");
         const recipe = (await res.json()) as ParsedRecipe;
         return {
