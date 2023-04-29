@@ -12,4 +12,4 @@ RUN pip install -r requirements.txt
 
 COPY . .
 
-CMD ["flask", "--app", "./", "run", "--host", "0.0.0.0", "--port", "8000"] 
+CMD ["flask", "--app", "api.index", "run", "--host", "0.0.0.0", "--port", "8000"]
