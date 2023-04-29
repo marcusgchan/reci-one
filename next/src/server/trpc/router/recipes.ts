@@ -95,7 +95,7 @@ export const recipesRouter = router({
     .query(async ({ input }) => {
       try {
         const res = await fetch(
-          `http://${env.PARSER_URL}/parse?url=${encodeURIComponent(input.url)}`,
+          `${env.PARSER_URL}/parse?url=${encodeURIComponent(input.url)}`,
           {
             headers: {
               Authorization: env.PARSER_SECRET,
