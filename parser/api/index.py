@@ -19,9 +19,10 @@ app.config.from_mapping(
 password = os.environ.get("PARSER_SECRET")
 
 
-@app.route('/test')
+@app.route('/')
 def test():
     return "test"
+
 
 @app.route('/parse', methods=["GET"])
 def hello():
