@@ -31,8 +31,5 @@
   },
   "nx": {
     "targets": {}
-  },
-  "dependencies": {
-    "@prisma/client": "^4.13.0"
   }
 }
