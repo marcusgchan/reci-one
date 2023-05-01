@@ -19,11 +19,6 @@ app.config.from_mapping(
 password = os.environ.get("PARSER_SECRET")
 
 
-@app.route('/')
-def test():
-    return "test"
-
-
 @app.route('/parse', methods=["GET"])
 def hello():
     secret = request.headers.get("Authorization")
