@@ -6,11 +6,7 @@ node_modules
 .pnp.js
 
 # next.js
-/next/.next/
-/next/out/
-
-# production
-/next/build
+.next/
 
 # misc
 .DS_Store
@@ -47,6 +43,3 @@ __pycache__
 /parser/dist/
 /parser/build/
 *.egg-info/
-
-.nx/installation
-.nx/cache
