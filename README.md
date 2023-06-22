@@ -14,15 +14,17 @@
 ## How to run
 - Install docker and run the daemon
 - Create a .env file in the root directory
-- Generate the NEXTAUTH_SECRET by running ```openssl rand -base64 32```
+- Generate the NEXTAUTH_SECRET and parser secret by running ```openssl rand -base64 32```
 - Create a Github client id and secret pair
-- The home page url and callback url is http://localhost:3000
+- The home page url is ```http://localhost:3000``` and callback url is ```http://localhost:3000/auth/callback/github```
+
+Create an env file in the root directory:
 
 ```
 # Prisma
 # Local dev database
 MY_SQL_ROOT_PASSWORD=secret
-DATABASE_URL=mysql://root:secret@localhost:3306/recipe-db
+DATABASE_URL=mysql://root:secret@localhost:3306/reci-one-db
 
 # Next Auth
 NEXTAUTH_SECRET=<NextAuth Secret>
@@ -38,8 +40,22 @@ SECRET_ACCESS_KEY=12345678
 BUCKET_NAME=minio-reci-one
 BUCKET_DOMAIN=http://localhost:9000
 
+# secret key for parsing server
+PARSER_SECRET=<parser-secret>
+PARSER_URL=http://parser:8000
 ```
 
-- Run ```npm run dev``` to start the NextJS server
+Create a .env file in ```/parser```. This parser secret must match the parser secret in the other .env file
+
+```
+PARSER_SECRET=<parser-secret>
+```
+
 - Run ```docker compose up``` to start the docker containers
-- Run ```npx prisma migrate dev``` and ```npx prisma db seed```
+- Go into the Nextjs docker container by running ```docker exec -it reci-one-next-1 bash``` and run ```npx prisma migrate dev``` and ```npx prisma db seed```
+
+Now we need to get the local types setup since we just installed everything in the containers
+
+Run:
+- ```npm i``` in the root directory
+- ```pip install -r requirements.txt``` in ```\parser```
