@@ -71,12 +71,10 @@ function MobileNav() {
   const toggleMenu = () => {
     setIsOpen((io) => !io);
   };
-  const queueNavigation = (
-    path: string,
-  ) => {
+  const queueNavigation = (path: string) => {
     toggleMenu();
     setNextRoute(path);
-   };
+  };
   return (
     <div className="isolate mx-auto flex w-full justify-between text-gray-500 md:hidden">
       <h1>
@@ -110,7 +108,7 @@ function MobileNav() {
         }}
         onAnimationComplete={() => {
           if (!isOpen && nextRoute) {
-            router.push(nextRoute)
+            router.push(nextRoute);
             setNextRoute("");
           }
         }}
