@@ -66,26 +66,22 @@ function MobileNav() {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const navRef = useRef<HTMLElement>(null);
+  const [nextRoute, setNextRoute] = useState("");
   const html = document.querySelector("html");
   const toggleMenu = () => {
     setIsOpen((io) => !io);
   };
-  const navigate = async (
+  const queueNavigation = (
     path: string,
-    config: { toggleNav: boolean } = { toggleNav: true }
   ) => {
-    if (router.pathname !== path) {
-      router.push(path);
-    }
-    if (config.toggleNav) {
-      toggleMenu();
-    }
-  };
+    toggleMenu();
+    setNextRoute(path);
+   };
   return (
     <div className="isolate mx-auto flex w-full justify-between text-gray-500 md:hidden">
       <h1>
         <button
-          onClick={() => navigate("/recipes", { toggleNav: false })}
+          onClick={() => queueNavigation("/recipes")}
           className="text-3xl tracking-wider"
         >
           Reci<span className="text-accent-500">One</span>
@@ -110,6 +106,12 @@ function MobileNav() {
           // Closing state
           else {
             (html as HTMLHtmlElement).style.overflow = "auto";
+          }
+        }}
+        onAnimationComplete={() => {
+          if (!isOpen && nextRoute) {
+            router.push(nextRoute)
+            setNextRoute("");
           }
         }}
         animate={isOpen ? "open" : "closed"}
@@ -139,7 +141,8 @@ function MobileNav() {
           <li className="text-center">
             <button
               className="cursor-pointer"
-              onClick={() => navigate("/recipes")}
+              onClick={toggleMenu}
+              onAnimationEnd={() => queueNavigation("/recipes")}
             >
               RECIPES
             </button>
@@ -150,7 +153,7 @@ function MobileNav() {
           <li className="text-center">
             <button
               className="cursor-pointer"
-              onClick={() => navigate("/recipes/create")}
+              onClick={() => queueNavigation("/recipes/create")}
             >
               ADD RECIPE
             </button>
