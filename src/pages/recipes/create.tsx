@@ -32,7 +32,11 @@ import {
 import { useSnackbarDispatch } from "@/components/Snackbar";
 import { Combobox } from "@/ui/Combobox";
 import { Chip } from "@/components/ui/Chip";
-import { ImageUpload, useImageUpload } from "@/ui/ImageUpload";
+import {
+  ImageUpload,
+  UploadedImageResult,
+  useImageUpload,
+} from "@/ui/ImageUpload";
 import { Input } from "@/ui/Input";
 import { Textarea } from "@/ui/Textarea";
 import { Button } from "@/ui/Button";
@@ -168,11 +172,10 @@ const RecipeForm = ({
           type: file.type,
           size: file.size,
         },
-        { shouldValidate: true, shouldDirty: true, shouldTouch: true }
+        { shouldDirty: true, shouldTouch: true }
       );
     } else {
       methods.setValue("image.imageMetadata", undefined, {
-        shouldValidate: true,
         shouldDirty: true,
         shouldTouch: true,
       });
@@ -181,9 +184,8 @@ const RecipeForm = ({
   const {
     file,
     handleFileSelect,
+    uploadedImageResult,
     handleFileDrop,
-    imgObjUrlRef,
-    handleFileLoad,
     removeFile,
   } = useImageUpload(setFileMetadata);
   const addRecipeMutation = trpc.recipes.addRecipe.useMutation({
@@ -279,11 +281,10 @@ const RecipeForm = ({
           </div>
           <SectionWrapper>
             <NameDesImgSection
+              uploadedImageResult={uploadedImageResult}
               handleFileSelect={handleFileSelect}
               handleFileDrop={handleFileDrop}
-              handleFileLoad={handleFileLoad}
               removeFile={removeFile}
-              imgObjUrl={imgObjUrlRef.current}
               isUploadedImage={isUploadedImage}
               setIsUploadedImage={setIsUploadedImage}
             />
@@ -318,19 +319,17 @@ type imgMetadata = NonNullable<
 >;
 
 const NameDesImgSection = ({
+  uploadedImageResult,
   handleFileSelect,
   handleFileDrop,
-  imgObjUrl,
-  handleFileLoad,
   removeFile,
   isUploadedImage,
   setIsUploadedImage,
 }: {
+  uploadedImageResult: UploadedImageResult;
   handleFileSelect: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleFileDrop: (e: React.DragEvent) => void;
-  imgObjUrl: undefined | string;
-  handleFileLoad: (src: string) => void;
-  removeFile: (src: string) => void;
+  removeFile: () => void;
   isUploadedImage: boolean;
   setIsUploadedImage: React.Dispatch<SetStateAction<boolean>>;
 }) => {
@@ -411,14 +410,14 @@ const NameDesImgSection = ({
           >
             {isUploadedImage ? (
               <ImageUpload
-                handleFileLoad={handleFileLoad}
+                uploadedImageResult={uploadedImageResult}
                 removeFile={removeFile}
                 handleFilesSelect={handleFileSelect}
                 handleFileDrop={handleFileDrop}
-                imgObjUrl={imgObjUrl}
               />
             ) : (
               <div className="relative h-full w-full">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   className={`absolute h-full w-full rounded-md border-2 border-dashed object-cover ${
                     urlSourceImage ? "border-transparent" : ""
