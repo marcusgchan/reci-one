@@ -58,4 +58,4 @@ Now we need to get the local types setup since we just installed everything in t
 
 Run:
 - ```npm i``` in the root directory
-- ```pip install -r requirements.txt``` in ```\parser```
+- ```pip install -r requirements.txt``` in ```/parser```
