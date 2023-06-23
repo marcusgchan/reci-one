@@ -66,26 +66,20 @@ function MobileNav() {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const navRef = useRef<HTMLElement>(null);
+  const [nextRoute, setNextRoute] = useState("");
   const html = document.querySelector("html");
   const toggleMenu = () => {
     setIsOpen((io) => !io);
   };
-  const navigate = async (
-    path: string,
-    config: { toggleNav: boolean } = { toggleNav: true }
-  ) => {
-    if (router.pathname !== path) {
-      router.push(path);
-    }
-    if (config.toggleNav) {
-      toggleMenu();
-    }
+  const queueNavigation = (path: string) => {
+    toggleMenu();
+    setNextRoute(path);
   };
   return (
     <div className="isolate mx-auto flex w-full justify-between text-gray-500 md:hidden">
       <h1>
         <button
-          onClick={() => navigate("/recipes", { toggleNav: false })}
+          onClick={() => queueNavigation("/recipes")}
           className="text-3xl tracking-wider"
         >
           Reci<span className="text-accent-500">One</span>
@@ -112,6 +106,12 @@ function MobileNav() {
             (html as HTMLHtmlElement).style.overflow = "auto";
           }
         }}
+        onAnimationComplete={() => {
+          if (!isOpen && nextRoute) {
+            router.push(nextRoute);
+            setNextRoute("");
+          }
+        }}
         animate={isOpen ? "open" : "closed"}
         variants={{
           open: { opacity: 1, y: 0 },
@@ -122,7 +122,7 @@ function MobileNav() {
         className="fixed inset-0 hidden flex-col items-center justify-center gap-2 bg-secondary text-xl"
       >
         <button
-          className="absolute top-[15px] right-[13px] text-gray-500"
+          className="absolute right-[13px] top-[15px] text-gray-500"
           onClick={toggleMenu}
           aria-expanded={isOpen}
           aria-controls="primary-navigation"
@@ -139,7 +139,8 @@ function MobileNav() {
           <li className="text-center">
             <button
               className="cursor-pointer"
-              onClick={() => navigate("/recipes")}
+              onClick={toggleMenu}
+              onAnimationEnd={() => queueNavigation("/recipes")}
             >
               RECIPES
             </button>
@@ -150,7 +151,7 @@ function MobileNav() {
           <li className="text-center">
             <button
               className="cursor-pointer"
-              onClick={() => navigate("/recipes/create")}
+              onClick={() => queueNavigation("/recipes/create")}
             >
               ADD RECIPE
             </button>

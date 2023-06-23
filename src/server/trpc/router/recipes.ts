@@ -2,12 +2,21 @@ import {
   addRecipeSchema,
   getRecipeSchema,
   getRecipesSchema,
+  addUrlImageRecipeSchema,
 } from "@/schemas/recipe";
-import { createRecipe, getRecipe, getRecipes } from "@/services/recipesService";
+import {
+  createParsedRecipe,
+  createRecipe,
+  getRecipe,
+  getRecipes,
+} from "@/services/recipesService";
 import { getImageSignedUrl, getUploadSignedUrl } from "@/services/s3Services";
-import { TRPCClient } from "@trpc/client";
+import { ParsedRecipe } from "@/shared/types";
 import { TRPCError } from "@trpc/server";
+import { env } from "src/server/env.mjs";
 import { protectedProcedure, router } from "../trpc";
+import { v4 as uuidv4 } from "uuid";
+import z from "zod";
 
 export const recipesRouter = router({
   getRecipes: protectedProcedure
@@ -16,34 +25,28 @@ export const recipesRouter = router({
       const userId = ctx.session?.user?.id;
       const recipes = await getRecipes(ctx, userId, input);
       const roundedDate = getFormattedUtcDate();
-      const signedUrls = await Promise.all(
-        recipes.map((recipe) =>
-          getImageSignedUrl(
-            recipe.authorId,
+      const formattedRecipes = recipes.map(async (recipe) => {
+        if (recipe.images[0]?.parsedImage) {
+          const url = recipe.images[0].parsedImage.url;
+          return { ...recipe, image: url };
+        } else if (recipe.images[0]?.uploadedImage) {
+          const url = await getImageSignedUrl(
+            userId,
             recipe.id,
-            recipe.mainImage,
+            recipe.images[0].uploadedImage.key,
             roundedDate
-          ).catch(() => "")
-        )
-      );
-      recipes.forEach(
-        (recipe, i) => (recipe.mainImage = signedUrls[i] as string)
-      );
-      return recipes;
+          );
+          return { ...recipe, image: url };
+        }
+        // Shouldn't reach this point since image is required
+        return { ...recipe, image: "" };
+      });
+      return await Promise.all(formattedRecipes);
     }),
   getRecipe: protectedProcedure
     .input(getRecipeSchema)
     .query(async ({ ctx, input }) => {
-      const recipe = await getRecipe(ctx, input.recipeId);
-      const roundedDate = getFormattedUtcDate();
-      const signedUrl = await getImageSignedUrl(
-        recipe!.authorId,
-        recipe!.id,
-        recipe!.mainImage,
-        roundedDate
-      ).catch(() => "");
-      recipe!.mainImage = signedUrl;
-      return recipe;
+      return await getRecipe(ctx, input.recipeId);
     }),
   addRecipe: protectedProcedure
     .input(addRecipeSchema)
@@ -64,6 +67,66 @@ export const recipesRouter = router({
         roundedDate
       );
       return signedUrl;
+    }),
+  addParsedRecipe: protectedProcedure
+    .input(addUrlImageRecipeSchema)
+    .mutation(async ({ ctx, input }) => {
+      const userId = ctx.session.user.id;
+      const recipe = await createParsedRecipe(ctx, userId, input);
+      return recipe;
+    }),
+  parseRecipe: protectedProcedure
+    .input(z.object({ url: z.string() }))
+    .query(async ({ input }) => {
+      try {
+        const res = await fetch(
+          `${env.PARSER_URL}/parse?url=${encodeURIComponent(input.url)}`,
+          {
+            headers: {
+              Authorization: env.PARSER_SECRET,
+            },
+          }
+        );
+        console.log(res);
+        if (!res.ok) throw new Error("Unable to parse recipe");
+        const recipe = (await res.json()) as ParsedRecipe;
+        return {
+          siteInfo: {
+            url: input.url,
+            author: recipe.author,
+          },
+          initialData: {
+            name: recipe.title,
+            description: recipe.description,
+            image: {
+              urlSourceImage: recipe.image,
+              imageMetadata: undefined,
+            },
+            ingredients: recipe.ingredients.map((ingredient) => ({
+              id: uuidv4(),
+              name: ingredient,
+              isHeader: false,
+            })),
+            steps: recipe.instructions_list.map((step) => ({
+              id: uuidv4(),
+              name: step,
+              isHeader: false,
+            })),
+            prepTime: recipe.prep_time,
+            cookTime: recipe.cook_time,
+            isPublic: false,
+            cookingMethods: [],
+            mealTypes: [],
+            nationalities: [],
+          },
+        };
+      } catch (e) {
+        console.log(e);
+        throw new TRPCError({
+          message: "Unable to parse recipe",
+          code: "INTERNAL_SERVER_ERROR",
+        });
+      }
     }),
 });
 

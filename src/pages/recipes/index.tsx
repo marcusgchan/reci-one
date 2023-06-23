@@ -138,8 +138,8 @@ const Recipes = ({ recipes }: { recipes: Recipes }) => {
       ref={parent}
       className="mx-auto grid h-full w-full max-w-7xl auto-rows-min grid-cols-1 gap-10 overflow-visible sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
     >
-      {recipes.map(({ id, name, mainImage }) => (
-        <RecipeCard key={id} id={id} name={name} src={mainImage} />
+      {recipes.map(({ id, name, image }) => (
+        <RecipeCard key={id} id={id} name={name} src={image} />
       ))}
     </section>
   );

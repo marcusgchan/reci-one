@@ -1,14 +1,27 @@
 version: "3.3"
 
 services:
+  next:
+    build:
+      context: ./
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./src:/app/src
+      - ./prisma:/app/prisma
+    networks:
+      - reci-one
+
   db:
     image: mysql:8.0.30
     restart: always
     environment:
-      - MYSQL_DATABASE=recipe-db
+      - MYSQL_DATABASE=${MY_SQL_DATABASE}
       - MYSQL_ROOT_PASSWORD=${MY_SQL_ROOT_PASSWORD}
     volumes:
-      - recipe-db:/var/lib/mysql
+      - reci-one-db:/var/lib/mysql
+    networks:
+      - reci-one
     ports:
       - "3306:3306"
 
@@ -57,7 +70,7 @@ services:
       - reci-one
 
 volumes:
-  recipe-db:
+  reci-one-db:
   minio-data:
 
 networks:

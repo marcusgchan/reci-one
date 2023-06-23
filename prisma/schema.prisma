@@ -7,8 +7,8 @@ generator client {
 }
 
 datasource db {
-  provider             = "mysql" // NOTE: sqlite does not work with NextAuth.js
-  url                  = env("DATABASE_URL")
+  provider     = "mysql" // NOTE: sqlite does not work with NextAuth.js
+  url          = env("DATABASE_URL")
   relationMode = "prisma"
 }
 
@@ -28,6 +28,7 @@ model Account {
   session_state     String?
   user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@index([userId])
   @@unique([provider, providerAccountId])
   @@map("accounts")
 }
@@ -39,6 +40,7 @@ model Session {
   expires      DateTime
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@index([userId])
   @@map("sessions")
 }
 
@@ -72,20 +74,51 @@ model Recipe {
   prepTime    Decimal?
   cookTime    Decimal?
   isPublic    Boolean  @default(false)
-  mainImage   String   @db.VarChar(127)
+  isParsed    Boolean
 
+  images         RecipeImage[]
   ingredients    Ingredient[]
   steps          Step[]
   mealTypes      MealTypesOnRecipies[]
   cookingMethods CookingMethodsOnRecipies[]
-  images         Image[]
   comments       Comment[]
   nationalities  NationalitiesOnRecipes[]
 
   authorId String @db.VarChar(255)
   author   User   @relation(fields: [authorId], references: [id])
 
+  @@index([authorId])
   @@map("recipes")
+}
+
+model RecipeImage {
+  id String @id @default(cuid())
+
+  recipeId      String
+  recipe        Recipe         @relation(fields: [recipeId], references: [id])
+  uploadedImage UploadedImage?
+  parsedImage   ParsedImage?
+
+  @@index([recipeId])
+  @@map("recipe_images")
+}
+
+model UploadedImage {
+  key String
+
+  recipeImageId String      @id @unique
+  recipeImage   RecipeImage @relation(fields: [recipeImageId], references: [id])
+
+  @@map("uploaded_images")
+}
+
+model ParsedImage {
+  url String
+
+  recipeImageId String      @id @unique
+  recipeImage   RecipeImage @relation(fields: [recipeImageId], references: [id])
+
+  @@map("parsed_images")
 }
 
 model Step {
@@ -96,6 +129,7 @@ model Step {
   recipeId String @db.VarChar(255)
   recipe   Recipe @relation(fields: [recipeId], references: [id])
 
+  @@index([recipeId])
   @@id([order, recipeId])
   @@map("steps")
 }
@@ -108,6 +142,7 @@ model Ingredient {
   recipeId String @db.VarChar(255)
   recipe   Recipe @relation(fields: [recipeId], references: [id])
 
+  @@index([recipeId])
   @@id([order, recipeId])
   @@map("ingredients")
 }
@@ -126,6 +161,8 @@ model CookingMethodsOnRecipies {
   Recipe          Recipe        @relation(fields: [recipeId], references: [id])
   recipeId        String
 
+  @@index([recipeId])
+  @@index([cookingMethodId])
   @@id([cookingMethodId, recipeId])
   @@map("cooking_methods_on_recipies")
 }
@@ -141,7 +178,9 @@ model Comment {
 
   recipeId String @db.VarChar(255)
   recipe   Recipe @relation(fields: [recipeId], references: [id])
-
+  
+  @@index([recipeId])
+  @@index([authorId])
   @@map("comments")
 }
 
@@ -152,6 +191,8 @@ model MealTypesOnRecipies {
   recipeId   String
 
   @@id([mealTypeId, recipeId])
+  @@index([mealTypeId])
+  @@index([recipeId])
   @@map("meal_types_on_recipies")
 }
 
@@ -161,16 +202,6 @@ model MealType {
   recipies MealTypesOnRecipies[]
 
   @@map("meal_types")
-}
-
-model Image {
-  id   String @id @default(cuid())
-  name String @db.VarChar(127)
-
-  recipeId String @db.VarChar(255)
-  recipe   Recipe @relation(fields: [recipeId], references: [id])
-
-  @@map("images")
 }
 
 model Nationality {
@@ -188,5 +219,7 @@ model NationalitiesOnRecipes {
   recipeId      String
 
   @@id([nationalityId, recipeId])
+  @@index([nationalityId])
+  @@index([recipeId])
   @@map("nationalities_on_recipies")
 }

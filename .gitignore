@@ -1,23 +1,12 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dependencies
-/node_modules
-/.pnp
+node_modules
+.pnp
 .pnp.js
 
-# testing
-/coverage
-
-# database
-/prisma/db.sqlite
-/prisma/db.sqlite-journal
-
 # next.js
-/.next/
-/out/
-
-# production
-/build
+.next/
 
 # misc
 .DS_Store
@@ -40,17 +29,17 @@ yarn-error.log*
 *.tsbuildinfo
 
 # Flask server (parser)
-venv/
+venv
 
 *.pyc
-__pycache__/
+__pycache__
 
-instance/
+/parser/instance/
 
-.pytest_cache/
-.coverage
-htmlcov/
+/parser/.pytest_cache/
+/parser/.coverage
+/parser/htmlcov/
 
-dist/
-build/
+/parser/dist/
+/parser/build/
 *.egg-info/
