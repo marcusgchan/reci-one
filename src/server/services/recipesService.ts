@@ -199,7 +199,7 @@ export async function getRecipe(ctx: Context, recipeId: string) {
   const recipe = await ctx.prisma.recipe.findUnique({
     where: { id: recipeId },
     include: {
-      images: { include: { parsedImage: true, uploadedImage: true } },
+      mainImage: { include: { urlImage: true, metadataImage: true } },
       ingredients: true,
       cookingMethods: true,
       nationalities: true,
@@ -215,15 +215,3 @@ export async function getRecipe(ctx: Context, recipeId: string) {
 
   return { ...recipe };
 }
-
-export const saveUploadedImageToDatabase = async (
-  ctx: Context,
-  userId: string,
-  recipeId: string,
-  key: string
-) => {
-  await ctx.prisma.recipe.update({
-    data: { images: { create: { uploadedImage: { create: { key } } } } },
-    where: { id: recipeId, authorId: userId },
-  });
-};

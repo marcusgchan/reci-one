@@ -57,7 +57,37 @@ export const recipesRouter = router({
   getRecipe: protectedProcedure
     .input(getRecipeSchema)
     .query(async ({ ctx, input }) => {
-      return await getRecipe(ctx, input.recipeId);
+      const recipe = await getRecipe(ctx, input.recipeId);
+      if (!recipe) {
+        return null;
+      }
+      if (recipe.mainImage?.type === "url" && recipe.mainImage.urlImage?.url) {
+        return {
+          ...recipe,
+          mainImage: {
+            type: "url" as const,
+            url: recipe.mainImage.urlImage.url,
+          },
+        };
+      } else if (
+        recipe.mainImage?.type === "presignedUrl" &&
+        recipe.mainImage.metadataImage
+      ) {
+        try {
+          const url = await getImageSignedUrl(
+            ctx.session.user.id,
+            recipe.id,
+            recipe.mainImage.metadataImage.key,
+            getFormattedUtcDate()
+          );
+          return {
+            ...recipe,
+            mainImage: { type: "presignedUrl" as const, url },
+          };
+        } catch (e) {}
+      }
+      // Should only reach here if there isn't an image
+      return { ...recipe, mainImage: { type: "noImage" as const, url: "" } };
     }),
   addRecipe: protectedProcedure
     .input(addRecipeSchema)
@@ -98,7 +128,6 @@ export const recipesRouter = router({
             },
           }
         );
-        console.log(res);
         if (!res.ok) throw new Error("Unable to parse recipe");
         const recipe = (await res.json()) as ParsedRecipe;
         return {
@@ -132,7 +161,6 @@ export const recipesRouter = router({
           },
         };
       } catch (e) {
-        console.log(e);
         throw new TRPCError({
           message: "Unable to parse recipe",
           code: "INTERNAL_SERVER_ERROR",

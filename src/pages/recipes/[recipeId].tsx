@@ -1,5 +1,5 @@
 import { Loader } from "@/shared/components/Loader";
-import { trpc } from "@/utils/trpc";
+import { RouterOutputs, trpc } from "@/utils/trpc";
 import { useRouter } from "next/router";
 import Image from "next/image";
 import { RiShareForwardFill } from "react-icons/ri";
@@ -15,34 +15,24 @@ export default function Recipe() {
     return <Loader />;
   }
 
+  if (!data) {
+    return <div>Recipe not found</div>;
+  }
+
   return (
     <div className="flex flex-col items-center pb-10">
       <div className="w-2/3 space-y-6">
         <div className="text-center text-4xl font-bold">{data!.name}</div>
         <div>
-          {data!.description}
+          {data.description}
           <br />
           <br />
           <div className="text-sm">
             Recipe by <b>{data!.author.name}</b>
           </div>
         </div>
-        <button
-          onClick={() => copy()}
-          className="flex flex-row border-4 border-solid border-red-400 p-2 px-10 font-bold hover:bg-red-400 gap-3"
-        >
-          Share
-          <RiShareForwardFill size={22}/>
-        </button>
         <div>
-          <Image
-            width={600}
-            height={600}
-            unoptimized
-            loading="lazy"
-            alt={data!.name}
-            src={data!.mainImage}
-          />
+          <DisplayImage {...data.mainImage} name={data.name} />
         </div>
         <div className="flex">
           <div className="flex flex-col gap-6 bg-amber-100 p-5">
@@ -137,11 +127,24 @@ export default function Recipe() {
       </div>
     </div>
   );
+}
 
-  async function copy() {
-    const el = document.createElement("input");
-    el.value = window.location.href;
-    await navigator.clipboard.writeText(el.value);
-    <SnackbarProvider > </SnackbarProvider>
+type DisplayImageProps = NonNullable<
+  RouterOutputs["recipes"]["getRecipe"]
+>["mainImage"] & { name: string };
+
+function DisplayImage(props: DisplayImageProps) {
+  if (props.type === "url" || props.type === "presignedUrl") {
+    return (
+      <Image
+        unoptimized
+        width={600}
+        height={600}
+        loading="lazy"
+        alt={props.name}
+        src={props.url}
+      />
+    );
   }
+  return <div>No Image</div>;
 }
