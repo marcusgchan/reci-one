@@ -12,12 +12,14 @@ export async function createRecipe(
     const recipe = await tx.recipe.create({
       data: {
         name: input.name,
-        isParsed: false,
-        images: {
+        mainImage: {
           create: {
-            uploadedImage: {
+            type: "presignedUrl",
+            metadataImage: {
               create: {
                 key: `${input.imageMetadata.name}-${formattedSignedDate}`,
+                type: input.imageMetadata.type,
+                size: input.imageMetadata.size,
               },
             },
           },
@@ -78,9 +80,11 @@ export async function createParsedRecipe(
       data: {
         name: input.name,
         images: {
-          create: { parsedImage: { create: { url: input.urlSourceImage } } },
+          create: {
+            type: "url",
+            urlImage: { create: { url: input.urlSourceImage } },
+          },
         },
-        isParsed: true,
         description: input.description,
         prepTime: input.prepTime || undefined,
         cookTime: input.cookTime || undefined,
@@ -133,7 +137,7 @@ export async function getRecipes(
 ) {
   const recipes = await ctx.prisma.recipe.findMany({
     select: {
-      images: { include: { parsedImage: true, uploadedImage: true } },
+      mainImage: { include: { urlImage: true, metadataImage: true } },
       id: true,
       name: true,
     },

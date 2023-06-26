@@ -26,20 +26,31 @@ export const recipesRouter = router({
       const recipes = await getRecipes(ctx, userId, input);
       const roundedDate = getFormattedUtcDate();
       const formattedRecipes = recipes.map(async (recipe) => {
-        if (recipe.images[0]?.parsedImage) {
-          const url = recipe.images[0].parsedImage.url;
-          return { ...recipe, image: url };
-        } else if (recipe.images[0]?.uploadedImage) {
-          const url = await getImageSignedUrl(
-            userId,
-            recipe.id,
-            recipe.images[0].uploadedImage.key,
-            roundedDate
-          );
-          return { ...recipe, image: url };
+        if (recipe.mainImage?.type === "url") {
+          const url = recipe.mainImage.urlImage?.url;
+          if (url) {
+            return { ...recipe, mainImage: { type: "url" as const, url } };
+          }
+        } else if (recipe.mainImage?.type === "presignedUrl") {
+          const key = recipe.mainImage?.metadataImage?.key;
+          if (key) {
+            const url = await getImageSignedUrl(
+              userId,
+              recipe.id,
+              key,
+              roundedDate
+            );
+            return {
+              ...recipe,
+              mainImage: { type: "presignedUrl" as const, url },
+            };
+          }
         }
-        // Shouldn't reach this point since image is required
-        return { ...recipe, image: "" };
+        // Shouldn't reach this point since image is required unless
+        // a recipe is missing a mainImage
+        // This can happen if an image upload fails
+        // TODO: add proper dummy image
+        return { ...recipe, mainImage: { type: "noImage" as const, url: "" } };
       });
       return await Promise.all(formattedRecipes);
     }),
