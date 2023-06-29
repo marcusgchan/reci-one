@@ -68,13 +68,14 @@ model VerificationToken {
 }
 
 model Recipe {
-  id          String   @id @default(cuid())
-  name        String
-  description String
-  prepTime    Decimal?
-  cookTime    Decimal?
-  isPublic    Boolean  @default(false)
-  mainImage   Image?   @relation("mainImageToRecipe")
+  id             String          @id @default(cuid())
+  name           String
+  description    String
+  prepTime       Decimal?
+  cookTime       Decimal?
+  isPublic       Boolean         @default(false)
+  mainImage      Image?          @relation("mainImageToRecipe")
+  parsedSiteInfo ParsedSiteInfo?
 
   images         Image[]                    @relation("imageToRecipe")
   ingredients    Ingredient[]
@@ -89,6 +90,16 @@ model Recipe {
 
   @@index([authorId])
   @@map("recipes")
+}
+
+model ParsedSiteInfo {
+  author String
+  url    String
+
+  recipeId String @unique @db.VarChar(255)
+  recipe   Recipe @relation(fields: [recipeId], references: [id])
+
+  @@map("parsed_sites_info")
 }
 
 enum ImageType {

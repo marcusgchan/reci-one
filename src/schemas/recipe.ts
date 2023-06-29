@@ -60,6 +60,7 @@ const baseAddRecipeSchema = z.object({
     })
     .array(),
   urlSource: z.string().url().optional(),
+  originalAuthor: z.string().optional(),
 });
 
 export const addRecipeSchema = baseAddRecipeSchema.extend({

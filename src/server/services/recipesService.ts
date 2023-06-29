@@ -46,6 +46,19 @@ export async function createRecipe(
         },
       },
     });
+    if (input.urlSource && input.originalAuthor) {
+      await tx.recipe.update({
+        where: { id: recipe.id },
+        data: {
+          parsedSiteInfo: {
+            create: {
+              url: input.urlSource,
+              author: input.originalAuthor,
+            },
+          },
+        },
+      });
+    }
     await tx.nationalitiesOnRecipes.createMany({
       data: input.nationalities.map((nationality) => ({
         nationalityId: nationality.id,
@@ -107,6 +120,19 @@ export async function createParsedRecipe(
         },
       },
     });
+    if (input.urlSource && input.urlSourceImage && input.originalAuthor) {
+      await tx.recipe.update({
+        where: { id: recipe.id },
+        data: {
+          parsedSiteInfo: {
+            create: {
+              url: input.urlSource,
+              author: input.originalAuthor,
+            },
+          },
+        },
+      });
+    }
     await tx.nationalitiesOnRecipes.createMany({
       data: input.nationalities.map((nationality) => ({
         nationalityId: nationality.id,
@@ -206,6 +232,7 @@ export async function getRecipe(ctx: Context, recipeId: string) {
       mealTypes: true,
       steps: true,
       author: true,
+      parsedSiteInfo: true,
     },
   });
 
