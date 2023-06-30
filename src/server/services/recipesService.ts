@@ -206,30 +206,15 @@ export async function getRecipes(
   return recipes;
 }
 
-/*
-          if (image.parsedImage) {
-            return Promise.resolve(image.parsedImage.url);
-          } else if (image.uploadedImage) {
-            return getImageSignedUrl(
-              userId,
-              recipe.id,
-              image.uploadedImage.key,
-              roundedDate
-            ).catch(() => "");
-          }
-          // No image for some reason (shouldn't happen)
-          return Promise.resolve("");
-        });
-        return { ...recipe, images: await Promise.all(urlPromises) };*/
 export async function getRecipe(ctx: Context, recipeId: string) {
   const recipe = await ctx.prisma.recipe.findUnique({
     where: { id: recipeId },
     include: {
       mainImage: { include: { urlImage: true, metadataImage: true } },
       ingredients: true,
-      cookingMethods: true,
-      nationalities: true,
-      mealTypes: true,
+      cookingMethods: { include: { cookingMethod: true } },
+      nationalities: { include: { nationality: true } },
+      mealTypes: { include: { mealType: true } },
       steps: true,
       author: true,
       parsedSiteInfo: true,
@@ -240,5 +225,5 @@ export async function getRecipe(ctx: Context, recipeId: string) {
     return null;
   }
 
-  return { ...recipe };
+  return recipe;
 }
