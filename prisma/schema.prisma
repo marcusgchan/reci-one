@@ -28,8 +28,8 @@ model Account {
   session_state     String?
   user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@index([userId])
   @@unique([provider, providerAccountId])
+  @@index([userId])
   @@map("accounts")
 }
 
@@ -68,15 +68,16 @@ model VerificationToken {
 }
 
 model Recipe {
-  id          String   @id @default(cuid())
-  name        String
-  description String
-  prepTime    Decimal?
-  cookTime    Decimal?
-  isPublic    Boolean  @default(false)
-  isParsed    Boolean
+  id             String          @id @default(cuid())
+  name           String
+  description    String
+  prepTime       Decimal?
+  cookTime       Decimal?
+  isPublic       Boolean         @default(false)
+  mainImage      Image?          @relation("mainImageToRecipe")
+  parsedSiteInfo ParsedSiteInfo?
 
-  images         RecipeImage[]
+  images         Image[]                    @relation("imageToRecipe")
   ingredients    Ingredient[]
   steps          Step[]
   mealTypes      MealTypesOnRecipies[]
@@ -91,34 +92,55 @@ model Recipe {
   @@map("recipes")
 }
 
-model RecipeImage {
-  id String @id @default(cuid())
+model ParsedSiteInfo {
+  author String
+  url    String
 
-  recipeId      String
-  recipe        Recipe         @relation(fields: [recipeId], references: [id])
-  uploadedImage UploadedImage?
-  parsedImage   ParsedImage?
+  recipeId String @unique @db.VarChar(255)
+  recipe   Recipe @relation(fields: [recipeId], references: [id])
 
-  @@index([recipeId])
-  @@map("recipe_images")
+  @@map("parsed_sites_info")
 }
 
-model UploadedImage {
-  key String
-
-  recipeImageId String      @id @unique
-  recipeImage   RecipeImage @relation(fields: [recipeImageId], references: [id])
-
-  @@map("uploaded_images")
+enum ImageType {
+  url
+  presignedUrl
 }
 
-model ParsedImage {
-  url String
+// Prisma doesn't support polymorphic relations
+// https://github.com/prisma/prisma/issues/1644
+model Image {
+  id                  String    @id @default(cuid())
+  type                ImageType
+  mainImageToRecipeId String?   @unique @map("mainImageToRecipe") @db.VarChar(255)
+  imageToRecipeId     String?   @map("imageToRecipe") @db.VarChar(255)
+  mainImageToRecipe   Recipe?   @relation("mainImageToRecipe", fields: [mainImageToRecipeId], references: [id])
+  imageToRecipe       Recipe?   @relation("imageToRecipe", fields: [imageToRecipeId], references: [id])
 
-  recipeImageId String      @id @unique
-  recipeImage   RecipeImage @relation(fields: [recipeImageId], references: [id])
+  urlImage      UrlImage?
+  metadataImage MetadataImage?
 
-  @@map("parsed_images")
+  @@index([mainImageToRecipeId])
+  @@index([imageToRecipeId])
+  @@map("images")
+}
+
+model UrlImage {
+  url     String
+  imageId String @unique @db.VarChar(255)
+  image   Image  @relation(fields: [imageId], references: [id])
+
+  @@map("url_images")
+}
+
+model MetadataImage {
+  key     String
+  type    String
+  size    Int
+  imageId String @unique @db.VarChar(255)
+  image   Image  @relation(fields: [imageId], references: [id])
+
+  @@map("metadata_images")
 }
 
 model Step {
@@ -129,8 +151,8 @@ model Step {
   recipeId String @db.VarChar(255)
   recipe   Recipe @relation(fields: [recipeId], references: [id])
 
-  @@index([recipeId])
   @@id([order, recipeId])
+  @@index([recipeId])
   @@map("steps")
 }
 
@@ -142,8 +164,8 @@ model Ingredient {
   recipeId String @db.VarChar(255)
   recipe   Recipe @relation(fields: [recipeId], references: [id])
 
-  @@index([recipeId])
   @@id([order, recipeId])
+  @@index([recipeId])
   @@map("ingredients")
 }
 
@@ -161,9 +183,9 @@ model CookingMethodsOnRecipies {
   Recipe          Recipe        @relation(fields: [recipeId], references: [id])
   recipeId        String
 
+  @@id([cookingMethodId, recipeId])
   @@index([recipeId])
   @@index([cookingMethodId])
-  @@id([cookingMethodId, recipeId])
   @@map("cooking_methods_on_recipies")
 }
 
@@ -178,7 +200,7 @@ model Comment {
 
   recipeId String @db.VarChar(255)
   recipe   Recipe @relation(fields: [recipeId], references: [id])
-  
+
   @@index([recipeId])
   @@index([authorId])
   @@map("comments")

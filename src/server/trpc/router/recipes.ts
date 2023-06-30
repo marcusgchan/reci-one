@@ -26,42 +26,68 @@ export const recipesRouter = router({
       const recipes = await getRecipes(ctx, userId, input);
       const roundedDate = getFormattedUtcDate();
       const formattedRecipes = recipes.map(async (recipe) => {
-        if (recipe.images[0]?.parsedImage) {
-          const url = recipe.images[0].parsedImage.url;
-          return { ...recipe, image: url };
-        } else if (recipe.images[0]?.uploadedImage) {
-          const url = await getImageSignedUrl(
-            userId,
-            recipe.id,
-            recipe.images[0].uploadedImage.key,
-            roundedDate
-          );
-          return { ...recipe, image: url };
+        if (recipe.mainImage?.type === "url") {
+          const url = recipe.mainImage.urlImage?.url;
+          if (url) {
+            return { ...recipe, mainImage: { type: "url" as const, url } };
+          }
+        } else if (recipe.mainImage?.type === "presignedUrl") {
+          const key = recipe.mainImage?.metadataImage?.key;
+          if (key) {
+            const url = await getImageSignedUrl(
+              userId,
+              recipe.id,
+              key,
+              roundedDate
+            );
+            return {
+              ...recipe,
+              mainImage: { type: "presignedUrl" as const, url },
+            };
+          }
         }
-        // Shouldn't reach this point since image is required
-        return { ...recipe, image: "" };
+        // Shouldn't reach this point since image is required unless
+        // a recipe is missing a mainImage
+        // This can happen if an image upload fails
+        // TODO: add proper dummy image
+        return { ...recipe, mainImage: { type: "noImage" as const, url: "" } };
       });
       return await Promise.all(formattedRecipes);
     }),
   getRecipe: protectedProcedure
     .input(getRecipeSchema)
     .query(async ({ ctx, input }) => {
-      return await getRecipe(ctx, input.recipeId);
-      /*
-          if (image.parsedImage) {
-            return Promise.resolve(image.parsedImage.url);
-          } else if (image.uploadedImage) {
-            return getImageSignedUrl(
-              userId,
-              recipe.id,
-              image.uploadedImage.key,
-              roundedDate
-            ).catch(() => "");
-          }
-          // No image for some reason (shouldn't happen)
-          return Promise.resolve("");
-        });
-        return { ...recipe, images: await Promise.all(urlPromises) };*/
+      const recipe = await getRecipe(ctx, input.recipeId);
+      if (!recipe) {
+        return null;
+      }
+      if (recipe.mainImage?.type === "url" && recipe.mainImage.urlImage?.url) {
+        return {
+          ...recipe,
+          mainImage: {
+            type: "url" as const,
+            url: recipe.mainImage.urlImage.url,
+          },
+        };
+      } else if (
+        recipe.mainImage?.type === "presignedUrl" &&
+        recipe.mainImage.metadataImage
+      ) {
+        try {
+          const url = await getImageSignedUrl(
+            ctx.session.user.id,
+            recipe.id,
+            recipe.mainImage.metadataImage.key,
+            getFormattedUtcDate()
+          );
+          return {
+            ...recipe,
+            mainImage: { type: "presignedUrl" as const, url },
+          };
+        } catch (e) {}
+      }
+      // Should only reach here if there isn't an image
+      return { ...recipe, mainImage: { type: "noImage" as const, url: "" } };
     }),
   addRecipe: protectedProcedure
     .input(addRecipeSchema)
@@ -102,7 +128,6 @@ export const recipesRouter = router({
             },
           }
         );
-        console.log(res);
         if (!res.ok) throw new Error("Unable to parse recipe");
         const recipe = (await res.json()) as ParsedRecipe;
         return {
@@ -136,7 +161,6 @@ export const recipesRouter = router({
           },
         };
       } catch (e) {
-        console.log(e);
         throw new TRPCError({
           message: "Unable to parse recipe",
           code: "INTERNAL_SERVER_ERROR",

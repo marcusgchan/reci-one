@@ -248,6 +248,7 @@ const RecipeForm = ({
         ...validData,
         imageMetadata: validData.image.imageMetadata,
         urlSource: data?.siteInfo.url,
+        originalAuthor: data?.siteInfo.author,
       };
       addRecipeMutation.mutate(formattedData);
     } else {
@@ -255,6 +256,7 @@ const RecipeForm = ({
         ...validData,
         urlSourceImage: validData.image.urlSourceImage,
         urlSource: data?.siteInfo.url,
+        originalAuthor: data?.siteInfo.author,
       };
       addParsedRecipeMutation.mutate(formattedData);
     }

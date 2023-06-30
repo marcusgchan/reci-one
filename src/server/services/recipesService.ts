@@ -12,12 +12,14 @@ export async function createRecipe(
     const recipe = await tx.recipe.create({
       data: {
         name: input.name,
-        isParsed: false,
-        images: {
+        mainImage: {
           create: {
-            uploadedImage: {
+            type: "presignedUrl",
+            metadataImage: {
               create: {
                 key: `${input.imageMetadata.name}-${formattedSignedDate}`,
+                type: input.imageMetadata.type,
+                size: input.imageMetadata.size,
               },
             },
           },
@@ -44,6 +46,19 @@ export async function createRecipe(
         },
       },
     });
+    if (input.urlSource && input.originalAuthor) {
+      await tx.recipe.update({
+        where: { id: recipe.id },
+        data: {
+          parsedSiteInfo: {
+            create: {
+              url: input.urlSource,
+              author: input.originalAuthor,
+            },
+          },
+        },
+      });
+    }
     await tx.nationalitiesOnRecipes.createMany({
       data: input.nationalities.map((nationality) => ({
         nationalityId: nationality.id,
@@ -78,9 +93,11 @@ export async function createParsedRecipe(
       data: {
         name: input.name,
         images: {
-          create: { parsedImage: { create: { url: input.urlSourceImage } } },
+          create: {
+            type: "url",
+            urlImage: { create: { url: input.urlSourceImage } },
+          },
         },
-        isParsed: true,
         description: input.description,
         prepTime: input.prepTime || undefined,
         cookTime: input.cookTime || undefined,
@@ -103,6 +120,19 @@ export async function createParsedRecipe(
         },
       },
     });
+    if (input.urlSource && input.urlSourceImage && input.originalAuthor) {
+      await tx.recipe.update({
+        where: { id: recipe.id },
+        data: {
+          parsedSiteInfo: {
+            create: {
+              url: input.urlSource,
+              author: input.originalAuthor,
+            },
+          },
+        },
+      });
+    }
     await tx.nationalitiesOnRecipes.createMany({
       data: input.nationalities.map((nationality) => ({
         nationalityId: nationality.id,
@@ -133,7 +163,7 @@ export async function getRecipes(
 ) {
   const recipes = await ctx.prisma.recipe.findMany({
     select: {
-      images: { include: { parsedImage: true, uploadedImage: true } },
+      mainImage: { include: { urlImage: true, metadataImage: true } },
       id: true,
       name: true,
     },
@@ -177,26 +207,23 @@ export async function getRecipes(
 }
 
 export async function getRecipe(ctx: Context, recipeId: string) {
-  return await ctx.prisma.recipe.findUnique({
+  const recipe = await ctx.prisma.recipe.findUnique({
     where: { id: recipeId },
     include: {
+      mainImage: { include: { urlImage: true, metadataImage: true } },
       ingredients: true,
-      cookingMethods: true,
-      nationalities: true,
-      mealTypes: true,
+      cookingMethods: { include: { cookingMethod: true } },
+      nationalities: { include: { nationality: true } },
+      mealTypes: { include: { mealType: true } },
       steps: true,
+      author: true,
+      parsedSiteInfo: true,
     },
   });
-}
 
-export const saveUploadedImageToDatabase = async (
-  ctx: Context,
-  userId: string,
-  recipeId: string,
-  key: string
-) => {
-  await ctx.prisma.recipe.update({
-    data: { images: { create: { uploadedImage: { create: { key } } } } },
-    where: { id: recipeId, authorId: userId },
-  });
-};
+  if (!recipe) {
+    return null;
+  }
+
+  return recipe;
+}

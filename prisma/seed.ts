@@ -74,11 +74,19 @@ async function createDefaultRecipies() {
       await prisma.recipe.create({
         data: {
           name: faker.commerce.productName(),
-          isParsed: false,
           description: faker.commerce.productDescription(),
           cookTime: faker.datatype.float(),
           prepTime: faker.datatype.float(),
-          images: { create: { parsedImage: { create: { url: "" } } } },
+          mainImage: {
+            create: {
+              type: "url",
+              urlImage: {
+                create: {
+                  url: "https://picsum.photos/200/300",
+                },
+              },
+            },
+          },
           isPublic: false,
           mealTypes: {
             create: [
