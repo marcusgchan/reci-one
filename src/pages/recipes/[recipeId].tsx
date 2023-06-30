@@ -76,45 +76,51 @@ export default function Recipe() {
           <p>This recipe doesn&apos;t have steps</p>
         )}
       </section>
-      <section>
-        <h2 className="mb-3 text-2xl font-bold">Nationalities</h2>
-        <ul className="flex gap-2">
-          {recipe.nationalities.map(({ nationality }) => (
-            <li
-              className="rounded-full bg-accent-600 py-2 px-3"
-              key={nationality.id}
-            >
-              {nationality.name}
-            </li>
-          ))}
-        </ul>
-      </section>
-      <section>
-        <h2 className="mb-3 text-2xl font-bold">Meal Types</h2>
-        <ul className="flex gap-2">
-          {recipe.mealTypes.map(({ mealType }) => (
-            <li
-              className="rounded-full bg-accent-600 py-2 px-3"
-              key={mealType.id}
-            >
-              {mealType.name}
-            </li>
-          ))}
-        </ul>
-      </section>
-      <section>
-        <h2 className="mb-3 text-2xl font-bold">Nationalities</h2>
-        <ul className="flex gap-2">
-          {recipe.cookingMethods.map(({ cookingMethod }) => (
-            <li
-              className="rounded-full bg-accent-600 py-2 px-3"
-              key={cookingMethod.id}
-            >
-              {cookingMethod.name}
-            </li>
-          ))}
-        </ul>
-      </section>
+      {!!recipe.nationalities.length && (
+        <section>
+          <h2 className="mb-3 text-2xl font-bold">Nationalities</h2>
+          <ul className="flex gap-2">
+            {recipe.nationalities.map(({ nationality }) => (
+              <li
+                className="rounded-full bg-accent-600 py-2 px-3"
+                key={nationality.id}
+              >
+                {nationality.name}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+      {!!recipe.mealTypes.length && (
+        <section>
+          <h2 className="mb-3 text-2xl font-bold">Meal Types</h2>
+          <ul className="flex gap-2">
+            {recipe.mealTypes.map(({ mealType }) => (
+              <li
+                className="rounded-full bg-accent-600 py-2 px-3"
+                key={mealType.id}
+              >
+                {mealType.name}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+      {!!recipe.cookingMethods.length && (
+        <section>
+          <h2 className="mb-3 text-2xl font-bold">Nationalities</h2>
+          <ul className="flex gap-2">
+            {recipe.cookingMethods.map(({ cookingMethod }) => (
+              <li
+                className="rounded-full bg-accent-600 py-2 px-3"
+                key={cookingMethod.id}
+              >
+                {cookingMethod.name}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
     </div>
   );
 }
