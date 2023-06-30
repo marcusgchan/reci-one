@@ -9,9 +9,12 @@ export default function Recipe() {
     data: recipe,
     isError,
     isLoading,
-  } = trpc.recipes.getRecipe.useQuery({
-    recipeId: String(router.query.recipeId),
-  });
+  } = trpc.recipes.getRecipe.useQuery(
+    {
+      recipeId: router.query.recipeId as string,
+    },
+    { enabled: !!router.query.recipeId }
+  );
 
   if (isLoading) {
     return <Loader />;
