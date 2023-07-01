@@ -2,6 +2,7 @@ import { Loader } from "@/shared/components/Loader";
 import { RouterOutputs, trpc } from "@/utils/trpc";
 import { useRouter } from "next/router";
 import Image from "next/image";
+import { Button } from "@/ui/Button";
 
 export default function Recipe() {
   const router = useRouter();
@@ -28,9 +29,16 @@ export default function Recipe() {
     return <div>Recipe not found</div>;
   }
 
+  const editRecipe = () => router.push(`/recipes/${recipe.id}/edit`);
+
   return (
     <div className="mx-auto flex max-w-lg flex-col items-start gap-4 pb-10">
-      <h1 className="text-4xl font-bold">{recipe.name}</h1>
+      <div className="flex w-full items-start justify-between gap-2">
+        <h1 className="text-4xl font-bold">{recipe.name}</h1>
+        <Button type="button" onClick={editRecipe}>
+          Edit
+        </Button>
+      </div>
       {!!recipe.description.length && <div>{recipe.description}</div>}
       {recipe.parsedSiteInfo && (
         <p className="text-sm">

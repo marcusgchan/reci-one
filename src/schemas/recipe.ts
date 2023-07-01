@@ -93,4 +93,4 @@ export const addRecipeFormSchema = baseAddRecipeSchema.extend({
       .optional(),
   }),
 });
-export type formAddRecipe = z.infer<typeof addRecipeFormSchema>;
+export type FormAddRecipe = z.infer<typeof addRecipeFormSchema>;

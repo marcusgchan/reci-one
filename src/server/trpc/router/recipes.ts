@@ -8,6 +8,7 @@ import {
   createParsedRecipe,
   createRecipe,
   getRecipe,
+  getRecipeFormFields,
   getRecipes,
 } from "@/services/recipesService";
 import { getImageSignedUrl, getUploadSignedUrl } from "@/services/s3Services";
@@ -61,6 +62,7 @@ export const recipesRouter = router({
       if (!recipe) {
         return null;
       }
+      console.log(recipe);
       if (recipe.mainImage?.type === "url" && recipe.mainImage.urlImage?.url) {
         return {
           ...recipe,
@@ -108,6 +110,57 @@ export const recipesRouter = router({
         roundedDate
       );
       return signedUrl;
+    }),
+  getRecipeFormFields: protectedProcedure
+    .input(getRecipeSchema)
+    .query(async ({ ctx, input }) => {
+      const recipe = await getRecipeFormFields(ctx, input.recipeId);
+      if (!recipe) {
+        return null;
+      }
+      return {
+        ...recipe,
+        prepTime: recipe.prepTime ? recipe.prepTime.toNumber() : undefined,
+        cookTime: recipe.cookTime ? recipe.cookTime.toNumber() : undefined,
+        image: {
+          // Only need if image is presignedUrl since the frontend will need
+          // a url to display the image
+          type: recipe.mainImage?.type ?? "noImage",
+          src:
+            recipe.mainImage?.type === "url"
+              ? recipe.mainImage.urlImage?.url
+              : recipe.mainImage?.type === "presignedUrl"
+              ? await getImageSignedUrl(
+                  ctx.session.user.id,
+                  recipe.id,
+                  recipe.mainImage.metadataImage?.key ?? "",
+                  getFormattedUtcDate()
+                )
+              : "",
+          imageMetadata: recipe.mainImage?.metadataImage ?? {
+            name: "",
+            size: 0,
+            type: "",
+          },
+          urlSourceImage: recipe.mainImage?.urlImage?.url ?? "",
+        },
+        nationalities: recipe.nationalities.map(
+          ({ nationality: { id, name } }) => ({
+            id,
+            name,
+          })
+        ),
+        cookingMethods: recipe.cookingMethods.map(
+          ({ cookingMethod: { id, name } }) => ({
+            id,
+            name,
+          })
+        ),
+        mealTypes: recipe.mealTypes.map(({ mealType: { id, name } }) => ({
+          id,
+          name,
+        })),
+      };
     }),
   addParsedRecipe: protectedProcedure
     .input(addUrlImageRecipeSchema)

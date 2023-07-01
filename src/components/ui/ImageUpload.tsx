@@ -9,17 +9,21 @@ export function ImageUpload({
   handleFilesSelect,
   handleFileDrop,
   removeFile,
+  defaultSrc,
 }: {
   uploadedImageResult: UploadedImageResult;
   handleFilesSelect: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleFileDrop: (e: React.DragEvent) => void;
   removeFile: () => void;
+  defaultSrc?: string;
 }) {
   const { src, isLoading } = uploadedImageResult;
+  const [defaultImageSrc, setDefaultImageSrc] = useState(defaultSrc);
+  console.log(src, defaultSrc);
   return (
     <FormItem className="flex h-full flex-col">
       <label htmlFor="cover-photo">Upload Recipe Image</label>
-      {!src ? (
+      {!src && !defaultImageSrc ? (
         <div
           className="cursor-drop flex h-full items-center justify-center rounded-md border-2 border-dashed border-gray-400 px-6 py-8 group-[.error]:border-red-500"
           onDrop={handleFileDrop}
@@ -68,13 +72,17 @@ export function ImageUpload({
           ) : (
             <>
               <button
-                onClick={removeFile}
+                onClick={() => {
+                  removeFile();
+                  setDefaultImageSrc(undefined);
+                }}
                 className="absolute right-0 top-0 z-10 -translate-y-1/2 translate-x-1/2 rounded-full bg-white text-gray-400 outline-offset-2 transition-transform hover:scale-110 focus:scale-110"
               >
                 <CgCloseO size={25} />
               </button>
               <Image
-                src={src}
+                unoptimized
+                src={(src || defaultImageSrc) as string}
                 className="object-cover"
                 fill={true}
                 alt="uploaded image"

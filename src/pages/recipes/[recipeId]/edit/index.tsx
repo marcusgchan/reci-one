@@ -62,105 +62,45 @@ import {
 } from "@/ui/FieldValidation";
 import { ErrorMessage } from "@hookform/error-message";
 import { Switch } from "@headlessui/react";
+import { LoaderSection } from "@/components/LoaderSection";
 
-type FormStage = 1 | 2 | 3;
-
-const Create: CustomReactFC = () => {
-  const [formStage, setFormStage] = useState<FormStage>(1);
-  const [url, setUrl] = useState<string>("");
+const Index: CustomReactFC = () => {
   const snackbarDispatch = useSnackbarDispatch();
-  const { refetch, data } = trpc.recipes.parseRecipe.useQuery(
-    { url },
-    {
-      enabled: false,
-      retry: false,
-      onSuccess() {
-        setFormStage(3);
-      },
-      onError() {
-        snackbarDispatch({
-          type: "ERROR",
-          message: "Sorry! Unable to parse this recipe :(",
-        });
-      },
-    }
+  const router = useRouter();
+  const {
+    data: recipe,
+    isLoading,
+    isError,
+  } = trpc.recipes.getRecipeFormFields.useQuery(
+    { recipeId: router.query.recipeId as string },
+    { enabled: !!router.query.recipeId }
   );
-  const parseRecipe = () => refetch();
-  if (formStage === 1) {
-    return (
-      <div className="mt-10 flex justify-center text-gray-500">
-        <div className="flex w-full max-w-md flex-col gap-4 rounded border-4 border-gray-400 p-8">
-          <h1>Do you want to parse a recipe from another site?</h1>
-          <ul className="flex justify-center gap-4">
-            <li>
-              <Button onClick={() => setFormStage(2)} className="w-[50px]">
-                Yes
-              </Button>
-            </li>
-            <li>
-              <Button onClick={() => setFormStage(3)} className="w-[50px]">
-                No
-              </Button>
-            </li>
-          </ul>
-        </div>
-      </div>
-    );
+
+  if (isLoading) {
+    return <LoaderSection />;
   }
-  if (formStage === 2) {
-    return (
-      <div className="mt-10 flex justify-center text-gray-500">
-        <div className="flex w-full max-w-md flex-col gap-4 rounded border-4 border-gray-400 p-8">
-          <h1>Enter a recipe website URL to parse</h1>
-          <Input value={url} onChange={(e) => setUrl(e.target.value)} />
-          <div className="flex justify-end gap-2">
-            <Button onClick={() => setFormStage(1)}>Back</Button>
-            <Button onClick={parseRecipe}>Parse</Button>
-          </div>
-        </div>
-      </div>
-    );
+
+  if (!recipe) {
+    return <p>Recipe not found</p>;
   }
-  return <RecipeForm initialData={data} />;
+
+  if (isError) {
+    return <p>Something went wrong</p>;
+  }
+
+  return <RecipeForm initialData={recipe} />;
 };
 
-type RecipeFormData = RouterOutputs["recipes"]["parseRecipe"] | undefined;
+type RecipeFormData = NonNullable<
+  RouterOutputs["recipes"]["getRecipeFormFields"]
+>;
 
-const RecipeForm = ({
-  initialData: data,
-}: {
-  initialData: RecipeFormData | undefined;
-}) => {
-  const usingUploadedImage =
-    (data?.initialData && data.initialData.image.urlSourceImage.length == 0) ??
-    true;
+const RecipeForm = ({ initialData: data }: { initialData: RecipeFormData }) => {
+  const usingUploadedImage = data.mainImage?.type === "presignedUrl";
   const [isUploadedImage, setIsUploadedImage] = useState(usingUploadedImage);
   const methods = useForm<FormAddRecipe>({
     resolver: zodResolver(addRecipeFormSchema),
-    defaultValues: data?.initialData || {
-      name: "",
-      description: "",
-      image: {
-        urlSourceImage: "",
-        imageMetadata: undefined,
-      },
-      ingredients: [
-        { id: uuidv4(), name: "", isHeader: false },
-        { id: uuidv4(), name: "", isHeader: false },
-        { id: uuidv4(), name: "", isHeader: false },
-      ],
-      steps: [
-        { id: uuidv4(), name: "", isHeader: false },
-        { id: uuidv4(), name: "", isHeader: false },
-        { id: uuidv4(), name: "", isHeader: false },
-      ],
-      prepTime: "",
-      cookTime: "",
-      isPublic: false,
-      cookingMethods: [],
-      mealTypes: [],
-      nationalities: [],
-    },
+    defaultValues: data,
   });
   const router = useRouter();
   const setFileMetadata = (file: File | undefined) => {
@@ -279,7 +219,7 @@ const RecipeForm = ({
             >
               Back
             </Button>
-            <h2 className="text-2xl">Add Recipe</h2>
+            <h2 className="text-2xl">Edit Recipe</h2>
           </div>
           <SectionWrapper>
             <NameDesImgSection
@@ -289,6 +229,7 @@ const RecipeForm = ({
               removeFile={removeFile}
               isUploadedImage={isUploadedImage}
               setIsUploadedImage={setIsUploadedImage}
+              defaultSrc={data.image.src}
             />
           </SectionWrapper>
           <SectionWrapper>
@@ -327,6 +268,7 @@ const NameDesImgSection = ({
   removeFile,
   isUploadedImage,
   setIsUploadedImage,
+  defaultSrc,
 }: {
   uploadedImageResult: UploadedImageResult;
   handleFileSelect: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -334,6 +276,7 @@ const NameDesImgSection = ({
   removeFile: () => void;
   isUploadedImage: boolean;
   setIsUploadedImage: React.Dispatch<SetStateAction<boolean>>;
+  defaultSrc?: string;
 }) => {
   const id = useId();
   const {
@@ -416,6 +359,7 @@ const NameDesImgSection = ({
                 removeFile={removeFile}
                 handleFilesSelect={handleFileSelect}
                 handleFileDrop={handleFileDrop}
+                defaultSrc={defaultSrc}
               />
             ) : (
               <div className="relative h-full w-full">
@@ -937,7 +881,7 @@ const DraggableInput = ({
   );
 };
 
-Create.auth = true;
-Create.hideNav = true;
+Index.auth = true;
+Index.hideNav = true;
 
-export default Create;
+export default Index;

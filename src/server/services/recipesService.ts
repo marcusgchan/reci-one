@@ -92,7 +92,7 @@ export async function createParsedRecipe(
     const recipe = await tx.recipe.create({
       data: {
         name: input.name,
-        images: {
+        mainImage: {
           create: {
             type: "url",
             urlImage: { create: { url: input.urlSourceImage } },
@@ -220,10 +220,27 @@ export async function getRecipe(ctx: Context, recipeId: string) {
       parsedSiteInfo: true,
     },
   });
-
   if (!recipe) {
     return null;
   }
+  return recipe;
+}
 
+export async function getRecipeFormFields(ctx: Context, recipeId: string) {
+  const recipe = await ctx.prisma.recipe.findUnique({
+    select: {
+      id: true,
+      name: true,
+      description: true,
+      prepTime: true,
+      cookTime: true,
+      mainImage: { include: { urlImage: true, metadataImage: true } },
+      ingredients: true,
+      cookingMethods: { include: { cookingMethod: true } },
+      mealTypes: { include: { mealType: true } },
+      nationalities: { include: { nationality: true } },
+    },
+    where: { id: recipeId },
+  });
   return recipe;
 }
