@@ -40,7 +40,6 @@ const baseAddRecipeSchema = z.object({
     .array(),
   prepTime: z.string().length(0).or(z.number().min(0)).or(z.nan()),
   cookTime: z.string().length(0).or(z.number().min(0)).or(z.nan()),
-  isPublic: z.boolean(),
   mealTypes: z
     .object({
       id: z.string(),
@@ -94,3 +93,8 @@ export const addRecipeFormSchema = baseAddRecipeSchema.extend({
   }),
 });
 export type FormAddRecipe = z.infer<typeof addRecipeFormSchema>;
+
+export const editRecipeSchema = addRecipeSchema.extend({
+  id: z.string(),
+});
+export type EditRecipe = z.infer<typeof editRecipeSchema>;

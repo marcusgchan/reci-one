@@ -3,15 +3,24 @@ import {
   getRecipeSchema,
   getRecipesSchema,
   addUrlImageRecipeSchema,
+  editRecipeSchema,
 } from "@/schemas/recipe";
 import {
   createParsedRecipe,
   createRecipe,
+  getMainImage,
   getRecipe,
   getRecipeFormFields,
   getRecipes,
+  updateRecipeNoneToSigned,
+  updateRecipeSignedToSigned,
+  updateRecipeUrlToSigned,
 } from "@/services/recipesService";
-import { getImageSignedUrl, getUploadSignedUrl } from "@/services/s3Services";
+import {
+  getImageSignedUrl,
+  getUploadSignedUrl,
+  remove,
+} from "@/services/s3Services";
 import { ParsedRecipe } from "@/shared/types";
 import { TRPCError } from "@trpc/server";
 import { env } from "src/server/env.mjs";
@@ -25,7 +34,6 @@ export const recipesRouter = router({
     .query(async ({ ctx, input }) => {
       const userId = ctx.session?.user?.id;
       const recipes = await getRecipes(ctx, userId, input);
-      const roundedDate = getFormattedUtcDate();
       const formattedRecipes = recipes.map(async (recipe) => {
         if (recipe.mainImage?.type === "url") {
           const url = recipe.mainImage.urlImage?.url;
@@ -39,7 +47,7 @@ export const recipesRouter = router({
               userId,
               recipe.id,
               key,
-              roundedDate
+              getFormattedUtcDate()
             );
             return {
               ...recipe,
@@ -62,7 +70,6 @@ export const recipesRouter = router({
       if (!recipe) {
         return null;
       }
-      console.log(recipe);
       if (recipe.mainImage?.type === "url" && recipe.mainImage.urlImage?.url) {
         return {
           ...recipe,
@@ -95,8 +102,8 @@ export const recipesRouter = router({
     .input(addRecipeSchema)
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.session.user.id;
-      const roundedDate = getFormattedUtcDate();
-      const recipe = await createRecipe(ctx, userId, input, roundedDate);
+      const uuid = uuidv4();
+      const recipe = await createRecipe(ctx, userId, input, uuid);
       if (!recipe) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -107,7 +114,7 @@ export const recipesRouter = router({
         userId,
         recipe.id,
         input.imageMetadata,
-        roundedDate
+        uuid
       );
       return signedUrl;
     }),
@@ -220,6 +227,64 @@ export const recipesRouter = router({
         });
       }
     }),
+  editRecipe: protectedProcedure
+    .input(editRecipeSchema)
+    .mutation(async ({ ctx, input }) => {
+      const oldRecipe = await getMainImage(ctx, input.id);
+      if (!oldRecipe) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Recipe does not exist",
+        });
+      }
+      if (
+        oldRecipe.mainImage?.type === "presignedUrl" &&
+        oldRecipe.mainImage.metadataImage?.key
+      ) {
+        const uuid = uuidv4();
+        await updateRecipeSignedToSigned(ctx, input, uuid);
+        await remove(
+          ctx.session.user.id,
+          input.id,
+          oldRecipe.mainImage.metadataImage.key
+        ).catch((e) => {
+          console.log("Error: Unable to remove old image", e);
+        });
+        const signedUrl = await getUploadSignedUrl(
+          ctx.session.user.id,
+          input.id,
+          input.imageMetadata,
+          uuid
+        );
+        return signedUrl;
+      } else if (
+        oldRecipe.mainImage?.type === "url" &&
+        oldRecipe.mainImage.urlImage?.url
+      ) {
+        const uuid = uuidv4();
+        await updateRecipeUrlToSigned(ctx, input, oldRecipe.mainImage.id, uuid);
+        const signedUrl = await getUploadSignedUrl(
+          ctx.session.user.id,
+          input.id,
+          input.imageMetadata,
+          getFormattedUtcDate()
+        );
+        return signedUrl;
+      } else {
+        const uuid = uuidv4();
+        await updateRecipeNoneToSigned(ctx, input, uuid);
+        const signedUrl = await getUploadSignedUrl(
+          ctx.session.user.id,
+          input.id,
+          input.imageMetadata,
+          uuid
+        );
+        return signedUrl;
+      }
+    }),
+  editUrlImageRecipe: protectedProcedure
+    .input(addUrlImageRecipeSchema)
+    .mutation(({ ctx, input }) => {}),
 });
 
 // Create a date that will be appended to the end

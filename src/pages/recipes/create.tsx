@@ -156,7 +156,6 @@ const RecipeForm = ({
       ],
       prepTime: "",
       cookTime: "",
-      isPublic: false,
       cookingMethods: [],
       mealTypes: [],
       nationalities: [],

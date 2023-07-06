@@ -130,10 +130,11 @@ const RecipeForm = ({ initialData: data }: { initialData: RecipeFormData }) => {
     removeFile,
   } = useImageUpload(setFileMetadata);
   const handleRemoveFile = () => {
+    console.log("removing file");
     setDefaultSrc(undefined);
     removeFile();
-  }
-  const addRecipeMutation = trpc.recipes.addRecipe.useMutation({
+  };
+  const addRecipeMutation = trpc.recipes.editRecipe.useMutation({
     async onSuccess(presignedPost) {
       if (!file) {
         // error unable to upload file or user somehow removed img after upload
@@ -190,10 +191,9 @@ const RecipeForm = ({ initialData: data }: { initialData: RecipeFormData }) => {
   const createRecipe = methods.handleSubmit((validData) => {
     if (isUploadedImage && validData.image.imageMetadata) {
       const formattedData = {
+        id: router.query.recipeId as string,
         ...validData,
         imageMetadata: validData.image.imageMetadata,
-        urlSource: data?.siteInfo.url,
-        originalAuthor: data?.siteInfo.author,
       };
       addRecipeMutation.mutate(formattedData);
     } else {

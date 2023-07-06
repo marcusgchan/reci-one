@@ -11,13 +11,13 @@ export const getUploadSignedUrl = async (
   userId: string,
   recipeId: string,
   imageMetadata: addRecipe["imageMetadata"],
-  roundedDate: string
+  uuid: string
 ) => {
   try {
     const { name, size, type } = imageMetadata;
     const presignedPost = await createPresignedPost(s3Client, {
       Bucket: env.BUCKET_NAME,
-      Key: `${userId}/${recipeId}/${name}-${roundedDate}`,
+      Key: `${userId}/${recipeId}/${name}-${uuid}`,
       Expires: config.s3.presignedUrlDuration,
       Fields: {
         acl: "private",
@@ -78,7 +78,6 @@ export const remove = async (
   };
   try {
     // Delete the object.
-    console.log(`\nDeleting object "${bucketParams.Key}"} from bucket`);
     await s3Client.send(
       new DeleteObjectCommand({
         Bucket: bucketParams.Bucket,
@@ -87,6 +86,5 @@ export const remove = async (
     );
   } catch (err) {
     console.log("Error deleting object", err);
-    throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
   }
 };

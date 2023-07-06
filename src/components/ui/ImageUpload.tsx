@@ -18,6 +18,7 @@ export function ImageUpload({
   defaultSrc?: string;
 }) {
   const { src, isLoading } = uploadedImageResult;
+  console.log(src, defaultSrc);
   return (
     <FormItem className="flex h-full flex-col">
       <label htmlFor="cover-photo">Upload Recipe Image</label>
@@ -70,6 +71,7 @@ export function ImageUpload({
           ) : (
             <>
               <button
+                type="button"
                 onClick={removeFile}
                 className="absolute right-0 top-0 z-10 -translate-y-1/2 translate-x-1/2 rounded-full bg-white text-gray-400 outline-offset-2 transition-transform hover:scale-110 focus:scale-110"
               >
