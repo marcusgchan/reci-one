@@ -9,8 +9,11 @@ services:
     volumes:
       - ./src:/app/src
       - ./prisma:/app/prisma
+      - ./.env:/app/.env
     networks:
       - reci-one
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
   db:
     image: mysql:8.0.30
