@@ -28,10 +28,10 @@ services:
   parser:
     build: ./parser
     environment:
-      FLASK_DEBUG: TRUE 
+      FLASK_DEBUG: TRUE
     ports:
       - "8000:8000"
-    volumes: 
+    volumes:
       - ./parser:/parser
     networks:
       - reci-one

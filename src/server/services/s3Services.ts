@@ -35,8 +35,12 @@ export const getUploadSignedUrl = async (
     // the url goes to http://localhost:9000 without appending the bucket name after
     // for some reason
     if (env.NODE_ENV === "development" || env.NODE_ENV === "test") {
+      const minioPort = env.BUCKET_DOMAIN.split(":")[2];
+      if (!minioPort) {
+        throw new Error("Minio port not found");
+      }
       return {
-        url: `${presignedPost.url}${env.BUCKET_NAME}`,
+        url: `http://localhost:${minioPort}/${env.BUCKET_NAME}`,
         fields: presignedPost.fields,
       };
     }
@@ -60,6 +64,13 @@ export const getImageSignedUrl = async (
     Bucket: `${env.BUCKET_NAME}`,
     Key: `${userId}/${recipeId}/${imageName}`,
   });
+  if (env.NODE_ENV === "development" || env.NODE_ENV === "test") {
+    const minioPort = env.BUCKET_DOMAIN.split(":")[2];
+    if (!minioPort) {
+      throw new Error("Minio port not found");
+    }
+    s3Client.config.endpoint = `http://localhost:${minioPort}` as any;
+  }
   const signedUrl = await getSignedUrl(s3Client, command, {
     expiresIn: config.s3.presignedUrlDuration,
     signingDate: roundedDate,
@@ -77,6 +88,9 @@ export const remove = async (
     Key: `${userId}/${recipeId}/${fileName}`,
   };
   try {
+    if (env.NODE_ENV === "development" || env.NODE_ENV === "test") {
+      s3Client.config.endpoint = env.BUCKET_DOMAIN as any;
+    }
     // Delete the object.
     await s3Client.send(
       new DeleteObjectCommand({
