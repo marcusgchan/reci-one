@@ -100,10 +100,10 @@ const RecipeForm = ({ initialData: data }: { initialData: RecipeFormData }) => {
   const [isUploadedImage, setIsUploadedImage] = useState(usingUploadedImage);
   const methods = useForm<FormAddRecipe>({
     resolver: zodResolver(addRecipeFormSchema),
-    defaultValues: data,
+    defaultValues: data.form,
   });
   const router = useRouter();
-  const [defaultSrc, setDefaultSrc] = useState(data.image.src);
+  const [defaultSrc, setDefaultSrc] = useState(data.mainImage.src);
   const setFileMetadata = (file: File | undefined) => {
     if (file) {
       methods.setValue(
@@ -130,12 +130,19 @@ const RecipeForm = ({ initialData: data }: { initialData: RecipeFormData }) => {
     removeFile,
   } = useImageUpload(setFileMetadata);
   const handleRemoveFile = () => {
-    console.log("removing file");
     setDefaultSrc(undefined);
     removeFile();
   };
-  const addRecipeMutation = trpc.recipes.editRecipe.useMutation({
+  const editRecipe = trpc.recipes.editRecipe.useMutation({
     async onSuccess(presignedPost) {
+      if (!presignedPost) {
+        snackbarDispatch({
+          type: "SUCCESS",
+          message: "Successfully edited recipe",
+        });
+        navigateToRecipes();
+        return;
+      }
       if (!file) {
         // error unable to upload file or user somehow removed img after upload
         snackbarDispatch({
@@ -188,14 +195,20 @@ const RecipeForm = ({ initialData: data }: { initialData: RecipeFormData }) => {
     },
   });
   const snackbarDispatch = useSnackbarDispatch();
+  const {
+    formState: { dirtyFields },
+  } = methods;
   const createRecipe = methods.handleSubmit((validData) => {
     if (isUploadedImage && validData.image.imageMetadata) {
       const formattedData = {
         id: router.query.recipeId as string,
-        ...validData,
-        imageMetadata: validData.image.imageMetadata,
+        updateImage: !!dirtyFields.image?.imageMetadata,
+        fields: {
+          ...validData,
+          imageMetadata: validData.image.imageMetadata,
+        },
       };
-      addRecipeMutation.mutate(formattedData);
+      editRecipe.mutate(formattedData);
     } else {
       const formattedData = {
         ...validData,
@@ -255,7 +268,7 @@ const RecipeForm = ({ initialData: data }: { initialData: RecipeFormData }) => {
           <SectionWrapper>
             <CookingMethodsSection />
           </SectionWrapper>
-          <Button disabled={addRecipeMutation.isLoading}>Create</Button>
+          <Button disabled={editRecipe.isLoading}>Edit</Button>
         </form>
       </FormProvider>
     </section>
@@ -370,8 +383,9 @@ const NameDesImgSection = ({
               <div className="relative h-full w-full">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  className={`absolute h-full w-full rounded-md border-2 border-dashed object-cover ${urlSourceImage ? "border-transparent" : ""
-                    }`}
+                  className={`absolute h-full w-full rounded-md border-2 border-dashed object-cover ${
+                    urlSourceImage ? "border-transparent" : ""
+                  }`}
                   src={urlSourceImage}
                   alt="recipe image"
                 />
@@ -871,8 +885,9 @@ const DraggableInput = ({
           placeholder={placeholder}
           disabled={canDrag}
           {...register(`${type}.${index}.name`)}
-          className={`${isHeader ? "font-extrabold" : ""
-            } flex-1 border-2 border-gray-500 p-1 tracking-wide`}
+          className={`${
+            isHeader ? "font-extrabold" : ""
+          } flex-1 border-2 border-gray-500 p-1 tracking-wide`}
         />
       </FieldValidation>
       {!canDrag && (

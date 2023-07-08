@@ -73,7 +73,6 @@ model Recipe {
   description    String
   prepTime       Decimal?
   cookTime       Decimal?
-  isPublic       Boolean         @default(false)
   mainImage      Image?          @relation("mainImageToRecipe")
   parsedSiteInfo ParsedSiteInfo?
 

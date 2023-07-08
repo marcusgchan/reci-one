@@ -87,7 +87,6 @@ async function createDefaultRecipies() {
               },
             },
           },
-          isPublic: false,
           mealTypes: {
             create: [
               {

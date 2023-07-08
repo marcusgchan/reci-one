@@ -18,7 +18,6 @@ export function ImageUpload({
   defaultSrc?: string;
 }) {
   const { src, isLoading } = uploadedImageResult;
-  console.log(src, defaultSrc);
   return (
     <FormItem className="flex h-full flex-col">
       <label htmlFor="cover-photo">Upload Recipe Image</label>

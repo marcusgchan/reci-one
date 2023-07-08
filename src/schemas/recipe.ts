@@ -94,7 +94,9 @@ export const addRecipeFormSchema = baseAddRecipeSchema.extend({
 });
 export type FormAddRecipe = z.infer<typeof addRecipeFormSchema>;
 
-export const editRecipeSchema = addRecipeSchema.extend({
+export const editRecipeSchema = z.object({
   id: z.string(),
+  updateImage: z.boolean(),
+  fields: addRecipeSchema.extend({}),
 });
 export type EditRecipe = z.infer<typeof editRecipeSchema>;
