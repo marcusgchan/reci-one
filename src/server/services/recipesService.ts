@@ -245,6 +245,7 @@ export async function getRecipeFormFields(ctx: Context, recipeId: string) {
   const recipe = await ctx.prisma.recipe.findUnique({
     select: {
       id: true,
+      updatedAt: true,
       name: true,
       description: true,
       prepTime: true,

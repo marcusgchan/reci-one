@@ -65,7 +65,6 @@ import { Switch } from "@headlessui/react";
 import { LoaderSection } from "@/components/LoaderSection";
 
 const Index: CustomReactFC = () => {
-  const snackbarDispatch = useSnackbarDispatch();
   const router = useRouter();
   const {
     data: recipe,
@@ -88,7 +87,7 @@ const Index: CustomReactFC = () => {
     return <p>Something went wrong</p>;
   }
 
-  return <RecipeForm initialData={recipe} />;
+  return <RecipeForm key={recipe.updatedAt.toString()} initialData={recipe} />;
 };
 
 type RecipeFormData = NonNullable<
@@ -383,9 +382,8 @@ const NameDesImgSection = ({
               <div className="relative h-full w-full">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  className={`absolute h-full w-full rounded-md border-2 border-dashed object-cover ${
-                    urlSourceImage ? "border-transparent" : ""
-                  }`}
+                  className={`absolute h-full w-full rounded-md border-2 border-dashed object-cover ${urlSourceImage ? "border-transparent" : ""
+                    }`}
                   src={urlSourceImage}
                   alt="recipe image"
                 />
@@ -885,9 +883,8 @@ const DraggableInput = ({
           placeholder={placeholder}
           disabled={canDrag}
           {...register(`${type}.${index}.name`)}
-          className={`${
-            isHeader ? "font-extrabold" : ""
-          } flex-1 border-2 border-gray-500 p-1 tracking-wide`}
+          className={`${isHeader ? "font-extrabold" : ""
+            } flex-1 border-2 border-gray-500 p-1 tracking-wide`}
         />
       </FieldValidation>
       {!canDrag && (

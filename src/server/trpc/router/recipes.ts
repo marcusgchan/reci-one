@@ -127,6 +127,7 @@ export const recipesRouter = router({
         return null;
       }
       return {
+        updatedAt: recipe.updatedAt,
         mainImage: {
           type: recipe.mainImage?.type ?? "noImage",
           src:

@@ -1,18 +1,14 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider        = "prisma-client-js"
   previewFeatures = ["extendedWhereUnique"]
 }
 
 datasource db {
-  provider     = "mysql" // NOTE: sqlite does not work with NextAuth.js
+  provider     = "mysql"
   url          = env("DATABASE_URL")
   relationMode = "prisma"
 }
 
-// Necessary for Next auth
 model Account {
   id                String  @id @default(cuid())
   userId            String
@@ -68,14 +64,16 @@ model VerificationToken {
 }
 
 model Recipe {
-  id             String          @id @default(cuid())
+  id             String                     @id @default(cuid())
   name           String
   description    String
   prepTime       Decimal?
   cookTime       Decimal?
-  mainImage      Image?          @relation("mainImageToRecipe")
+  authorId       String                     @db.VarChar(255)
+  mainImage      Image?                     @relation("mainImageToRecipe")
   parsedSiteInfo ParsedSiteInfo?
-
+  createdAt      DateTime                   @default(now())
+  updatedAt      DateTime                   @updatedAt
   images         Image[]                    @relation("imageToRecipe")
   ingredients    Ingredient[]
   steps          Step[]
@@ -83,41 +81,30 @@ model Recipe {
   cookingMethods CookingMethodsOnRecipies[]
   comments       Comment[]
   nationalities  NationalitiesOnRecipes[]
-
-  authorId String @db.VarChar(255)
-  author   User   @relation(fields: [authorId], references: [id])
+  author         User                       @relation(fields: [authorId], references: [id])
 
   @@index([authorId])
   @@map("recipes")
 }
 
 model ParsedSiteInfo {
-  author String
-  url    String
-
+  author   String
+  url      String
   recipeId String @unique @db.VarChar(255)
   recipe   Recipe @relation(fields: [recipeId], references: [id])
 
   @@map("parsed_sites_info")
 }
 
-enum ImageType {
-  url
-  presignedUrl
-}
-
-// Prisma doesn't support polymorphic relations
-// https://github.com/prisma/prisma/issues/1644
 model Image {
-  id                  String    @id @default(cuid())
+  id                  String         @id @default(cuid())
   type                ImageType
-  mainImageToRecipeId String?   @unique @map("mainImageToRecipe") @db.VarChar(255)
-  imageToRecipeId     String?   @map("imageToRecipe") @db.VarChar(255)
-  mainImageToRecipe   Recipe?   @relation("mainImageToRecipe", fields: [mainImageToRecipeId], references: [id])
-  imageToRecipe       Recipe?   @relation("imageToRecipe", fields: [imageToRecipeId], references: [id])
-
-  urlImage      UrlImage?
-  metadataImage MetadataImage?
+  imageToRecipeId     String?        @map("imageToRecipe") @db.VarChar(255)
+  mainImageToRecipeId String?        @unique @map("mainImageToRecipe") @db.VarChar(255)
+  mainImageToRecipe   Recipe?        @relation("mainImageToRecipe", fields: [mainImageToRecipeId], references: [id])
+  imageToRecipe       Recipe?        @relation("imageToRecipe", fields: [imageToRecipeId], references: [id])
+  urlImage            UrlImage?
+  metadataImage       MetadataImage?
 
   @@index([mainImageToRecipeId])
   @@index([imageToRecipeId])
@@ -144,11 +131,10 @@ model MetadataImage {
 
 model Step {
   order    Int
-  name     String  @db.VarChar(1000)
+  recipeId String  @db.VarChar(255)
   isHeader Boolean @default(false)
-
-  recipeId String @db.VarChar(255)
-  recipe   Recipe @relation(fields: [recipeId], references: [id])
+  name     String  @db.VarChar(1000)
+  recipe   Recipe  @relation(fields: [recipeId], references: [id])
 
   @@id([order, recipeId])
   @@index([recipeId])
@@ -156,12 +142,11 @@ model Step {
 }
 
 model Ingredient {
+  recipeId String  @db.VarChar(255)
+  isHeader Boolean @default(false)
   order    Int
   name     String
-  isHeader Boolean @default(false)
-
-  recipeId String @db.VarChar(255)
-  recipe   Recipe @relation(fields: [recipeId], references: [id])
+  recipe   Recipe  @relation(fields: [recipeId], references: [id])
 
   @@id([order, recipeId])
   @@index([recipeId])
@@ -177,10 +162,10 @@ model CookingMethod {
 }
 
 model CookingMethodsOnRecipies {
-  cookingMethod   CookingMethod @relation(fields: [cookingMethodId], references: [id])
   cookingMethodId String
-  Recipe          Recipe        @relation(fields: [recipeId], references: [id])
   recipeId        String
+  cookingMethod   CookingMethod @relation(fields: [cookingMethodId], references: [id])
+  Recipe          Recipe        @relation(fields: [recipeId], references: [id])
 
   @@id([cookingMethodId, recipeId])
   @@index([recipeId])
@@ -190,15 +175,13 @@ model CookingMethodsOnRecipies {
 
 model Comment {
   id          String   @id @default(cuid())
-  description String   @db.VarChar(1000)
   dateCreated DateTime @default(now())
   rating      Decimal
-
-  authorId String @db.VarChar(255)
-  author   User   @relation(fields: [authorId], references: [id])
-
-  recipeId String @db.VarChar(255)
-  recipe   Recipe @relation(fields: [recipeId], references: [id])
+  authorId    String   @db.VarChar(255)
+  recipeId    String   @db.VarChar(255)
+  description String   @db.VarChar(1000)
+  author      User     @relation(fields: [authorId], references: [id])
+  recipe      Recipe   @relation(fields: [recipeId], references: [id])
 
   @@index([recipeId])
   @@index([authorId])
@@ -206,10 +189,10 @@ model Comment {
 }
 
 model MealTypesOnRecipies {
-  mealType   MealType @relation(fields: [mealTypeId], references: [id])
   mealTypeId String
-  recipe     Recipe   @relation(fields: [recipeId], references: [id])
   recipeId   String
+  mealType   MealType @relation(fields: [mealTypeId], references: [id])
+  recipe     Recipe   @relation(fields: [recipeId], references: [id])
 
   @@id([mealTypeId, recipeId])
   @@index([mealTypeId])
@@ -234,13 +217,18 @@ model Nationality {
 }
 
 model NationalitiesOnRecipes {
-  nationality   Nationality @relation(fields: [nationalityId], references: [id])
   nationalityId String
-  recipe        Recipe      @relation(fields: [recipeId], references: [id])
   recipeId      String
+  nationality   Nationality @relation(fields: [nationalityId], references: [id])
+  recipe        Recipe      @relation(fields: [recipeId], references: [id])
 
   @@id([nationalityId, recipeId])
   @@index([nationalityId])
   @@index([recipeId])
   @@map("nationalities_on_recipies")
+}
+
+enum ImageType {
+  url
+  presignedUrl
 }
