@@ -353,6 +353,7 @@ export async function updateRecipeUrlToSigned({
         cookTime: fields.cookTime,
         mainImage: {
           update: {
+            type: "presignedUrl",
             urlImage: {
               delete: {
                 imageId: oldUrlImageId,
@@ -428,7 +429,7 @@ export async function updateRecipeNoneToSigned({
         prepTime: fields.prepTime,
         cookTime: fields.cookTime,
         mainImage: {
-          create: {
+          update: {
             type: "presignedUrl",
             metadataImage: {
               create: {

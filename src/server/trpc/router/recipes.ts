@@ -36,6 +36,7 @@ export const recipesRouter = router({
       const userId = ctx.session?.user?.id;
       const recipes = await getRecipes(ctx, userId, input);
       const formattedRecipes = recipes.map(async (recipe) => {
+        console.log(recipe.mainImage);
         if (recipe.mainImage?.type === "url") {
           const url = recipe.mainImage.urlImage?.url;
           if (url) {
@@ -282,7 +283,7 @@ export const recipesRouter = router({
             ctx.session.user.id,
             id,
             fields.imageMetadata,
-            getFormattedUtcDate()
+            uuid
           );
           return signedUrl;
         } else {

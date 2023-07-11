@@ -102,7 +102,9 @@ const RecipeForm = ({ initialData: data }: { initialData: RecipeFormData }) => {
     defaultValues: data.form,
   });
   const router = useRouter();
-  const [defaultSrc, setDefaultSrc] = useState(data.mainImage.src);
+  const [defaultSrc, setDefaultSrc] = useState(
+    usingUploadedImage ? data.mainImage.src : undefined
+  );
   const setFileMetadata = (file: File | undefined) => {
     if (file) {
       methods.setValue(
@@ -132,6 +134,7 @@ const RecipeForm = ({ initialData: data }: { initialData: RecipeFormData }) => {
     setDefaultSrc(undefined);
     removeFile();
   };
+  const queryUtils = trpc.useContext();
   const editRecipe = trpc.recipes.editRecipe.useMutation({
     async onSuccess(presignedPost) {
       if (!presignedPost) {
@@ -150,14 +153,6 @@ const RecipeForm = ({ initialData: data }: { initialData: RecipeFormData }) => {
         });
         return;
       }
-      if (!presignedPost) {
-        snackbarDispatch({
-          type: "SUCCESS",
-          message: "Successfully create recipe",
-        });
-        navigateToRecipes();
-        return;
-      }
       // Add fields that are required for presigned post
       const newFormData = new FormData();
       Object.entries(presignedPost.fields).forEach(([field, value]) => {
@@ -174,6 +169,13 @@ const RecipeForm = ({ initialData: data }: { initialData: RecipeFormData }) => {
         snackbarDispatch({
           type: "SUCCESS",
           message: "Successfully create recipe",
+        });
+        queryUtils.recipes.getRecipe.invalidate({
+          recipeId: router.query.recipeId as string,
+        });
+        queryUtils.recipes.getRecipes.invalidate();
+        queryUtils.recipes.getRecipeFormFields.invalidate({
+          recipeId: router.query.recipeId as string,
         });
         navigateToRecipes();
       } catch (e) {
@@ -333,6 +335,7 @@ const NameDesImgSection = ({
       setImageErrorMessage("");
     }
   }, [urlSourceImage, imageMetadata, submitCount]);
+
   return (
     <div className="flex flex-col gap-2">
       <div className="grid min-h-[250px] grid-cols-1 gap-2 sm:grid-cols-2">
@@ -382,8 +385,9 @@ const NameDesImgSection = ({
               <div className="relative h-full w-full">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  className={`absolute h-full w-full rounded-md border-2 border-dashed object-cover ${urlSourceImage ? "border-transparent" : ""
-                    }`}
+                  className={`absolute h-full w-full rounded-md border-2 border-dashed object-cover ${
+                    urlSourceImage ? "border-transparent" : ""
+                  }`}
                   src={urlSourceImage}
                   alt="recipe image"
                 />
@@ -883,8 +887,9 @@ const DraggableInput = ({
           placeholder={placeholder}
           disabled={canDrag}
           {...register(`${type}.${index}.name`)}
-          className={`${isHeader ? "font-extrabold" : ""
-            } flex-1 border-2 border-gray-500 p-1 tracking-wide`}
+          className={`${
+            isHeader ? "font-extrabold" : ""
+          } flex-1 border-2 border-gray-500 p-1 tracking-wide`}
         />
       </FieldValidation>
       {!canDrag && (
