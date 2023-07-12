@@ -11,13 +11,13 @@ export const getUploadSignedUrl = async (
   userId: string,
   recipeId: string,
   imageMetadata: addRecipe["imageMetadata"],
-  roundedDate: string
+  uuid: string
 ) => {
   try {
     const { name, size, type } = imageMetadata;
     const presignedPost = await createPresignedPost(s3Client, {
       Bucket: env.BUCKET_NAME,
-      Key: `${userId}/${recipeId}/${name}-${roundedDate}`,
+      Key: `${userId}/${recipeId}/${name}-${uuid}`,
       Expires: config.s3.presignedUrlDuration,
       Fields: {
         acl: "private",
@@ -36,7 +36,7 @@ export const getUploadSignedUrl = async (
     // for some reason
     if (env.NODE_ENV === "development" || env.NODE_ENV === "test") {
       return {
-        url: `${presignedPost.url}${env.BUCKET_NAME}`,
+        url: `${env.BUCKET_DOMAIN}/${env.BUCKET_NAME}`,
         fields: presignedPost.fields,
       };
     }
@@ -76,17 +76,38 @@ export const remove = async (
     Bucket: `${env.BUCKET_NAME}`,
     Key: `${userId}/${recipeId}/${fileName}`,
   };
-  try {
-    // Delete the object.
-    console.log(`\nDeleting object "${bucketParams.Key}"} from bucket`);
-    await s3Client.send(
-      new DeleteObjectCommand({
-        Bucket: bucketParams.Bucket,
-        Key: bucketParams.Key,
-      })
-    );
-  } catch (err) {
-    console.log("Error deleting object", err);
-    throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+  if (env.NODE_ENV === "development" || env.NODE_ENV === "test") {
+    const minioPort = env.BUCKET_DOMAIN.split(":")[2];
+    if (!minioPort) {
+      throw new Error("Minio port not found");
+    }
+    const prevEndpoint = s3Client.config.endpoint;
+    s3Client.config.endpoint =
+      `http://host.docker.internal:${minioPort}` as any;
+    try {
+      // Delete the object.
+      await s3Client.send(
+        new DeleteObjectCommand({
+          Bucket: bucketParams.Bucket,
+          Key: bucketParams.Key,
+        })
+      );
+    } catch (err) {
+      console.log("Error deleting object", err);
+    } finally {
+      s3Client.config.endpoint = prevEndpoint;
+    }
+  } else {
+    try {
+      // Delete the object.
+      await s3Client.send(
+        new DeleteObjectCommand({
+          Bucket: bucketParams.Bucket,
+          Key: bucketParams.Key,
+        })
+      );
+    } catch (err) {
+      console.log("Error deleting object", err);
+    }
   }
 };

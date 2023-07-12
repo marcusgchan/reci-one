@@ -3,14 +3,29 @@ import {
   getRecipeSchema,
   getRecipesSchema,
   addUrlImageRecipeSchema,
+  editRecipeSchema,
+  editUrlImageRecipeSchema,
 } from "@/schemas/recipe";
 import {
   createParsedRecipe,
   createRecipe,
+  getMainImage,
   getRecipe,
+  getRecipeFormFields,
   getRecipes,
+  updateRecipe,
+  updateRecipeNoneToSigned,
+  updateRecipeNoneToUrl,
+  updateRecipeSignedToSigned,
+  updateRecipeSignedToUrl,
+  updateRecipeUrlToSigned,
+  updateRecipeUrlToUrl,
 } from "@/services/recipesService";
-import { getImageSignedUrl, getUploadSignedUrl } from "@/services/s3Services";
+import {
+  getImageSignedUrl,
+  getUploadSignedUrl,
+  remove,
+} from "@/services/s3Services";
 import { ParsedRecipe } from "@/shared/types";
 import { TRPCError } from "@trpc/server";
 import { env } from "src/server/env.mjs";
@@ -24,27 +39,22 @@ export const recipesRouter = router({
     .query(async ({ ctx, input }) => {
       const userId = ctx.session?.user?.id;
       const recipes = await getRecipes(ctx, userId, input);
-      const roundedDate = getFormattedUtcDate();
       const formattedRecipes = recipes.map(async (recipe) => {
-        if (recipe.mainImage?.type === "url") {
-          const url = recipe.mainImage.urlImage?.url;
-          if (url) {
-            return { ...recipe, mainImage: { type: "url" as const, url } };
-          }
-        } else if (recipe.mainImage?.type === "presignedUrl") {
-          const key = recipe.mainImage?.metadataImage?.key;
-          if (key) {
-            const url = await getImageSignedUrl(
-              userId,
-              recipe.id,
-              key,
-              roundedDate
-            );
-            return {
-              ...recipe,
-              mainImage: { type: "presignedUrl" as const, url },
-            };
-          }
+        const url = recipe.mainImage?.urlImage?.url;
+        const key = recipe.mainImage?.metadataImage?.key;
+        if (url) {
+          return { ...recipe, mainImage: { type: "url" as const, url } };
+        } else if (key) {
+          const url = await getImageSignedUrl(
+            userId,
+            recipe.id,
+            key,
+            getFormattedUtcDate()
+          );
+          return {
+            ...recipe,
+            mainImage: { type: "presignedUrl" as const, url },
+          };
         }
         // Shouldn't reach this point since image is required unless
         // a recipe is missing a mainImage
@@ -61,7 +71,7 @@ export const recipesRouter = router({
       if (!recipe) {
         return null;
       }
-      if (recipe.mainImage?.type === "url" && recipe.mainImage.urlImage?.url) {
+      if (recipe.mainImage?.urlImage?.url) {
         return {
           ...recipe,
           mainImage: {
@@ -69,10 +79,7 @@ export const recipesRouter = router({
             url: recipe.mainImage.urlImage.url,
           },
         };
-      } else if (
-        recipe.mainImage?.type === "presignedUrl" &&
-        recipe.mainImage.metadataImage
-      ) {
+      } else if (recipe.mainImage?.metadataImage) {
         try {
           const url = await getImageSignedUrl(
             ctx.session.user.id,
@@ -93,8 +100,8 @@ export const recipesRouter = router({
     .input(addRecipeSchema)
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.session.user.id;
-      const roundedDate = getFormattedUtcDate();
-      const recipe = await createRecipe(ctx, userId, input, roundedDate);
+      const uuid = uuidv4();
+      const recipe = await createRecipe(ctx, userId, input, uuid);
       if (!recipe) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -105,9 +112,65 @@ export const recipesRouter = router({
         userId,
         recipe.id,
         input.imageMetadata,
-        roundedDate
+        uuid
       );
       return signedUrl;
+    }),
+  getRecipeFormFields: protectedProcedure
+    .input(getRecipeSchema)
+    .query(async ({ ctx, input }) => {
+      const recipe = await getRecipeFormFields(ctx, input.recipeId);
+      if (!recipe) {
+        return null;
+      }
+      const url = recipe.mainImage?.urlImage?.url;
+      const key = recipe.mainImage?.metadataImage?.key;
+      return {
+        updatedAt: recipe.updatedAt,
+        mainImage: {
+          type: url ?? key ?? "noImage",
+          src: url
+            ? url
+            : key
+            ? await getImageSignedUrl(
+                ctx.session.user.id,
+                recipe.id,
+                key,
+                getFormattedUtcDate()
+              )
+            : "",
+        },
+        form: {
+          name: recipe.name,
+          description: recipe.description,
+          prepTime: recipe.prepTime ? recipe.prepTime.toNumber() : "",
+          cookTime: recipe.cookTime ? recipe.cookTime.toNumber() : "",
+          image: {
+            imageMetadata: {
+              name: recipe.mainImage?.metadataImage?.key ?? "",
+              type: recipe.mainImage?.metadataImage?.type ?? "",
+              size: recipe.mainImage?.metadataImage?.size ?? 0,
+            },
+            urlSourceImage: recipe.mainImage?.urlImage?.url ?? "",
+          },
+          nationalities: recipe.nationalities.map(
+            ({ nationality: { id, name } }) => ({
+              id,
+              name,
+            })
+          ),
+          cookingMethods: recipe.cookingMethods.map(
+            ({ cookingMethod: { id, name } }) => ({
+              id,
+              name,
+            })
+          ),
+          mealTypes: recipe.mealTypes.map(({ mealType: { id, name } }) => ({
+            id,
+            name,
+          })),
+        },
+      };
     }),
   addParsedRecipe: protectedProcedure
     .input(addUrlImageRecipeSchema)
@@ -165,6 +228,92 @@ export const recipesRouter = router({
           message: "Unable to parse recipe",
           code: "INTERNAL_SERVER_ERROR",
         });
+      }
+    }),
+  editRecipe: protectedProcedure
+    .input(editRecipeSchema)
+    .mutation(async ({ ctx, input: { id, fields, updateImage } }) => {
+      if (!updateImage) {
+        await updateRecipe({ ctx, id, fields });
+        return null;
+      } else {
+        const oldRecipe = await getMainImage(ctx, id);
+        if (!oldRecipe) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Recipe does not exist",
+          });
+        }
+        if (oldRecipe.mainImage?.metadataImage?.key) {
+          const uuid = uuidv4();
+          await updateRecipeSignedToSigned({ ctx, id, fields, uuid });
+          await remove(
+            ctx.session.user.id,
+            id,
+            oldRecipe.mainImage.metadataImage.key
+          ).catch((e) => {
+            console.log("Error: Unable to remove old image", e);
+          });
+          const signedUrl = await getUploadSignedUrl(
+            ctx.session.user.id,
+            id,
+            fields.imageMetadata,
+            uuid
+          );
+          return signedUrl;
+        } else if (oldRecipe.mainImage?.urlImage?.url) {
+          const uuid = uuidv4();
+          await updateRecipeUrlToSigned({
+            ctx,
+            id,
+            fields,
+            oldUrlImageId: oldRecipe.mainImage.id,
+            uuid,
+          });
+          const signedUrl = await getUploadSignedUrl(
+            ctx.session.user.id,
+            id,
+            fields.imageMetadata,
+            uuid
+          );
+          return signedUrl;
+        } else {
+          const uuid = uuidv4();
+          await updateRecipeNoneToSigned({ ctx, id, fields, uuid });
+          const signedUrl = await getUploadSignedUrl(
+            ctx.session.user.id,
+            id,
+            fields.imageMetadata,
+            uuid
+          );
+          return signedUrl;
+        }
+      }
+    }),
+  editUrlImageRecipe: protectedProcedure
+    .input(editUrlImageRecipeSchema)
+    .mutation(async ({ ctx, input: { id, fields } }) => {
+      const oldRecipe = await getMainImage(ctx, id);
+      if (!oldRecipe) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Recipe does not exist",
+        });
+      }
+      if (oldRecipe.mainImage?.metadataImage?.key) {
+        const oldImageId = oldRecipe.mainImage.id;
+        await updateRecipeSignedToUrl({ ctx, id, oldImageId, fields });
+        await remove(
+          ctx.session.user.id,
+          id,
+          oldRecipe.mainImage.metadataImage.key
+        ).catch((e) => {
+          console.log("Error: Unable to remove old image", e);
+        });
+      } else if (oldRecipe.mainImage?.urlImage?.url) {
+        await updateRecipeUrlToUrl({ ctx, id, fields });
+      } else {
+        await updateRecipeNoneToUrl({ ctx, id, fields });
       }
     }),
 });

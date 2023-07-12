@@ -79,7 +79,6 @@ async function createDefaultRecipies() {
           prepTime: faker.datatype.float(),
           mainImage: {
             create: {
-              type: "url",
               urlImage: {
                 create: {
                   url: "https://picsum.photos/200/300",
@@ -87,7 +86,6 @@ async function createDefaultRecipies() {
               },
             },
           },
-          isPublic: false,
           mealTypes: {
             create: [
               {

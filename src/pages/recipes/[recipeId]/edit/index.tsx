@@ -62,106 +62,49 @@ import {
 } from "@/ui/FieldValidation";
 import { ErrorMessage } from "@hookform/error-message";
 import { Switch } from "@headlessui/react";
+import { LoaderSection } from "@/components/LoaderSection";
 
-type FormStage = 1 | 2 | 3;
-
-const Create: CustomReactFC = () => {
-  const [formStage, setFormStage] = useState<FormStage>(1);
-  const [url, setUrl] = useState<string>("");
-  const snackbarDispatch = useSnackbarDispatch();
-  const { refetch, data } = trpc.recipes.parseRecipe.useQuery(
-    { url },
-    {
-      enabled: false,
-      retry: false,
-      onSuccess() {
-        setFormStage(3);
-      },
-      onError() {
-        snackbarDispatch({
-          type: "ERROR",
-          message: "Sorry! Unable to parse this recipe :(",
-        });
-      },
-    }
+const Index: CustomReactFC = () => {
+  const router = useRouter();
+  const {
+    data: recipe,
+    isLoading,
+    isError,
+  } = trpc.recipes.getRecipeFormFields.useQuery(
+    { recipeId: router.query.recipeId as string },
+    { enabled: !!router.query.recipeId }
   );
-  const parseRecipe = () => refetch();
-  if (formStage === 1) {
-    return (
-      <div className="mt-10 flex justify-center text-gray-500">
-        <div className="flex w-full max-w-md flex-col gap-4 rounded border-4 border-gray-400 p-8">
-          <h1>Do you want to parse a recipe from another site?</h1>
-          <ul className="flex justify-center gap-4">
-            <li>
-              <Button onClick={() => setFormStage(2)} className="w-[50px]">
-                Yes
-              </Button>
-            </li>
-            <li>
-              <Button onClick={() => setFormStage(3)} className="w-[50px]">
-                No
-              </Button>
-            </li>
-          </ul>
-        </div>
-      </div>
-    );
+
+  if (isLoading) {
+    return <LoaderSection />;
   }
-  if (formStage === 2) {
-    return (
-      <div className="mt-10 flex justify-center text-gray-500">
-        <div className="flex w-full max-w-md flex-col gap-4 rounded border-4 border-gray-400 p-8">
-          <h1>Enter a recipe website URL to parse</h1>
-          <Input value={url} onChange={(e) => setUrl(e.target.value)} />
-          <div className="flex justify-end gap-2">
-            <Button onClick={() => setFormStage(1)}>Back</Button>
-            <Button onClick={parseRecipe}>Parse</Button>
-          </div>
-        </div>
-      </div>
-    );
+
+  if (!recipe) {
+    return <p>Recipe not found</p>;
   }
-  return <RecipeForm initialData={data} />;
+
+  if (isError) {
+    return <p>Something went wrong</p>;
+  }
+
+  return <RecipeForm key={recipe.updatedAt.toString()} initialData={recipe} />;
 };
 
-type RecipeFormData = RouterOutputs["recipes"]["parseRecipe"] | undefined;
+type RecipeFormData = NonNullable<
+  RouterOutputs["recipes"]["getRecipeFormFields"]
+>;
 
-const RecipeForm = ({
-  initialData: data,
-}: {
-  initialData: RecipeFormData | undefined;
-}) => {
-  const usingUploadedImage =
-    (data?.initialData && data.initialData.image.urlSourceImage.length == 0) ??
-    true;
+const RecipeForm = ({ initialData: data }: { initialData: RecipeFormData }) => {
+  const usingUploadedImage = data.mainImage?.type === "presignedUrl";
   const [isUploadedImage, setIsUploadedImage] = useState(usingUploadedImage);
   const methods = useForm<FormAddRecipe>({
     resolver: zodResolver(addRecipeFormSchema),
-    defaultValues: data?.initialData || {
-      name: "",
-      description: "",
-      image: {
-        urlSourceImage: "",
-        imageMetadata: undefined,
-      },
-      ingredients: [
-        { id: uuidv4(), name: "", isHeader: false },
-        { id: uuidv4(), name: "", isHeader: false },
-        { id: uuidv4(), name: "", isHeader: false },
-      ],
-      steps: [
-        { id: uuidv4(), name: "", isHeader: false },
-        { id: uuidv4(), name: "", isHeader: false },
-        { id: uuidv4(), name: "", isHeader: false },
-      ],
-      prepTime: "",
-      cookTime: "",
-      cookingMethods: [],
-      mealTypes: [],
-      nationalities: [],
-    },
+    defaultValues: data.form,
   });
   const router = useRouter();
+  const [defaultSrc, setDefaultSrc] = useState(
+    usingUploadedImage ? data.mainImage.src : undefined
+  );
   const setFileMetadata = (file: File | undefined) => {
     if (file) {
       methods.setValue(
@@ -187,22 +130,27 @@ const RecipeForm = ({
     handleFileDrop,
     removeFile,
   } = useImageUpload(setFileMetadata);
-  const addRecipeMutation = trpc.recipes.addRecipe.useMutation({
+  const handleRemoveFile = () => {
+    setDefaultSrc(undefined);
+    removeFile();
+  };
+  const queryUtils = trpc.useContext();
+  const editRecipe = trpc.recipes.editRecipe.useMutation({
     async onSuccess(presignedPost) {
+      if (!presignedPost) {
+        snackbarDispatch({
+          type: "SUCCESS",
+          message: "Successfully edited recipe",
+        });
+        navigateToRecipes();
+        return;
+      }
       if (!file) {
         // error unable to upload file or user somehow removed img after upload
         snackbarDispatch({
           type: "ERROR",
           message: "There was a problem with uploading your image",
         });
-        return;
-      }
-      if (!presignedPost) {
-        snackbarDispatch({
-          type: "SUCCESS",
-          message: "Successfully create recipe",
-        });
-        navigateToRecipes();
         return;
       }
       // Add fields that are required for presigned post
@@ -222,6 +170,13 @@ const RecipeForm = ({
           type: "SUCCESS",
           message: "Successfully create recipe",
         });
+        queryUtils.recipes.getRecipe.invalidate({
+          recipeId: router.query.recipeId as string,
+        });
+        queryUtils.recipes.getRecipes.invalidate();
+        queryUtils.recipes.getRecipeFormFields.invalidate({
+          recipeId: router.query.recipeId as string,
+        });
         navigateToRecipes();
       } catch (e) {
         snackbarDispatch({
@@ -231,33 +186,40 @@ const RecipeForm = ({
       }
     },
   });
-  const addParsedRecipeMutation = trpc.recipes.addParsedRecipe.useMutation({
-    onSuccess() {
-      snackbarDispatch({
-        type: "SUCCESS",
-        message: "Successfully create recipe",
-      });
-      navigateToRecipes();
-    },
-  });
+  const editUrlImageRecipeMutation =
+    trpc.recipes.editUrlImageRecipe.useMutation({
+      onSuccess() {
+        snackbarDispatch({
+          type: "SUCCESS",
+          message: "Successfully create recipe",
+        });
+        navigateToRecipes();
+      },
+    });
   const snackbarDispatch = useSnackbarDispatch();
+  const {
+    formState: { dirtyFields },
+  } = methods;
   const createRecipe = methods.handleSubmit((validData) => {
     if (isUploadedImage && validData.image.imageMetadata) {
       const formattedData = {
-        ...validData,
-        imageMetadata: validData.image.imageMetadata,
-        urlSource: data?.siteInfo.url,
-        originalAuthor: data?.siteInfo.author,
+        id: router.query.recipeId as string,
+        updateImage: !!dirtyFields.image?.imageMetadata,
+        fields: {
+          ...validData,
+          imageMetadata: validData.image.imageMetadata,
+        },
       };
-      addRecipeMutation.mutate(formattedData);
+      editRecipe.mutate(formattedData);
     } else {
       const formattedData = {
-        ...validData,
-        urlSourceImage: validData.image.urlSourceImage,
-        urlSource: data?.siteInfo.url,
-        originalAuthor: data?.siteInfo.author,
+        id: router.query.recipeId as string,
+        fields: {
+          ...validData,
+          urlSourceImage: validData.image.urlSourceImage,
+        },
       };
-      addParsedRecipeMutation.mutate(formattedData);
+      editUrlImageRecipeMutation.mutate(formattedData);
     }
   });
   const navigateToRecipes = () => router.push("/recipes");
@@ -278,16 +240,17 @@ const RecipeForm = ({
             >
               Back
             </Button>
-            <h2 className="text-2xl">Add Recipe</h2>
+            <h2 className="text-2xl">Edit Recipe</h2>
           </div>
           <SectionWrapper>
             <NameDesImgSection
               uploadedImageResult={uploadedImageResult}
               handleFileSelect={handleFileSelect}
               handleFileDrop={handleFileDrop}
-              removeFile={removeFile}
+              removeFile={handleRemoveFile}
               isUploadedImage={isUploadedImage}
               setIsUploadedImage={setIsUploadedImage}
+              defaultSrc={defaultSrc}
             />
           </SectionWrapper>
           <SectionWrapper>
@@ -308,7 +271,7 @@ const RecipeForm = ({
           <SectionWrapper>
             <CookingMethodsSection />
           </SectionWrapper>
-          <Button disabled={addRecipeMutation.isLoading}>Create</Button>
+          <Button disabled={editRecipe.isLoading}>Edit</Button>
         </form>
       </FormProvider>
     </section>
@@ -326,6 +289,7 @@ const NameDesImgSection = ({
   removeFile,
   isUploadedImage,
   setIsUploadedImage,
+  defaultSrc,
 }: {
   uploadedImageResult: UploadedImageResult;
   handleFileSelect: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -333,6 +297,7 @@ const NameDesImgSection = ({
   removeFile: () => void;
   isUploadedImage: boolean;
   setIsUploadedImage: React.Dispatch<SetStateAction<boolean>>;
+  defaultSrc?: string;
 }) => {
   const id = useId();
   const {
@@ -368,6 +333,7 @@ const NameDesImgSection = ({
       setImageErrorMessage("");
     }
   }, [urlSourceImage, imageMetadata, submitCount]);
+
   return (
     <div className="flex flex-col gap-2">
       <div className="grid min-h-[250px] grid-cols-1 gap-2 sm:grid-cols-2">
@@ -411,6 +377,7 @@ const NameDesImgSection = ({
                 removeFile={removeFile}
                 handleFilesSelect={handleFileSelect}
                 handleFileDrop={handleFileDrop}
+                defaultSrc={defaultSrc}
               />
             ) : (
               <div className="relative h-full w-full">
@@ -932,7 +899,7 @@ const DraggableInput = ({
   );
 };
 
-Create.auth = true;
-Create.hideNav = true;
+Index.auth = true;
+Index.hideNav = true;
 
-export default Create;
+export default Index;

@@ -1,11 +1,27 @@
-import { GetRecipe, addRecipe, addParsedRecipe } from "@/schemas/recipe";
+import {
+  GetRecipe,
+  addRecipe,
+  addParsedRecipe,
+  EditRecipe,
+  EditUrlImageRecipe,
+} from "@/schemas/recipe";
 import { Context } from "src/server/trpc/router/context";
+import type { Prisma, PrismaClient } from "@prisma/client";
+
+type PrismaTx = Omit<
+  PrismaClient<
+    Prisma.PrismaClientOptions,
+    never,
+    Prisma.RejectOnNotFound | Prisma.RejectPerOperation | undefined
+  >,
+  "$connect" | "$disconnect" | "$on" | "$transaction" | "$use"
+>;
 
 export async function createRecipe(
   ctx: Context,
   userId: string,
   input: addRecipe,
-  formattedSignedDate: string
+  uuid: string
 ) {
   const recipe = await ctx.prisma.$transaction(async (tx) => {
     // Unable to connect multiple on create b/c it requires recipeId
@@ -14,10 +30,9 @@ export async function createRecipe(
         name: input.name,
         mainImage: {
           create: {
-            type: "presignedUrl",
             metadataImage: {
               create: {
-                key: `${input.imageMetadata.name}-${formattedSignedDate}`,
+                key: `${input.imageMetadata.name}-${uuid}`,
                 type: input.imageMetadata.type,
                 size: input.imageMetadata.size,
               },
@@ -92,9 +107,8 @@ export async function createParsedRecipe(
     const recipe = await tx.recipe.create({
       data: {
         name: input.name,
-        images: {
+        mainImage: {
           create: {
-            type: "url",
             urlImage: { create: { url: input.urlSourceImage } },
           },
         },
@@ -220,10 +234,333 @@ export async function getRecipe(ctx: Context, recipeId: string) {
       parsedSiteInfo: true,
     },
   });
-
   if (!recipe) {
     return null;
   }
-
   return recipe;
+}
+
+export async function getRecipeFormFields(ctx: Context, recipeId: string) {
+  const recipe = await ctx.prisma.recipe.findUnique({
+    select: {
+      id: true,
+      updatedAt: true,
+      name: true,
+      description: true,
+      prepTime: true,
+      cookTime: true,
+      mainImage: { include: { urlImage: true, metadataImage: true } },
+      ingredients: true,
+      cookingMethods: { include: { cookingMethod: true } },
+      mealTypes: { include: { mealType: true } },
+      nationalities: { include: { nationality: true } },
+    },
+    where: { id: recipeId },
+  });
+  return recipe;
+}
+
+export async function getMainImage(ctx: Context, recipeId: string) {
+  const recipe = await ctx.prisma.recipe.findUnique({
+    select: {
+      mainImage: { include: { urlImage: true, metadataImage: true } },
+    },
+    where: { id: recipeId },
+  });
+  return recipe;
+}
+
+export async function updateRecipe({
+  ctx,
+  id,
+  fields,
+}: {
+  ctx: Context;
+  id: EditRecipe["id"];
+  fields: EditRecipe["fields"];
+}) {
+  await ctx.prisma.$transaction(async (prisma) => {
+    await prisma.recipe.update({
+      where: { id },
+      data: {
+        name: fields.name,
+        description: fields.description,
+        prepTime: fields.prepTime,
+        cookTime: fields.cookTime,
+      },
+    });
+    await updateManyToMany({ prismaTx: prisma, recipeId: id, fields });
+  });
+}
+
+export async function updateRecipeSignedToSigned({
+  ctx,
+  id,
+  fields,
+  uuid,
+}: {
+  ctx: Context;
+  id: EditRecipe["id"];
+  fields: EditRecipe["fields"];
+  uuid: string;
+}) {
+  await ctx.prisma.$transaction(async (prisma) => {
+    await prisma.recipe.update({
+      where: { id },
+      data: {
+        name: fields.name,
+        description: fields.description,
+        prepTime: fields.prepTime,
+        cookTime: fields.cookTime,
+        mainImage: {
+          update: {
+            metadataImage: {
+              update: {
+                type: fields.imageMetadata.type,
+                key: `${fields.imageMetadata.name}-${uuid}`,
+                size: fields.imageMetadata.size,
+              },
+            },
+          },
+        },
+      },
+    });
+    await updateManyToMany({ prismaTx: prisma, recipeId: id, fields });
+  });
+}
+
+export async function updateRecipeUrlToSigned({
+  ctx,
+  id,
+  oldUrlImageId,
+  fields,
+  uuid,
+}: {
+  ctx: Context;
+  id: EditRecipe["id"];
+  oldUrlImageId: string;
+  fields: EditRecipe["fields"];
+  uuid: string;
+}) {
+  await ctx.prisma.$transaction(async (prisma) => {
+    await prisma.recipe.update({
+      where: { id },
+      data: {
+        name: fields.name,
+        description: fields.description,
+        prepTime: fields.prepTime,
+        cookTime: fields.cookTime,
+        mainImage: {
+          update: {
+            urlImage: {
+              delete: {
+                imageId: oldUrlImageId,
+              },
+            },
+            metadataImage: {
+              create: {
+                type: fields.imageMetadata.type,
+                key: `${fields.imageMetadata.name}-${uuid}`,
+                size: fields.imageMetadata.size,
+              },
+            },
+          },
+        },
+      },
+    });
+    await updateManyToMany({ prismaTx: prisma, recipeId: id, fields });
+  });
+}
+
+export async function updateRecipeSignedToUrl({
+  ctx,
+  id,
+  oldImageId,
+  fields,
+}: {
+  ctx: Context;
+  id: EditUrlImageRecipe["id"];
+  oldImageId: string;
+  fields: EditUrlImageRecipe["fields"];
+}) {
+  await ctx.prisma.$transaction(async (prisma) => {
+    await ctx.prisma.recipe.update({
+      where: { id },
+      data: {
+        name: fields.name,
+        description: fields.description,
+        prepTime: fields.prepTime,
+        cookTime: fields.cookTime,
+        mainImage: {
+          update: {
+            urlImage: {
+              create: {
+                url: fields.urlSourceImage,
+              },
+            },
+            metadataImage: {
+              delete: {
+                imageId: oldImageId,
+              },
+            },
+          },
+        },
+      },
+    });
+    await updateManyToMany({ prismaTx: prisma, recipeId: id, fields });
+  });
+}
+
+export async function updateRecipeUrlToUrl({
+  ctx,
+  id,
+  fields,
+}: {
+  ctx: Context;
+  id: EditUrlImageRecipe["id"];
+  fields: EditUrlImageRecipe["fields"];
+}) {
+  await ctx.prisma.$transaction(async (prisma) => {
+    await ctx.prisma.recipe.update({
+      where: { id },
+      data: {
+        name: fields.name,
+        description: fields.description,
+        prepTime: fields.prepTime,
+        cookTime: fields.cookTime,
+        mainImage: {
+          update: {
+            urlImage: {
+              update: {
+                url: fields.urlSourceImage,
+              },
+            },
+          },
+        },
+      },
+    });
+    await updateManyToMany({ prismaTx: prisma, recipeId: id, fields });
+  });
+}
+
+export async function updateRecipeNoneToUrl({
+  ctx,
+  id,
+  fields,
+}: {
+  ctx: Context;
+  id: EditUrlImageRecipe["id"];
+  fields: EditUrlImageRecipe["fields"];
+}) {
+  await ctx.prisma.$transaction(async (prisma) => {
+    await ctx.prisma.recipe.update({
+      where: { id },
+      data: {
+        name: fields.name,
+        description: fields.description,
+        prepTime: fields.prepTime,
+        cookTime: fields.cookTime,
+        mainImage: {
+          create: {
+            urlImage: {
+              create: {
+                url: fields.urlSourceImage,
+              },
+            },
+          },
+        },
+      },
+    });
+    await updateManyToMany({ prismaTx: prisma, recipeId: id, fields });
+  });
+}
+
+export async function updateRecipeNoneToSigned({
+  ctx,
+  id,
+  fields,
+  uuid,
+}: {
+  ctx: Context;
+  id: EditRecipe["id"];
+  fields: EditRecipe["fields"];
+  uuid: string;
+}) {
+  await ctx.prisma.$transaction(async (prisma) => {
+    await prisma.recipe.update({
+      where: { id },
+      data: {
+        name: fields.name,
+        description: fields.description,
+        prepTime: fields.prepTime,
+        cookTime: fields.cookTime,
+        mainImage: {
+          create: {
+            metadataImage: {
+              create: {
+                key: `${fields.imageMetadata.name}-${uuid}`,
+                type: fields.imageMetadata.type,
+                size: fields.imageMetadata.size,
+              },
+            },
+          },
+        },
+      },
+    });
+    await updateManyToMany({ prismaTx: prisma, recipeId: id, fields });
+  });
+}
+
+async function updateManyToMany({
+  prismaTx,
+  recipeId,
+  fields,
+}: {
+  prismaTx: PrismaTx;
+  recipeId: string;
+  fields: EditRecipe["fields"] | EditUrlImageRecipe["fields"];
+}) {
+  const deleteNationalitiesPromise = prismaTx.nationalitiesOnRecipes.deleteMany(
+    {
+      where: { recipeId: recipeId },
+    }
+  );
+  const deleteCookingMethodsPromise =
+    prismaTx.cookingMethodsOnRecipies.deleteMany({
+      where: { recipeId: recipeId },
+    });
+  const deleteMealTypesPormise = prismaTx.mealTypesOnRecipies.deleteMany({
+    where: { recipeId: recipeId },
+  });
+  await Promise.all([
+    deleteNationalitiesPromise,
+    deleteCookingMethodsPromise,
+    deleteMealTypesPormise,
+  ]);
+  const createNationalitiesPromise = prismaTx.nationalitiesOnRecipes.createMany(
+    {
+      data: fields.nationalities.map(({ id }) => ({
+        nationalityId: id,
+        recipeId: recipeId,
+      })),
+    }
+  );
+  const createCookingMethodsPromise =
+    prismaTx.cookingMethodsOnRecipies.createMany({
+      data: fields.cookingMethods.map(({ id }) => ({
+        cookingMethodId: id,
+        recipeId: recipeId,
+      })),
+    });
+  const createMealTypesPromise = prismaTx.mealTypesOnRecipies.createMany({
+    data: fields.mealTypes.map(({ id }) => ({
+      mealTypeId: id,
+      recipeId: recipeId,
+    })),
+  });
+  await Promise.all([
+    createNationalitiesPromise,
+    createCookingMethodsPromise,
+    createMealTypesPromise,
+  ]);
 }
