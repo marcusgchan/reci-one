@@ -98,7 +98,6 @@ model ParsedSiteInfo {
 
 model Image {
   id                  String         @id @default(cuid())
-  type                ImageType
   imageToRecipeId     String?        @map("imageToRecipe") @db.VarChar(255)
   mainImageToRecipeId String?        @unique @map("mainImageToRecipe") @db.VarChar(255)
   mainImageToRecipe   Recipe?        @relation("mainImageToRecipe", fields: [mainImageToRecipeId], references: [id])
@@ -226,9 +225,4 @@ model NationalitiesOnRecipes {
   @@index([nationalityId])
   @@index([recipeId])
   @@map("nationalities_on_recipies")
-}
-
-enum ImageType {
-  url
-  presignedUrl
 }

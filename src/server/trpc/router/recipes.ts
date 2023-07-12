@@ -40,25 +40,21 @@ export const recipesRouter = router({
       const userId = ctx.session?.user?.id;
       const recipes = await getRecipes(ctx, userId, input);
       const formattedRecipes = recipes.map(async (recipe) => {
-        if (recipe.mainImage?.type === "url") {
-          const url = recipe.mainImage.urlImage?.url;
-          if (url) {
-            return { ...recipe, mainImage: { type: "url" as const, url } };
-          }
-        } else if (recipe.mainImage?.type === "presignedUrl") {
-          const key = recipe.mainImage?.metadataImage?.key;
-          if (key) {
-            const url = await getImageSignedUrl(
-              userId,
-              recipe.id,
-              key,
-              getFormattedUtcDate()
-            );
-            return {
-              ...recipe,
-              mainImage: { type: "presignedUrl" as const, url },
-            };
-          }
+        const url = recipe.mainImage?.urlImage?.url;
+        const key = recipe.mainImage?.metadataImage?.key;
+        if (url) {
+          return { ...recipe, mainImage: { type: "url" as const, url } };
+        } else if (key) {
+          const url = await getImageSignedUrl(
+            userId,
+            recipe.id,
+            key,
+            getFormattedUtcDate()
+          );
+          return {
+            ...recipe,
+            mainImage: { type: "presignedUrl" as const, url },
+          };
         }
         // Shouldn't reach this point since image is required unless
         // a recipe is missing a mainImage
@@ -75,7 +71,7 @@ export const recipesRouter = router({
       if (!recipe) {
         return null;
       }
-      if (recipe.mainImage?.type === "url" && recipe.mainImage.urlImage?.url) {
+      if (recipe.mainImage?.urlImage?.url) {
         return {
           ...recipe,
           mainImage: {
@@ -83,10 +79,7 @@ export const recipesRouter = router({
             url: recipe.mainImage.urlImage.url,
           },
         };
-      } else if (
-        recipe.mainImage?.type === "presignedUrl" &&
-        recipe.mainImage.metadataImage
-      ) {
+      } else if (recipe.mainImage?.metadataImage) {
         try {
           const url = await getImageSignedUrl(
             ctx.session.user.id,
@@ -130,21 +123,22 @@ export const recipesRouter = router({
       if (!recipe) {
         return null;
       }
+      const url = recipe.mainImage?.urlImage?.url;
+      const key = recipe.mainImage?.metadataImage?.key;
       return {
         updatedAt: recipe.updatedAt,
         mainImage: {
-          type: recipe.mainImage?.type ?? "noImage",
-          src:
-            recipe.mainImage?.type === "url"
-              ? recipe.mainImage.urlImage?.url
-              : recipe.mainImage?.type === "presignedUrl"
-              ? await getImageSignedUrl(
-                  ctx.session.user.id,
-                  recipe.id,
-                  recipe.mainImage.metadataImage?.key ?? "",
-                  getFormattedUtcDate()
-                )
-              : "",
+          type: url ?? key ?? "noImage",
+          src: url
+            ? url
+            : key
+            ? await getImageSignedUrl(
+                ctx.session.user.id,
+                recipe.id,
+                key,
+                getFormattedUtcDate()
+              )
+            : "",
         },
         form: {
           name: recipe.name,
@@ -250,10 +244,7 @@ export const recipesRouter = router({
             message: "Recipe does not exist",
           });
         }
-        if (
-          oldRecipe.mainImage?.type === "presignedUrl" &&
-          oldRecipe.mainImage.metadataImage?.key
-        ) {
+        if (oldRecipe.mainImage?.metadataImage?.key) {
           const uuid = uuidv4();
           await updateRecipeSignedToSigned({ ctx, id, fields, uuid });
           await remove(
@@ -270,10 +261,7 @@ export const recipesRouter = router({
             uuid
           );
           return signedUrl;
-        } else if (
-          oldRecipe.mainImage?.type === "url" &&
-          oldRecipe.mainImage.urlImage?.url
-        ) {
+        } else if (oldRecipe.mainImage?.urlImage?.url) {
           const uuid = uuidv4();
           await updateRecipeUrlToSigned({
             ctx,
@@ -312,10 +300,7 @@ export const recipesRouter = router({
           message: "Recipe does not exist",
         });
       }
-      if (
-        oldRecipe.mainImage?.type === "presignedUrl" &&
-        oldRecipe.mainImage.metadataImage?.key
-      ) {
+      if (oldRecipe.mainImage?.metadataImage?.key) {
         const oldImageId = oldRecipe.mainImage.id;
         await updateRecipeSignedToUrl({ ctx, id, oldImageId, fields });
         await remove(
@@ -325,10 +310,7 @@ export const recipesRouter = router({
         ).catch((e) => {
           console.log("Error: Unable to remove old image", e);
         });
-      } else if (
-        oldRecipe.mainImage?.type === "url" &&
-        oldRecipe.mainImage.urlImage?.url
-      ) {
+      } else if (oldRecipe.mainImage?.urlImage?.url) {
         await updateRecipeUrlToUrl({ ctx, id, fields });
       } else {
         await updateRecipeNoneToUrl({ ctx, id, fields });

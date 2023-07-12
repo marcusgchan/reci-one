@@ -30,7 +30,6 @@ export async function createRecipe(
         name: input.name,
         mainImage: {
           create: {
-            type: "presignedUrl",
             metadataImage: {
               create: {
                 key: `${input.imageMetadata.name}-${uuid}`,
@@ -110,7 +109,6 @@ export async function createParsedRecipe(
         name: input.name,
         mainImage: {
           create: {
-            type: "url",
             urlImage: { create: { url: input.urlSourceImage } },
           },
         },
@@ -354,7 +352,6 @@ export async function updateRecipeUrlToSigned({
         cookTime: fields.cookTime,
         mainImage: {
           update: {
-            type: "presignedUrl",
             urlImage: {
               delete: {
                 imageId: oldUrlImageId,
@@ -396,7 +393,6 @@ export async function updateRecipeSignedToUrl({
         cookTime: fields.cookTime,
         mainImage: {
           update: {
-            type: "url",
             urlImage: {
               create: {
                 url: fields.urlSourceImage,
@@ -466,7 +462,6 @@ export async function updateRecipeNoneToUrl({
         cookTime: fields.cookTime,
         mainImage: {
           create: {
-            type: "url",
             urlImage: {
               create: {
                 url: fields.urlSourceImage,
@@ -501,7 +496,6 @@ export async function updateRecipeNoneToSigned({
         cookTime: fields.cookTime,
         mainImage: {
           create: {
-            type: "presignedUrl",
             metadataImage: {
               create: {
                 key: `${fields.imageMetadata.name}-${uuid}`,

@@ -362,11 +362,7 @@ const NameDesImgSection = ({
   const imageMetadata = useWatch({ control, name: "image.imageMetadata" });
   const [imageErrorMessage, setImageErrorMessage] = useState("");
   useEffect(() => {
-    if (urlSourceImage.length && imageMetadata && submitCount) {
-      setImageErrorMessage(
-        "Either enter an image url or upload an image. Not both"
-      );
-    } else if (!urlSourceImage.length && !imageMetadata && submitCount) {
+    if (!urlSourceImage.length && !imageMetadata && submitCount) {
       setImageErrorMessage("Enter an image url or upload an image");
     } else {
       setImageErrorMessage("");
