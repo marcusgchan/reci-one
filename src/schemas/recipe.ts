@@ -100,3 +100,9 @@ export const editRecipeSchema = z.object({
   fields: addRecipeSchema.extend({}),
 });
 export type EditRecipe = z.infer<typeof editRecipeSchema>;
+
+export const editUrlImageRecipeSchema = z.object({
+  id: z.string(),
+  fields: addUrlImageRecipeSchema.extend({}),
+});
+export type EditUrlImageRecipe = z.infer<typeof editUrlImageRecipeSchema>;

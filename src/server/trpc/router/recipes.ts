@@ -4,6 +4,7 @@ import {
   getRecipesSchema,
   addUrlImageRecipeSchema,
   editRecipeSchema,
+  editUrlImageRecipeSchema,
 } from "@/schemas/recipe";
 import {
   createParsedRecipe,
@@ -14,8 +15,11 @@ import {
   getRecipes,
   updateRecipe,
   updateRecipeNoneToSigned,
+  updateRecipeNoneToUrl,
   updateRecipeSignedToSigned,
+  updateRecipeSignedToUrl,
   updateRecipeUrlToSigned,
+  updateRecipeUrlToUrl,
 } from "@/services/recipesService";
 import {
   getImageSignedUrl,
@@ -36,7 +40,6 @@ export const recipesRouter = router({
       const userId = ctx.session?.user?.id;
       const recipes = await getRecipes(ctx, userId, input);
       const formattedRecipes = recipes.map(async (recipe) => {
-        console.log(recipe.mainImage);
         if (recipe.mainImage?.type === "url") {
           const url = recipe.mainImage.urlImage?.url;
           if (url) {
@@ -95,7 +98,7 @@ export const recipesRouter = router({
             ...recipe,
             mainImage: { type: "presignedUrl" as const, url },
           };
-        } catch (e) {}
+        } catch (e) { }
       }
       // Should only reach here if there isn't an image
       return { ...recipe, mainImage: { type: "noImage" as const, url: "" } };
@@ -135,13 +138,13 @@ export const recipesRouter = router({
             recipe.mainImage?.type === "url"
               ? recipe.mainImage.urlImage?.url
               : recipe.mainImage?.type === "presignedUrl"
-              ? await getImageSignedUrl(
+                ? await getImageSignedUrl(
                   ctx.session.user.id,
                   recipe.id,
                   recipe.mainImage.metadataImage?.key ?? "",
                   getFormattedUtcDate()
                 )
-              : "",
+                : "",
         },
         form: {
           name: recipe.name,
@@ -300,8 +303,37 @@ export const recipesRouter = router({
       }
     }),
   editUrlImageRecipe: protectedProcedure
-    .input(addUrlImageRecipeSchema)
-    .mutation(({ ctx, input }) => {}),
+    .input(editUrlImageRecipeSchema)
+    .mutation(async ({ ctx, input: { id, fields } }) => {
+      const oldRecipe = await getMainImage(ctx, id);
+      if (!oldRecipe) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Recipe does not exist",
+        });
+      }
+      if (
+        oldRecipe.mainImage?.type === "presignedUrl" &&
+        oldRecipe.mainImage.metadataImage?.key
+      ) {
+        const oldImageId = oldRecipe.mainImage.id;
+        await updateRecipeSignedToUrl({ ctx, id, oldImageId, fields });
+        await remove(
+          ctx.session.user.id,
+          id,
+          oldRecipe.mainImage.metadataImage.key
+        ).catch((e) => {
+          console.log("Error: Unable to remove old image", e);
+        });
+      } else if (
+        oldRecipe.mainImage?.type === "url" &&
+        oldRecipe.mainImage.urlImage?.url
+      ) {
+        await updateRecipeUrlToUrl({ ctx, id, fields });
+      } else {
+        await updateRecipeNoneToUrl({ ctx, id, fields });
+      }
+    }),
 });
 
 // Create a date that will be appended to the end

@@ -186,15 +186,16 @@ const RecipeForm = ({ initialData: data }: { initialData: RecipeFormData }) => {
       }
     },
   });
-  const addParsedRecipeMutation = trpc.recipes.addParsedRecipe.useMutation({
-    onSuccess() {
-      snackbarDispatch({
-        type: "SUCCESS",
-        message: "Successfully create recipe",
-      });
-      navigateToRecipes();
-    },
-  });
+  const editUrlImageRecipeMutation =
+    trpc.recipes.editUrlImageRecipe.useMutation({
+      onSuccess() {
+        snackbarDispatch({
+          type: "SUCCESS",
+          message: "Successfully create recipe",
+        });
+        navigateToRecipes();
+      },
+    });
   const snackbarDispatch = useSnackbarDispatch();
   const {
     formState: { dirtyFields },
@@ -212,12 +213,13 @@ const RecipeForm = ({ initialData: data }: { initialData: RecipeFormData }) => {
       editRecipe.mutate(formattedData);
     } else {
       const formattedData = {
-        ...validData,
-        urlSourceImage: validData.image.urlSourceImage,
-        urlSource: data?.siteInfo.url,
-        originalAuthor: data?.siteInfo.author,
+        id: router.query.recipeId as string,
+        fields: {
+          ...validData,
+          urlSourceImage: validData.image.urlSourceImage,
+        },
       };
-      addParsedRecipeMutation.mutate(formattedData);
+      editUrlImageRecipeMutation.mutate(formattedData);
     }
   });
   const navigateToRecipes = () => router.push("/recipes");
