@@ -125,10 +125,11 @@ export const recipesRouter = router({
       }
       const url = recipe.mainImage?.urlImage?.url;
       const key = recipe.mainImage?.metadataImage?.key;
+      const type = url ? "url" : key ? "presignedUrl" : "noImage";
       return {
         updatedAt: recipe.updatedAt,
         mainImage: {
-          type: url ?? key ?? "noImage",
+          type: type,
           src: url
             ? url
             : key

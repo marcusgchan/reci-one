@@ -6,16 +6,9 @@ import {
   EditUrlImageRecipe,
 } from "@/schemas/recipe";
 import { Context } from "src/server/trpc/router/context";
-import type { Prisma, PrismaClient } from "@prisma/client";
+import type { PrismaClient } from "@prisma/client";
 
-type PrismaTx = Omit<
-  PrismaClient<
-    Prisma.PrismaClientOptions,
-    never,
-    Prisma.RejectOnNotFound | Prisma.RejectPerOperation | undefined
-  >,
-  "$connect" | "$disconnect" | "$on" | "$transaction" | "$use"
->;
+type PrismaTx = Parameters<Parameters<PrismaClient["$transaction"]>[0]>[0];
 
 export async function createRecipe(
   ctx: Context,
