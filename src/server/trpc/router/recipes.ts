@@ -91,7 +91,7 @@ export const recipesRouter = router({
             ...recipe,
             mainImage: { type: "presignedUrl" as const, url },
           };
-        } catch (e) {}
+        } catch (e) { }
       }
       // Should only reach here if there isn't an image
       return { ...recipe, mainImage: { type: "noImage" as const, url: "" } };
@@ -125,20 +125,21 @@ export const recipesRouter = router({
       }
       const url = recipe.mainImage?.urlImage?.url;
       const key = recipe.mainImage?.metadataImage?.key;
+      const type = url ? "url" : key ? "presignedUrl" : "noImage";
       return {
         updatedAt: recipe.updatedAt,
         mainImage: {
-          type: url ?? key ?? "noImage",
+          type: type,
           src: url
             ? url
             : key
-            ? await getImageSignedUrl(
+              ? await getImageSignedUrl(
                 ctx.session.user.id,
                 recipe.id,
                 key,
                 getFormattedUtcDate()
               )
-            : "",
+              : "",
         },
         form: {
           name: recipe.name,
