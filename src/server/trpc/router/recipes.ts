@@ -91,7 +91,7 @@ export const recipesRouter = router({
             ...recipe,
             mainImage: { type: "presignedUrl" as const, url },
           };
-        } catch (e) { }
+        } catch (e) {}
       }
       // Should only reach here if there isn't an image
       return { ...recipe, mainImage: { type: "noImage" as const, url: "" } };
@@ -133,13 +133,13 @@ export const recipesRouter = router({
           src: url
             ? url
             : key
-              ? await getImageSignedUrl(
+            ? await getImageSignedUrl(
                 ctx.session.user.id,
                 recipe.id,
                 key,
                 getFormattedUtcDate()
               )
-              : "",
+            : "",
         },
         form: {
           name: recipe.name,
