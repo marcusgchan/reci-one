@@ -193,6 +193,13 @@ const RecipeForm = ({ initialData: data }: { initialData: RecipeFormData }) => {
           type: "SUCCESS",
           message: "Successfully create recipe",
         });
+        queryUtils.recipes.getRecipe.invalidate({
+          recipeId: router.query.recipeId as string,
+        });
+        queryUtils.recipes.getRecipes.invalidate();
+        queryUtils.recipes.getRecipeFormFields.invalidate({
+          recipeId: router.query.recipeId as string,
+        });
         navigateToRecipes();
       },
     });

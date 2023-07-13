@@ -3,8 +3,9 @@ import { RouterOutputs, trpc } from "@/utils/trpc";
 import { useRouter } from "next/router";
 import Image from "next/image";
 import { Button } from "@/ui/Button";
+import { CustomReactFC } from "@/shared/types";
 
-export default function Recipe() {
+const Recipe: CustomReactFC = () => {
   const router = useRouter();
   const {
     data: recipe,
@@ -134,7 +135,10 @@ export default function Recipe() {
       )}
     </div>
   );
-}
+};
+
+Recipe.auth = true;
+export default Recipe;
 
 type DisplayImageProps = NonNullable<
   RouterOutputs["recipes"]["getRecipe"]
