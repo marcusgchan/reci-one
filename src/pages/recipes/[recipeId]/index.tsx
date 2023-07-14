@@ -94,7 +94,7 @@ const Recipe: CustomReactFC = () => {
           <ul className="flex gap-2">
             {recipe.nationalities.map(({ nationality }) => (
               <li
-                className="rounded-full bg-accent-600 py-2 px-3"
+                className="rounded-full bg-accent-600 px-3 py-2"
                 key={nationality.id}
               >
                 {nationality.name}
@@ -109,7 +109,7 @@ const Recipe: CustomReactFC = () => {
           <ul className="flex gap-2">
             {recipe.mealTypes.map(({ mealType }) => (
               <li
-                className="rounded-full bg-accent-600 py-2 px-3"
+                className="rounded-full bg-accent-600 px-3 py-2"
                 key={mealType.id}
               >
                 {mealType.name}
@@ -124,7 +124,7 @@ const Recipe: CustomReactFC = () => {
           <ul className="flex gap-2">
             {recipe.cookingMethods.map(({ cookingMethod }) => (
               <li
-                className="rounded-full bg-accent-600 py-2 px-3"
+                className="rounded-full bg-accent-600 px-3 py-2"
                 key={cookingMethod.id}
               >
                 {cookingMethod.name}
