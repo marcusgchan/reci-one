@@ -193,14 +193,16 @@ const RecipeForm = ({ initialData: data }: { initialData: RecipeFormData }) => {
           type: "SUCCESS",
           message: "Successfully create recipe",
         });
-        queryUtils.recipes.getRecipe.invalidate({
-          recipeId: router.query.recipeId as string,
-        });
-        queryUtils.recipes.getRecipes.invalidate();
-        queryUtils.recipes.getRecipeFormFields.invalidate({
-          recipeId: router.query.recipeId as string,
-        });
-        navigateToRecipe();
+        return Promise.all([
+          navigateToRecipe(),
+          queryUtils.recipes.getRecipe.invalidate({
+            recipeId: router.query.recipeId as string,
+          }),
+          queryUtils.recipes.getRecipes.invalidate(),
+          queryUtils.recipes.getRecipeFormFields.invalidate({
+            recipeId: router.query.recipeId as string,
+          }),
+        ]);
       },
     });
   const snackbarDispatch = useSnackbarDispatch();
@@ -229,7 +231,22 @@ const RecipeForm = ({ initialData: data }: { initialData: RecipeFormData }) => {
       editUrlImageRecipeMutation.mutate(formattedData);
     }
   });
-  const navigateToRecipe = () => router.push(`../${router.query.recipeId}`);
+  const deleteRecipe = trpc.recipes.delete.useMutation({
+    async onSuccess() {
+      snackbarDispatch({
+        type: "SUCCESS",
+        message: "Successfully deleted recipe",
+      });
+      return Promise.all([
+        router.push("/recipes"),
+        queryUtils.recipes.getRecipes.invalidate(),
+      ]);
+    },
+  });
+  const handleDelete = () =>
+    deleteRecipe.mutate({ id: router.query.recipeId as string });
+  const navigateToRecipe = async () =>
+    router.push(`../${router.query.recipeId}`);
   return (
     <section className="p-5 pb-10">
       <FormProvider {...methods}>
@@ -247,7 +264,16 @@ const RecipeForm = ({ initialData: data }: { initialData: RecipeFormData }) => {
             >
               Back
             </Button>
-            <h2 className="text-2xl">Edit Recipe</h2>
+            <div className="flex justify-between">
+              <h2 className="text-2xl">Edit Recipe</h2>
+              <Button
+                type="button"
+                onClick={handleDelete}
+                disabled={deleteRecipe.isLoading}
+              >
+                Delete
+              </Button>
+            </div>
           </div>
           <SectionWrapper>
             <NameDesImgSection
