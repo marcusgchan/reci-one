@@ -557,3 +557,7 @@ async function updateManyToMany({
     createMealTypesPromise,
   ]);
 }
+
+export async function deleteRecipe({ ctx, id }: { ctx: Context; id: string }) {
+  await ctx.prisma.recipe.delete({ where: { id } });
+}

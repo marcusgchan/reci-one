@@ -1,9 +1,9 @@
-import { Loader } from "@/shared/components/Loader";
 import { RouterOutputs, trpc } from "@/utils/trpc";
 import { useRouter } from "next/router";
 import Image from "next/image";
 import { Button } from "@/ui/Button";
 import { CustomReactFC } from "@/shared/types";
+import { LoaderSection } from "@/components/LoaderSection";
 
 const Recipe: CustomReactFC = () => {
   const router = useRouter();
@@ -19,7 +19,7 @@ const Recipe: CustomReactFC = () => {
   );
 
   if (isLoading) {
-    return <Loader />;
+    return <LoaderSection centerFixed />;
   }
 
   if (isError) {
