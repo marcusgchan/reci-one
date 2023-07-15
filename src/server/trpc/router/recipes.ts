@@ -9,6 +9,7 @@ import {
 import {
   createParsedRecipe,
   createRecipe,
+  deleteRecipe,
   getMainImage,
   getRecipe,
   getRecipeFormFields,
@@ -316,6 +317,21 @@ export const recipesRouter = router({
       } else {
         await updateRecipeNoneToUrl({ ctx, id, fields });
       }
+    }),
+  delete: protectedProcedure
+    .input(z.object({ id: z.string() }))
+    .mutation(async ({ ctx, input: { id } }) => {
+      const recipe = await getRecipe(ctx, id);
+      if (recipe?.mainImage?.metadataImage?.key) {
+        await remove(
+          ctx.session.user.id,
+          id,
+          recipe.mainImage.metadataImage.key
+        ).catch((e) => {
+          console.log("Error: Unable to remove old image", e);
+        });
+      }
+      await deleteRecipe({ ctx, id });
     }),
 });
 
