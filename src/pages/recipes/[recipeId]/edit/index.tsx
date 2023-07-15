@@ -142,7 +142,7 @@ const RecipeForm = ({ initialData: data }: { initialData: RecipeFormData }) => {
           type: "SUCCESS",
           message: "Successfully edited recipe",
         });
-        navigateToRecipes();
+        navigateToRecipe();
         return;
       }
       if (!file) {
@@ -177,7 +177,7 @@ const RecipeForm = ({ initialData: data }: { initialData: RecipeFormData }) => {
         queryUtils.recipes.getRecipeFormFields.invalidate({
           recipeId: router.query.recipeId as string,
         });
-        navigateToRecipes();
+        navigateToRecipe();
       } catch (e) {
         snackbarDispatch({
           type: "ERROR",
@@ -200,7 +200,7 @@ const RecipeForm = ({ initialData: data }: { initialData: RecipeFormData }) => {
         queryUtils.recipes.getRecipeFormFields.invalidate({
           recipeId: router.query.recipeId as string,
         });
-        navigateToRecipes();
+        navigateToRecipe();
       },
     });
   const snackbarDispatch = useSnackbarDispatch();
@@ -229,7 +229,7 @@ const RecipeForm = ({ initialData: data }: { initialData: RecipeFormData }) => {
       editUrlImageRecipeMutation.mutate(formattedData);
     }
   });
-  const navigateToRecipes = () => router.push("/recipes");
+  const navigateToRecipe = () => router.push(`../${router.query.recipeId}`);
   return (
     <section className="p-5 pb-10">
       <FormProvider {...methods}>
@@ -242,7 +242,7 @@ const RecipeForm = ({ initialData: data }: { initialData: RecipeFormData }) => {
             <Button
               intent="noBoarder"
               type="button"
-              onClick={navigateToRecipes}
+              onClick={navigateToRecipe}
               className="p-1"
             >
               Back
