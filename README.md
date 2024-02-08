@@ -24,6 +24,7 @@ Create an env file in the root directory:
 # Prisma
 # Local dev database
 MY_SQL_ROOT_PASSWORD=secret
+MY_SQL_DATABASE=reci-one-db
 DATABASE_URL=mysql://root:secret@localhost:3306/reci-one-db
 
 # Next Auth
