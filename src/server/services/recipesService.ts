@@ -213,7 +213,11 @@ export async function getRecipes(
   return recipes;
 }
 
-export async function getRecipe(ctx: Context, recipeId: string, userId: string) {
+export async function getRecipe(
+  ctx: Context,
+  recipeId: string,
+  userId: string
+) {
   const recipe = await ctx.prisma.recipe.findFirst({
     where: { id: recipeId, authorId: userId },
     include: {
@@ -230,15 +234,19 @@ export async function getRecipe(ctx: Context, recipeId: string, userId: string) 
   return recipe;
 }
 
-export async function recipeExists(ctx: Context, recipeId: string, userId: string) {
+export async function recipeExists(
+  ctx: Context,
+  recipeId: string,
+  userId: string
+) {
   const recipe = await ctx.prisma.recipe.findFirst({
     select: { id: true, mainImage: { select: { metadataImage: true } } },
     where: {
       id: recipeId,
-      authorId: userId
+      authorId: userId,
     },
   });
-  return recipe
+  return recipe;
 }
 
 export async function getRecipeFormFields(ctx: Context, recipeId: string) {
@@ -572,8 +580,20 @@ export async function deleteRecipe({ ctx, id }: { ctx: Context; id: string }) {
     await tx.step.deleteMany({ where: { recipeId: id } });
     await tx.mealTypesOnRecipies.deleteMany({ where: { recipeId: id } });
     await tx.nationalitiesOnRecipes.deleteMany({ where: { recipeId: id } });
-    await tx.urlImage.deleteMany({ where: { image: { OR: [{ mainImageToRecipe: { id } }, { imageToRecipe: { id } }] } } });
-    await tx.metadataImage.deleteMany({ where: { image: { OR: [{ mainImageToRecipe: { id } }, { imageToRecipe: { id } }] } } });
+    await tx.urlImage.deleteMany({
+      where: {
+        image: {
+          OR: [{ mainImageToRecipe: { id } }, { imageToRecipe: { id } }],
+        },
+      },
+    });
+    await tx.metadataImage.deleteMany({
+      where: {
+        image: {
+          OR: [{ mainImageToRecipe: { id } }, { imageToRecipe: { id } }],
+        },
+      },
+    });
     await tx.image.deleteMany({ where: { mainImageToRecipe: { id } } });
     await tx.recipe.delete({ where: { id } });
   });
