@@ -14,6 +14,7 @@ import {
   getRecipe,
   getRecipeFormFields,
   getRecipes,
+  recipeExists,
   updateRecipe,
   updateRecipeNoneToSigned,
   updateRecipeNoneToUrl,
@@ -68,7 +69,7 @@ export const recipesRouter = router({
   getRecipe: protectedProcedure
     .input(getRecipeSchema)
     .query(async ({ ctx, input }) => {
-      const recipe = await getRecipe(ctx, input.recipeId);
+      const recipe = await getRecipe(ctx, input.recipeId, ctx.session.user.id);
       if (!recipe) {
         return null;
       }
@@ -321,7 +322,13 @@ export const recipesRouter = router({
   delete: protectedProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ ctx, input: { id } }) => {
-      const recipe = await getRecipe(ctx, id);
+      const recipe = await recipeExists(ctx, id, ctx.session.user.id);
+      if (!recipe) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Recipe does not exist",
+        });
+      }
       if (recipe?.mainImage?.metadataImage?.key) {
         await remove(
           ctx.session.user.id,
