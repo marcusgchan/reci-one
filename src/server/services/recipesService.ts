@@ -213,9 +213,9 @@ export async function getRecipes(
   return recipes;
 }
 
-export async function getRecipe(ctx: Context, recipeId: string) {
-  const recipe = await ctx.prisma.recipe.findUnique({
-    where: { id: recipeId },
+export async function getRecipe(ctx: Context, recipeId: string, userId: string) {
+  const recipe = await ctx.prisma.recipe.findFirst({
+    where: { id: recipeId, authorId: userId },
     include: {
       mainImage: { include: { urlImage: true, metadataImage: true } },
       ingredients: true,
@@ -227,10 +227,18 @@ export async function getRecipe(ctx: Context, recipeId: string) {
       parsedSiteInfo: true,
     },
   });
-  if (!recipe) {
-    return null;
-  }
   return recipe;
+}
+
+export async function recipeExists(ctx: Context, recipeId: string, userId: string) {
+  const recipe = await ctx.prisma.recipe.findFirst({
+    select: { id: true, mainImage: { select: { metadataImage: true } } },
+    where: {
+      id: recipeId,
+      authorId: userId
+    },
+  });
+  return recipe
 }
 
 export async function getRecipeFormFields(ctx: Context, recipeId: string) {
@@ -559,5 +567,14 @@ async function updateManyToMany({
 }
 
 export async function deleteRecipe({ ctx, id }: { ctx: Context; id: string }) {
-  await ctx.prisma.recipe.delete({ where: { id } });
+  await ctx.prisma.$transaction(async (tx) => {
+    await tx.ingredient.deleteMany({ where: { recipeId: id } });
+    await tx.step.deleteMany({ where: { recipeId: id } });
+    await tx.mealTypesOnRecipies.deleteMany({ where: { recipeId: id } });
+    await tx.nationalitiesOnRecipes.deleteMany({ where: { recipeId: id } });
+    await tx.urlImage.deleteMany({ where: { image: { OR: [{ mainImageToRecipe: { id } }, { imageToRecipe: { id } }] } } });
+    await tx.metadataImage.deleteMany({ where: { image: { OR: [{ mainImageToRecipe: { id } }, { imageToRecipe: { id } }] } } });
+    await tx.image.deleteMany({ where: { mainImageToRecipe: { id } } });
+    await tx.recipe.delete({ where: { id } });
+  });
 }

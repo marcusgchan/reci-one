@@ -14,6 +14,7 @@ import {
   getRecipe,
   getRecipeFormFields,
   getRecipes,
+  recipeExists,
   updateRecipe,
   updateRecipeNoneToSigned,
   updateRecipeNoneToUrl,
@@ -92,7 +93,7 @@ export const recipesRouter = router({
             ...recipe,
             mainImage: { type: "presignedUrl" as const, url },
           };
-        } catch (e) {}
+        } catch (e) { }
       }
       // Should only reach here if there isn't an image
       return { ...recipe, mainImage: { type: "noImage" as const, url: "" } };
@@ -134,13 +135,13 @@ export const recipesRouter = router({
           src: url
             ? url
             : key
-            ? await getImageSignedUrl(
+              ? await getImageSignedUrl(
                 ctx.session.user.id,
                 recipe.id,
                 key,
                 getFormattedUtcDate()
               )
-            : "",
+              : "",
         },
         form: {
           name: recipe.name,
@@ -321,7 +322,13 @@ export const recipesRouter = router({
   delete: protectedProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ ctx, input: { id } }) => {
-      const recipe = await getRecipe(ctx, id);
+      const recipe = await recipeExists(ctx, id, ctx.session.user.id);
+      if (!recipe) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Recipe does not exist",
+        });
+      }
       if (recipe?.mainImage?.metadataImage?.key) {
         await remove(
           ctx.session.user.id,
