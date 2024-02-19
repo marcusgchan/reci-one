@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "parser"
+version = "0.1.0"
+description = ""
+authors = ["Marcus Chan <marcuscchan@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+Flask = "^3.0.2"
+recipe-scrapers = "^14.54.0"
+
+[tool.poetry.group.dev.dependencies]
+pyright = "^1.1.350"
+black = "^24.2.0"
+python-dotenv = "^1.0.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
