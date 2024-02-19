@@ -63,4 +63,4 @@ Now we need to get the local types setup since we just installed everything in t
 Run:
 
 - `npm i` in the root directory
-- `pip install -r requirements.txt` in `/parser`
+- `poetry install --no-root` in `/parser` (Ensure you have poetry installed in your machine before running this command)
