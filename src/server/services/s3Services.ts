@@ -31,15 +31,6 @@ export const getUploadSignedUrl = async (
         ["content-length-range", config.s3.minFileSize, config.s3.maxFileSize],
       ],
     });
-    // Hacky workaround to get post presigned urls to work with minIO b/c
-    // the url goes to http://localhost:9000 without appending the bucket name after
-    // for some reason
-    if (env.NODE_ENV === "development" || env.NODE_ENV === "test") {
-      return {
-        url: `${env.BUCKET_DOMAIN}/${env.BUCKET_NAME}`,
-        fields: presignedPost.fields,
-      };
-    }
     return {
       url: `${presignedPost.url}`,
       fields: presignedPost.fields,
