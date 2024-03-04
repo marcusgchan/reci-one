@@ -121,7 +121,11 @@ export const recipesRouter = router({
   getRecipeFormFields: protectedProcedure
     .input(getRecipeSchema)
     .query(async ({ ctx, input }) => {
-      const recipe = await getRecipeFormFields(ctx, input.recipeId);
+      const recipe = await getRecipeFormFields(
+        ctx,
+        input.recipeId,
+        ctx.session.user.id
+      );
       if (!recipe) {
         return null;
       }
@@ -237,10 +241,10 @@ export const recipesRouter = router({
     .input(editRecipeSchema)
     .mutation(async ({ ctx, input: { id, fields, updateImage } }) => {
       if (!updateImage) {
-        await updateRecipe({ ctx, id, fields });
+        await updateRecipe({ ctx, id, fields, userId: ctx.session.user.id });
         return null;
       } else {
-        const oldRecipe = await getMainImage(ctx, id);
+        const oldRecipe = await getMainImage(ctx, id, ctx.session.user.id);
         if (!oldRecipe) {
           throw new TRPCError({
             code: "BAD_REQUEST",
@@ -296,7 +300,7 @@ export const recipesRouter = router({
   editUrlImageRecipe: protectedProcedure
     .input(editUrlImageRecipeSchema)
     .mutation(async ({ ctx, input: { id, fields } }) => {
-      const oldRecipe = await getMainImage(ctx, id);
+      const oldRecipe = await getMainImage(ctx, id, ctx.session.user.id);
       if (!oldRecipe) {
         throw new TRPCError({
           code: "BAD_REQUEST",

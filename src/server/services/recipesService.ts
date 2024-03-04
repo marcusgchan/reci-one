@@ -249,7 +249,11 @@ export async function recipeExists(
   return recipe;
 }
 
-export async function getRecipeFormFields(ctx: Context, recipeId: string) {
+export async function getRecipeFormFields(
+  ctx: Context,
+  recipeId: string,
+  userId: string
+) {
   const recipe = await ctx.prisma.recipe.findUnique({
     select: {
       id: true,
@@ -264,17 +268,21 @@ export async function getRecipeFormFields(ctx: Context, recipeId: string) {
       mealTypes: { include: { mealType: true } },
       nationalities: { include: { nationality: true } },
     },
-    where: { id: recipeId },
+    where: { id: recipeId, authorId: userId },
   });
   return recipe;
 }
 
-export async function getMainImage(ctx: Context, recipeId: string) {
+export async function getMainImage(
+  ctx: Context,
+  recipeId: string,
+  userId: string
+) {
   const recipe = await ctx.prisma.recipe.findUnique({
     select: {
       mainImage: { include: { urlImage: true, metadataImage: true } },
     },
-    where: { id: recipeId },
+    where: { id: recipeId, authorId: userId },
   });
   return recipe;
 }
@@ -283,14 +291,16 @@ export async function updateRecipe({
   ctx,
   id,
   fields,
+  userId,
 }: {
   ctx: Context;
   id: EditRecipe["id"];
   fields: EditRecipe["fields"];
+  userId: string;
 }) {
   await ctx.prisma.$transaction(async (prisma) => {
     await prisma.recipe.update({
-      where: { id },
+      where: { id, authorId: userId },
       data: {
         name: fields.name,
         description: fields.description,
@@ -580,6 +590,7 @@ export async function deleteRecipe({ ctx, id }: { ctx: Context; id: string }) {
     await tx.step.deleteMany({ where: { recipeId: id } });
     await tx.mealTypesOnRecipies.deleteMany({ where: { recipeId: id } });
     await tx.nationalitiesOnRecipes.deleteMany({ where: { recipeId: id } });
+    await tx.cookingMethodsOnRecipies.deleteMany({ where: { recipeId: id } });
     await tx.urlImage.deleteMany({
       where: {
         image: {
