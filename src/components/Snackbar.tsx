@@ -1,3 +1,5 @@
+"use client";
+
 import React, {
   createContext,
   useContext,
@@ -33,7 +35,7 @@ export function useSnackbarDispatch() {
 export function SnackbarProvider({ children }: { children: React.ReactNode }) {
   const [snacks, snacksDispatch] = useReducer(
     snacksReducer,
-    [] as SnackNotification[]
+    [] as SnackNotification[],
   );
   const currentSnack = Array.isArray(snacks) && snacks[0];
 
@@ -95,7 +97,7 @@ function Notification({ message, type, dispatch }: Notification) {
       {
         duration: 3000,
         easing: "cubic-bezier(.1,.52,.99,.5)",
-      }
+      },
     );
     animationRef.current.play();
     animationRef.current.finished.then(() => {

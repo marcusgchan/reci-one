@@ -3,17 +3,6 @@ import { z } from "zod";
 
 export const getRecipesSchema = z.object({
   search: z.string(),
-  filters: z.object({
-    ingredientsInclude: z.string().array(),
-    ingredientsExclude: z.string().array(),
-    nationalitiesInclude: z.string().array(),
-    nationalitiesExclude: z.string().array(),
-    prepTimeMin: z.number(),
-    prepTimeMax: z.number(),
-    cookTimeMin: z.number(),
-    cookTimeMax: z.number(),
-    rating: z.number().min(0).max(5),
-  }),
 });
 export type GetRecipe = z.infer<typeof getRecipesSchema>;
 
@@ -26,14 +15,12 @@ const baseAddRecipeSchema = z.object({
   description: z.string(),
   ingredients: z
     .object({
-      id: z.string(),
       name: z.string().trim().min(1, { message: "Can't be empty string" }),
       isHeader: z.boolean(),
     })
     .array(),
   steps: z
     .object({
-      id: z.string(),
       name: z.string().trim().min(1, { message: "Can't be empty string" }),
       isHeader: z.boolean(),
     })

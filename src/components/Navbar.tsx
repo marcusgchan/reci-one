@@ -1,8 +1,10 @@
+"use client";
+
 import { useSession } from "next-auth/react";
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { FaBars } from "react-icons/fa";
 import { CgClose } from "react-icons/cg";
-import { useRouter } from "next/router";
+import { useRouter, usePathname } from "next/navigation";
 import { motion } from "framer-motion";
 
 export function NavBar() {
@@ -16,13 +18,14 @@ export function NavBar() {
 
 function DesktopNav() {
   const router = useRouter();
+  const pathname = usePathname();
   const navigate = (path: string) => {
-    if (router.pathname !== path) {
+    if (pathname !== path) {
       router.push(path);
     }
   };
   return (
-    <nav className="hidden w-full max-w-7xl justify-between border-4 border-gray-500 p-2 px-3 text-2xl text-gray-500 md:flex">
+    <nav className="hidden w-full justify-between border-4 border-gray-500 p-2 px-3 text-2xl text-gray-500 md:flex">
       <h1>
         <button
           onClick={() => navigate("/recipes")}
@@ -67,7 +70,10 @@ function MobileNav() {
   const [isOpen, setIsOpen] = useState(false);
   const navRef = useRef<HTMLElement>(null);
   const [nextRoute, setNextRoute] = useState("");
-  const html = document.querySelector("html");
+  // let html: HTMLElement | undefined;
+  // useEffect(() => {
+  //   html = document.querySelector("html") as HTMLElement;
+  // }, []);
   const toggleMenu = () => {
     setIsOpen((io) => !io);
   };
@@ -99,11 +105,11 @@ function MobileNav() {
           // Animating opening state
           if (isOpen && navRef.current) {
             navRef.current.style.display = "flex";
-            (html as HTMLHtmlElement).style.overflow = "hidden";
+            // (html as HTMLHtmlElement).style.overflow = "hidden";
           }
           // Closing state
           else {
-            (html as HTMLHtmlElement).style.overflow = "auto";
+            // (html as HTMLHtmlElement).style.overflow = "auto";
           }
         }}
         onAnimationComplete={() => {
@@ -159,28 +165,5 @@ function MobileNav() {
         </ul>
       </motion.nav>
     </div>
-  );
-}
-
-function LoggedIn(
-  props: React.HTMLAttributes<HTMLParagraphElement | HTMLAnchorElement>
-) {
-  const { status, data } = useSession();
-  const isLoggedIn = status === "authenticated";
-  // if (isLoggedIn) {
-  //   return <p {...props}>Logged in as {data?.user?.name}</p>;
-  // }
-
-  // return <a {...props}>Login</a>;
-  return (
-    <p className="ml-auto flex min-w-0 items-center gap-2 overflow-hidden whitespace-nowrap">
-      Logged in as
-      <span
-        style={{ maxWidth: "5rem" }}
-        className="inline-block w-full min-w-0 overflow-hidden text-ellipsis whitespace-nowrap"
-      >
-        very long name for testing purposes
-      </span>
-    </p>
   );
 }

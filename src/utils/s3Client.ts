@@ -1,6 +1,6 @@
 // Create service client module using ES6 syntax.
 import { S3Client } from "@aws-sdk/client-s3";
-import { env } from "src/server/env.mjs";
+import { env } from "~/env";
 
 // Set the AWS Region.
 const REGION = "us-west-1";
