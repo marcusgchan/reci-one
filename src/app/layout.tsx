@@ -24,7 +24,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`mx-auto max-w-screen-xl p-4 font-sans ${inter.variable}`}
+        className={`mx-auto max-w-screen-xl p-6 font-sans md:p-4 ${inter.variable}`}
       >
         <TRPCReactProvider>
           <SnackbarProvider>{children}</SnackbarProvider>

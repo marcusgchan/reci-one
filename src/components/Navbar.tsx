@@ -1,11 +1,13 @@
 "use client";
 
-import { useSession } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import React, { useEffect, useRef, useState } from "react";
 import { FaBars } from "react-icons/fa";
 import { CgClose } from "react-icons/cg";
 import { useRouter, usePathname } from "next/navigation";
 import { motion } from "framer-motion";
+import Link from "next/link";
+import { SignOutButton } from "~/app/_lib/auth/SignOut";
 
 export function NavBar() {
   return (
@@ -35,12 +37,9 @@ function DesktopNav() {
         </button>
       </h1>
       <ul className="flex min-w-0 gap-4 text-xl text-accent-500">
-        <li className="grid place-items-center">
-          <button className="cursor-pointer">HOME</button>
-        </li>
-        <li className="grid place-items-center">
-          <button className="cursor-pointer">FAVOURITES</button>
-        </li>
+        {/* <li className="grid place-items-center"> */}
+        {/*   <button className="cursor-pointer">FAVOURITES</button> */}
+        {/* </li> */}
         <li className="grid place-items-center">
           <button
             className="cursor-pointer"
@@ -49,15 +48,25 @@ function DesktopNav() {
             RECIPES
           </button>
         </li>
-        <li className="grid place-items-center">
-          <button className="cursor-pointer">NOTES</button>
-        </li>
+        {/* <li className="grid place-items-center"> */}
+        {/*   <button className="cursor-pointer">NOTES</button> */}
+        {/* </li> */}
         <li className="grid place-items-center">
           <button
             className="cursor-pointer"
             onClick={() => navigate("/recipes/create")}
           >
             ADD RECIPE
+          </button>
+        </li>
+        <li className="grid place-items-center capitalize">
+          <button
+            className="cursor-pointer"
+            onClick={() => {
+              signOut({ callbackUrl: "/login" });
+            }}
+          >
+            LOG OUT
           </button>
         </li>
       </ul>
@@ -70,13 +79,13 @@ function MobileNav() {
   const [isOpen, setIsOpen] = useState(false);
   const navRef = useRef<HTMLElement>(null);
   const [nextRoute, setNextRoute] = useState("");
-  // let html: HTMLElement | undefined;
-  // useEffect(() => {
-  //   html = document.querySelector("html") as HTMLElement;
-  // }, []);
-  const toggleMenu = () => {
-    setIsOpen((io) => !io);
-  };
+  const htmlRef = useRef<HTMLElement>(
+    document.querySelector("html") as HTMLElement,
+  );
+  useEffect(() => {
+    htmlRef.current = document.querySelector("html") as HTMLElement;
+  }, [htmlRef]);
+  const toggleMenu = () => setIsOpen((io) => !io);
   const queueNavigation = (path: string) => {
     toggleMenu();
     setNextRoute(path);
@@ -105,11 +114,11 @@ function MobileNav() {
           // Animating opening state
           if (isOpen && navRef.current) {
             navRef.current.style.display = "flex";
-            // (html as HTMLHtmlElement).style.overflow = "hidden";
+            htmlRef.current.style.overflow = "hidden";
           }
           // Closing state
           else {
-            // (html as HTMLHtmlElement).style.overflow = "auto";
+            htmlRef.current.style.overflow = "auto";
           }
         }}
         onAnimationComplete={() => {
@@ -136,30 +145,39 @@ function MobileNav() {
           <CgClose size={35} />
         </button>
         <ul>
-          <li className="text-center">
-            <button className="cursor-pointer">HOME</button>
-          </li>
-          <li className="text-center">
-            <button className="cursor-pointer">FAVOURITES</button>
-          </li>
+          {/* <li className="text-center"> */}
+          {/*   <button className="cursor-pointer">FAVOURITES</button> */}
+          {/* </li> */}
           <li className="text-center">
             <button
               className="cursor-pointer"
-              onClick={toggleMenu}
-              onAnimationEnd={() => queueNavigation("/recipes")}
+              onClick={() => {
+                queueNavigation("/recipes");
+              }}
             >
               RECIPES
             </button>
           </li>
-          <li className="text-center">
-            <button className="cursor-pointer">NOTES</button>
-          </li>
+          {/* <li className="text-center"> */}
+          {/*   <button className="cursor-pointer">NOTES</button> */}
+          {/* </li> */}
           <li className="text-center">
             <button
               className="cursor-pointer"
               onClick={() => queueNavigation("/recipes/create")}
             >
               ADD RECIPE
+            </button>
+          </li>
+          <li className="text-center">
+            <button
+              className="cursor-pointer"
+              onClick={() => {
+                toggleMenu();
+                signOut({ callbackUrl: "/login" });
+              }}
+            >
+              LOG OUT
             </button>
           </li>
         </ul>

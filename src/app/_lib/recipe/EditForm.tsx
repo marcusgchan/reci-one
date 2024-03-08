@@ -127,15 +127,9 @@ export function EditForm({
           type: "SUCCESS",
           message: "Successfully create recipe",
         });
-        await Promise.all([
-          queryUtils.recipes.getRecipe.invalidate({
-            recipeId: params.recipeId as string,
-          }),
-          queryUtils.recipes.getRecipes.invalidate(),
-          queryUtils.recipes.getRecipeFormFields.invalidate({
-            recipeId: params.recipeId as string,
-          }),
-        ]);
+        await queryUtils.recipes.getRecipeFormFields.invalidate({
+          recipeId: params.recipeId as string,
+        });
         navigateToRecipe();
         router.refresh();
       },

@@ -15,12 +15,14 @@ const baseAddRecipeSchema = z.object({
   description: z.string(),
   ingredients: z
     .object({
+      id: z.string().optional(),
       name: z.string().trim().min(1, { message: "Can't be empty string" }),
       isHeader: z.boolean(),
     })
     .array(),
   steps: z
     .object({
+      id: z.string().optional(),
       name: z.string().trim().min(1, { message: "Can't be empty string" }),
       isHeader: z.boolean(),
     })
