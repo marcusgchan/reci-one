@@ -1,16 +1,20 @@
 import { type RouterOutputs } from "~/trpc/shared";
 import { AiOutlineArrowUp, AiOutlineFilter } from "react-icons/ai";
-import { useAutoAnimate } from "@formkit/auto-animate/react";
-import { useRouter } from "next/navigation";
 import { unstable_noStore as noStore } from "next/cache";
-import { Auth } from "~/app/_lib/auth/Auth";
 import { api } from "~/trpc/server";
 import { RecipeList } from "./RecipeList";
+import { getServerAuthSession } from "~/server/auth";
+import { redirect } from "next/navigation";
 
 export default async function RecipesPage() {
+  noStore();
+  const session = await getServerAuthSession();
+  if (!session) {
+    redirect("/login");
+  }
   const recipes = await api.recipes.getRecipes.query({ search: "" });
   return (
-    <Auth>
+    <>
       {/* Mobile */}
       <section className="mx-auto grid h-full w-full grid-cols-1 gap-8 md:hidden">
         {/* <form className="flex flex-col gap-3"> */}
@@ -35,6 +39,6 @@ export default async function RecipesPage() {
       <section className="hidden h-full w-full flex-col gap-3 md:flex">
         <RecipeList recipes={recipes} />
       </section>
-    </Auth>
+    </>
   );
 }

@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Stage2Form } from "~/app/_lib/recipe/CreateForm2";
 import { getServerAuthSession } from "~/server/auth";
 import { RecipeForm } from "~/app/_lib/recipe/Form";
+import { unstable_noStore as noStore } from "next/cache";
 
 const searchParamsSchema = z
   .object({
@@ -28,6 +29,7 @@ export default async function Create({
 }: {
   searchParams: Record<string, string | string[]> | undefined;
 }) {
+  noStore();
   const params = searchParamsSchema.safeParse(searchParams);
   if (!params.success) {
     redirect(`/recipes/create?formStage=1`);

@@ -79,9 +79,7 @@ function MobileNav() {
   const [isOpen, setIsOpen] = useState(false);
   const navRef = useRef<HTMLElement>(null);
   const [nextRoute, setNextRoute] = useState("");
-  const htmlRef = useRef<HTMLElement>(
-    document.querySelector("html") as HTMLElement,
-  );
+  const htmlRef = useRef<HTMLElement>();
   useEffect(() => {
     htmlRef.current = document.querySelector("html") as HTMLElement;
   }, [htmlRef]);
@@ -111,6 +109,7 @@ function MobileNav() {
       <motion.nav
         ref={navRef}
         onAnimationStart={() => {
+          if (!htmlRef.current) return;
           // Animating opening state
           if (isOpen && navRef.current) {
             navRef.current.style.display = "flex";
