@@ -10,7 +10,7 @@ import { useFormContext, useFieldArray } from "react-hook-form";
 import { MdCompareArrows } from "react-icons/md";
 import { useListDnd } from "~/app/_lib/common/dnd/useListDnd";
 import { Button } from "~/components/ui/Button";
-import { FormAddRecipe } from "~/schemas/recipe";
+import { type FormAddRecipe } from "~/schemas/recipe";
 import { SortableItem } from "../common/dnd/SortableItem";
 import { DraggableListItem } from "../common/dnd/DraggableListItem";
 import { ListInput } from "./ListInputField";
@@ -30,7 +30,7 @@ export function DraggableIngredientList() {
   });
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
-    if (active && over && active.id !== over!.id) {
+    if (active && over && active.id !== over.id) {
       const oldIndex = fields.map(({ id }) => id).indexOf(active.id as string);
       const newIndex = fields.map(({ id }) => id).indexOf(over.id as string);
       move(oldIndex, newIndex);

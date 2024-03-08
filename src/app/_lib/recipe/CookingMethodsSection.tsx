@@ -1,10 +1,10 @@
 "use client";
 
 import { Combobox } from "~/components/ui/Combobox";
-import { DropdownListValues } from "./types";
+import { type DropdownListValues } from "./types";
 import { api } from "~/trpc/react";
 import { useFormContext, useFieldArray } from "react-hook-form";
-import { FormAddRecipe } from "~/schemas/recipe";
+import { type FormAddRecipe } from "~/schemas/recipe";
 import { ChipContainer } from "./ChipContainer";
 import { Chip } from "~/components/ui/Chip";
 

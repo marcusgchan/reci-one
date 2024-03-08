@@ -3,10 +3,10 @@
 import { useFormContext, useFieldArray } from "react-hook-form";
 import { Combobox } from "~/components/ui/Combobox";
 import { api } from "~/trpc/react";
-import { DropdownListValues } from "./types";
+import { type DropdownListValues } from "./types";
 import { ChipContainer } from "./ChipContainer";
 import { Chip } from "~/components/ui/Chip";
-import { FormAddRecipe } from "~/schemas/recipe";
+import { type FormAddRecipe } from "~/schemas/recipe";
 
 export function MealTypesSection() {
   const { data } = api.mealTypes.getMealTypes.useQuery(undefined, {

@@ -10,7 +10,7 @@ export default async function RecipePage({
   params: { recipeId: string };
 }) {
   const recipe = await api.recipes.getRecipe.query({
-    recipeId: params.recipeId as string,
+    recipeId: params.recipeId,
   });
 
   if (!recipe) {

@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
-import { FormAddRecipe, addRecipeFormSchema } from "~/schemas/recipe";
-import { RouterOutputs } from "~/trpc/shared";
+import { type FormAddRecipe, addRecipeFormSchema } from "~/schemas/recipe";
+import { type RouterOutputs } from "~/trpc/shared";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { v4 as uuidv4 } from "uuid";
 import { useRouter } from "next/navigation";
@@ -27,12 +27,13 @@ export function RecipeForm({
   initialData: RecipeFormData | undefined;
 }) {
   const usingUploadedImage =
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     (data?.initialData && data.initialData.image.urlSourceImage.length == 0) ??
     true;
   const [isUploadedImage, setIsUploadedImage] = useState(usingUploadedImage);
   const methods = useForm<FormAddRecipe>({
     resolver: zodResolver(addRecipeFormSchema),
-    defaultValues: data?.initialData || {
+    defaultValues: data?.initialData ?? {
       name: "",
       description: "",
       image: {

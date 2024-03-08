@@ -3,7 +3,7 @@
 import { FormProvider, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "~/components/ui/Button";
-import { RouterOutputs } from "~/trpc/shared";
+import { type RouterOutputs } from "~/trpc/shared";
 import { CookingMethodsSection } from "./CookingMethodsSection";
 import { NationalitiesSection } from "./NationalitiesSection";
 import { MealTypesSection } from "./MealtypesSection";
@@ -11,7 +11,7 @@ import { TimeSection } from "./TimeSection";
 import { DraggableStepList } from "./DraggableStepList";
 import { DraggableIngredientList } from "./DraggableIngredientList";
 import { NameDesImgSection } from "./NameImgDesSection";
-import { FormAddRecipe, addRecipeFormSchema } from "~/schemas/recipe";
+import { type FormAddRecipe, addRecipeFormSchema } from "~/schemas/recipe";
 import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useImageUpload } from "~/components/ui/ImageUpload";
@@ -173,7 +173,7 @@ export function EditForm({
   });
   const handleDelete = () =>
     deleteRecipe.mutate({ id: params.recipeId as string });
-  const navigateToRecipe = async () =>
+  const navigateToRecipe = () =>
     router.push(`../${params.recipeId as string}`);
   return (
     <section className="p-5 pb-10">

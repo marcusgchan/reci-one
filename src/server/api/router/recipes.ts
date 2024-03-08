@@ -28,14 +28,13 @@ import {
   getUploadSignedUrl,
   remove,
 } from "@/services/s3Services";
-import { ParsedRecipe } from "@/shared/types";
+import { type ParsedRecipe } from "@/shared/types";
 import { TRPCError } from "@trpc/server";
 import { env } from "~/env";
 import { protectedProcedure, createTRPCRouter } from "../trpc";
 import { v4 as uuidv4 } from "uuid";
 import z from "zod";
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 
 export const recipesRouter = createTRPCRouter({
   getRecipes: protectedProcedure

@@ -9,7 +9,7 @@ import {
   hasError,
 } from "~/components/ui/FieldValidation";
 import { Input } from "~/components/ui/Input";
-import { FormAddRecipe } from "~/schemas/recipe";
+import { type FormAddRecipe } from "~/schemas/recipe";
 
 export function TimeSection() {
   const id = useId();

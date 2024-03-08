@@ -1,9 +1,9 @@
 import { Switch } from "@headlessui/react";
-import { SetStateAction, useEffect, useId, useState } from "react";
+import { type SetStateAction, useEffect, useId, useState } from "react";
 import {
-  FieldError,
-  FieldErrorsImpl,
-  Merge,
+  type FieldError,
+  type FieldErrorsImpl,
+  type Merge,
   useFormContext,
   useWatch,
 } from "react-hook-form";
@@ -14,10 +14,10 @@ import {
   getErrorMsg,
   hasError,
 } from "~/components/ui/FieldValidation";
-import { ImageUpload, UploadedImageResult } from "~/components/ui/ImageUpload";
+import { ImageUpload, type UploadedImageResult } from "~/components/ui/ImageUpload";
 import { Input } from "~/components/ui/Input";
 import { Textarea } from "~/components/ui/Textarea";
-import { FormAddRecipe } from "~/schemas/recipe";
+import { type FormAddRecipe } from "~/schemas/recipe";
 
 type ImgMetadata = NonNullable<
   Exclude<FormAddRecipe["image"]["imageMetadata"], string>

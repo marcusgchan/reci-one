@@ -2,7 +2,7 @@
 
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { RecipeCard } from "./RecipeCard";
-import { RouterOutputs } from "~/trpc/shared";
+import { type RouterOutputs } from "~/trpc/shared";
 
 type Recipes = RouterOutputs["recipes"]["getRecipes"];
 

@@ -1,4 +1,4 @@
-import { addRecipe } from "@/schemas/recipe";
+import { type addRecipe } from "@/schemas/recipe";
 import {
   type CookingMethod,
   type MealType,

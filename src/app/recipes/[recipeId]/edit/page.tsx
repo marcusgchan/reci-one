@@ -14,7 +14,7 @@ export default async function Page({
   }
 
   const recipe = await api.recipes.getRecipeFormFields.query({
-    recipeId: params.recipeId as string,
+    recipeId: params.recipeId,
   });
 
   if (!recipe) {
