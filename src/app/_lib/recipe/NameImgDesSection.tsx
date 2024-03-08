@@ -14,7 +14,10 @@ import {
   getErrorMsg,
   hasError,
 } from "~/components/ui/FieldValidation";
-import { ImageUpload, type UploadedImageResult } from "~/components/ui/ImageUpload";
+import {
+  ImageUpload,
+  type UploadedImageResult,
+} from "~/components/ui/ImageUpload";
 import { Input } from "~/components/ui/Input";
 import { Textarea } from "~/components/ui/Textarea";
 import { type FormAddRecipe } from "~/schemas/recipe";

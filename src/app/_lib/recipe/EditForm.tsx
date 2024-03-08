@@ -173,8 +173,7 @@ export function EditForm({
   });
   const handleDelete = () =>
     deleteRecipe.mutate({ id: params.recipeId as string });
-  const navigateToRecipe = () =>
-    router.push(`../${params.recipeId as string}`);
+  const navigateToRecipe = () => router.push(`../${params.recipeId as string}`);
   return (
     <section className="p-5 pb-10">
       <FormProvider {...methods}>
