@@ -76,6 +76,7 @@ export function EditForm({
           message: "Successfully edited recipe",
         });
         navigateToRecipe();
+        router.refresh();
         return;
       }
       if (!file) {
@@ -104,16 +105,13 @@ export function EditForm({
           type: "SUCCESS",
           message: "Successfully create recipe",
         });
-        Promise.all([
-          queryUtils.recipes.getRecipe.invalidate({
-            recipeId: params.recipeId as string,
-          }),
-          queryUtils.recipes.getRecipes.invalidate(),
+        await Promise.all([
           queryUtils.recipes.getRecipeFormFields.invalidate({
             recipeId: params.recipeId as string,
           }),
         ]);
         navigateToRecipe();
+        router.refresh();
       } catch (e) {
         snackbarDispatch({
           type: "ERROR",
@@ -124,13 +122,12 @@ export function EditForm({
   });
   const editUrlImageRecipeMutation = api.recipes.editUrlImageRecipe.useMutation(
     {
-      onSuccess() {
+      async onSuccess() {
         snackbarDispatch({
           type: "SUCCESS",
           message: "Successfully create recipe",
         });
-        return Promise.all([
-          navigateToRecipe(),
+        await Promise.all([
           queryUtils.recipes.getRecipe.invalidate({
             recipeId: params.recipeId as string,
           }),
@@ -139,14 +136,15 @@ export function EditForm({
             recipeId: params.recipeId as string,
           }),
         ]);
+        navigateToRecipe();
+        router.refresh();
       },
     },
   );
   const snackbarDispatch = useSnackbarDispatch();
   const {
-    formState: { dirtyFields, errors },
+    formState: { dirtyFields },
   } = methods;
-  console.log(errors);
   const createRecipe = methods.handleSubmit((validData) => {
     if (isUploadedImage && validData.image.imageMetadata) {
       const formattedData = {
@@ -157,7 +155,6 @@ export function EditForm({
           imageMetadata: validData.image.imageMetadata,
         },
       };
-      console.log("Mutation");
       editRecipe.mutate(formattedData);
     } else {
       const formattedData = {
@@ -176,8 +173,8 @@ export function EditForm({
         type: "SUCCESS",
         message: "Successfully deleted recipe",
       });
-      await queryUtils.recipes.getRecipes.invalidate();
       router.push("/recipes");
+      router.refresh();
     },
   });
   const handleDelete = () =>

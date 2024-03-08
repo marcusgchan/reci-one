@@ -34,6 +34,8 @@ import { env } from "~/env";
 import { protectedProcedure, createTRPCRouter } from "../trpc";
 import { v4 as uuidv4 } from "uuid";
 import z from "zod";
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 
 export const recipesRouter = createTRPCRouter({
   getRecipes: protectedProcedure
@@ -124,7 +126,7 @@ export const recipesRouter = createTRPCRouter({
       const recipe = await getRecipeFormFields(
         ctx,
         input.recipeId,
-        ctx.session.user.id
+        ctx.session.user.id,
       );
       if (!recipe) {
         return null;
@@ -345,6 +347,7 @@ export const recipesRouter = createTRPCRouter({
         });
       }
       await deleteRecipe({ ctx, id });
+      revalidatePath("/recipes");
     }),
 });
 

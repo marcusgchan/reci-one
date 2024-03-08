@@ -8,10 +8,7 @@ import { api } from "~/trpc/server";
 import { RecipeList } from "./RecipeList";
 
 export default async function RecipesPage() {
-  noStore();
   const recipes = await api.recipes.getRecipes.query({ search: "" });
-  console.log("test");
-  console.log(recipes);
   return (
     <Auth>
       {/* Mobile */}

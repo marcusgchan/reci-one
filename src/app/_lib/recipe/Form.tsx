@@ -98,6 +98,7 @@ export function RecipeForm({
           message: "Successfully create recipe",
         });
         navigateToRecipes();
+        router.refresh();
         return;
       }
       // Add fields that are required for presigned post
@@ -118,6 +119,7 @@ export function RecipeForm({
           message: "Successfully create recipe",
         });
         navigateToRecipes();
+        router.refresh();
       } catch (e) {
         snackbarDispatch({
           type: "ERROR",
@@ -133,6 +135,7 @@ export function RecipeForm({
         message: "Successfully create recipe",
       });
       navigateToRecipes();
+      router.refresh();
     },
   });
   const snackbarDispatch = useSnackbarDispatch();

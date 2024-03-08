@@ -20,6 +20,5 @@ export default async function Page({
   if (!recipe) {
     return <p>Recipe not found</p>;
   }
-  console.log(recipe);
   return <EditForm initialData={recipe} />;
 }
