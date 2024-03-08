@@ -25,7 +25,7 @@ export default async function RecipePage({
     <Auth>
       <div className="mx-auto flex max-w-lg flex-col items-start gap-4 pb-10">
         <div>
-          <Link href="/recipes">Back to recipes</Link>
+          <Link href="/recipes">Back </Link>
         </div>
         <div className="flex w-full items-start justify-between gap-2">
           <h1 className="text-4xl font-bold">{recipe.name}</h1>
