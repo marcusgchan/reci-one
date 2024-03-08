@@ -55,7 +55,6 @@ type ParsedRecipe = {
   yields: string;
 };
 
-
 export const recipesRouter = createTRPCRouter({
   getRecipes: protectedProcedure
     .input(getRecipesSchema)
