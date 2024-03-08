@@ -38,16 +38,16 @@ export async function createRecipe(
         authorId: userId,
         ingredients: {
           createMany: {
-            data: input.ingredients.map((ingredients, i) => ({
-              ...ingredients,
+            data: input.ingredients.map(({ id: _, ...rest }, i) => ({
+              ...rest,
               order: i,
             })),
           },
         },
         steps: {
           createMany: {
-            data: input.steps.map((steps, i) => ({
-              ...steps,
+            data: input.steps.map(({ id: _, ...rest }, i) => ({
+              ...rest,
               order: i,
             })),
           },
@@ -111,16 +111,16 @@ export async function createParsedRecipe(
         authorId: userId,
         ingredients: {
           createMany: {
-            data: input.ingredients.map((ingredients, i) => ({
-              ...ingredients,
+            data: input.ingredients.map(({ id: _, ...rest }, i) => ({
+              ...rest,
               order: i,
             })),
           },
         },
         steps: {
           createMany: {
-            data: input.steps.map((steps, i) => ({
-              ...steps,
+            data: input.steps.map(({ id: _, ...rest }, i) => ({
+              ...rest,
               order: i,
             })),
           },

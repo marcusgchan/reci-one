@@ -18,6 +18,7 @@ import { TimeSection } from "./TimeSection";
 import { DraggableStepList } from "./DraggableStepList";
 import { NationalitiesSection } from "./NationalitiesSection";
 import { CookingMethodsSection } from "./CookingMethodsSection";
+import Link from "next/link";
 
 type RecipeFormData = RouterOutputs["recipes"]["parseRecipe"] | undefined;
 
@@ -169,14 +170,13 @@ export function RecipeForm({
           onSubmit={createRecipe}
         >
           <div>
-            <Button
-              intent="noBoarder"
+            <Link
               type="button"
-              onClick={navigateToRecipes}
+              href="/recipes/create?formStage=1"
               className="p-1"
             >
               Back
-            </Button>
+            </Link>
             <h2 className="text-2xl">Add Recipe</h2>
           </div>
           <SectionWrapper>

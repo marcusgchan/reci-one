@@ -76,12 +76,18 @@ function FormStage1() {
         <h1>Do you want to parse a recipe from another site?</h1>
         <ul className="flex justify-center gap-4">
           <li>
-            <Link href="/recipes/create?formStage=2" className="w-[50px]">
+            <Link
+              href="/recipes/create?formStage=2"
+              className="flex w-[50px] justify-center border-2 border-primary p-1"
+            >
               Yes
             </Link>
           </li>
           <li>
-            <Link href="/recipes/create?formStage=3" className="w-[50px]">
+            <Link
+              href="/recipes/create?formStage=3"
+              className="flex w-[50px] justify-center border-2 border-primary p-1"
+            >
               No
             </Link>
           </li>
