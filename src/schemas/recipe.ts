@@ -58,12 +58,12 @@ export const addRecipeSchema = baseAddRecipeSchema.extend({
     size: z.number({ invalid_type_error: "Image too big" }),
   }),
 });
-export type addRecipe = z.infer<typeof addRecipeSchema>;
+export type AddRecipe = z.infer<typeof addRecipeSchema>;
 
 export const addUrlImageRecipeSchema = baseAddRecipeSchema.extend({
   urlSourceImage: z.string().url(),
 });
-export type addParsedRecipe = z.infer<typeof addUrlImageRecipeSchema>;
+export type AddParsedRecipe = z.infer<typeof addUrlImageRecipeSchema>;
 
 export const addRecipeFormSchema = baseAddRecipeSchema.extend({
   image: z.object({

@@ -1,11 +1,11 @@
 import {
-  GetRecipe,
-  addRecipe,
-  addParsedRecipe,
-  EditRecipe,
-  EditUrlImageRecipe,
+  type GetRecipe,
+  type AddRecipe,
+  type AddParsedRecipe,
+  type EditRecipe,
+  type EditUrlImageRecipe,
 } from "@/schemas/recipe";
-import { Context } from "~/server/api/trpc";
+import { type Context } from "~/server/api/trpc";
 import type { PrismaClient } from "@prisma/client";
 
 type PrismaTx = Parameters<Parameters<PrismaClient["$transaction"]>[0]>[0];
@@ -13,7 +13,7 @@ type PrismaTx = Parameters<Parameters<PrismaClient["$transaction"]>[0]>[0];
 export async function createRecipe(
   ctx: Context,
   userId: string,
-  input: addRecipe,
+  input: AddRecipe,
   uuid: string,
 ) {
   const recipe = await ctx.prisma.$transaction(async (tx) => {
@@ -93,7 +93,7 @@ export async function createRecipe(
 export async function createParsedRecipe(
   ctx: Context,
   userId: string,
-  input: addParsedRecipe,
+  input: AddParsedRecipe,
 ) {
   const recipe = await ctx.prisma.$transaction(async (tx) => {
     // Unable to connect multiple on create b/c it requires recipeId

@@ -1,6 +1,6 @@
-import { cva, VariantProps } from "class-variance-authority";
+import { cva, type VariantProps } from "class-variance-authority";
 import { AiOutlineInfoCircle } from "react-icons/ai";
-import { FieldError, MultipleFieldErrors } from "react-hook-form";
+import { type FieldError, type MultipleFieldErrors } from "react-hook-form";
 
 export function FieldValidation({
   children,

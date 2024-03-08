@@ -5,12 +5,12 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { env } from "~/env";
 import { config } from "src/server/config";
 import { TRPCError } from "@trpc/server";
-import { addRecipe } from "@/schemas/recipe";
+import { type AddRecipe } from "@/schemas/recipe";
 
 export const getUploadSignedUrl = async (
   userId: string,
   recipeId: string,
-  imageMetadata: addRecipe["imageMetadata"],
+  imageMetadata: AddRecipe["imageMetadata"],
   uuid: string,
 ) => {
   try {
@@ -72,10 +72,8 @@ export const remove = async (
     if (!minioPort) {
       throw new Error("Minio port not found");
     }
-    console.log("TEST\n\n\n\n");
-    console.log("minioPort", minioPort);
     const prevEndpoint = s3Client.config.endpoint;
-    s3Client.config.endpoint = `http://minio:${minioPort}` as any;
+    s3Client.config.endpoint = `http://minio:${minioPort}` as never;
     try {
       // Delete the object.
       await s3Client.send(

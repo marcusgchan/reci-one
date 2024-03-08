@@ -78,7 +78,7 @@ export function ImageUpload({
               </button>
               <Image
                 unoptimized
-                src={(src || defaultSrc) as string}
+                src={src ?? defaultSrc ?? ""}
                 className="object-cover"
                 fill={true}
                 alt="uploaded image"
@@ -131,7 +131,7 @@ export function useImageUpload(
     useState<UploadedImageResult>({ src: null, isLoading: false, error: null });
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const fileList = e.target.files;
-    if (fileList && fileList[0] && fileList[0].type.includes("image/")) {
+    if (fileList?.[0] && fileList[0].type.includes("image/")) {
       setFile(fileList[0]);
       setFileMetadata(fileList[0]);
       const fileReader = new FileReader();

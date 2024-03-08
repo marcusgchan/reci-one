@@ -1,4 +1,4 @@
-import { type addRecipe } from "@/schemas/recipe";
+import { type AddRecipe } from "@/schemas/recipe";
 import {
   type CookingMethod,
   type MealType,
@@ -6,4 +6,4 @@ import {
 } from "@prisma/client";
 
 export type DropdownListValues = MealType | CookingMethod | Nationality;
-export type ListInputFields = keyof Pick<addRecipe, "ingredients" | "steps">;
+export type ListInputFields = keyof Pick<AddRecipe, "ingredients" | "steps">;
