@@ -18,5 +18,4 @@ export function RecipeList({ recipes }: { recipes: Recipes }) {
       ))}
     </section>
   );
-};
-
+}

@@ -11,7 +11,7 @@ export function RecipeCard({
   id: string;
   name: string;
   src: string;
-}){
+}) {
   const router = useRouter();
   return (
     <button
@@ -33,4 +33,4 @@ export function RecipeCard({
       </div>
     </button>
   );
-};
+}

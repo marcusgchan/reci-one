@@ -1,11 +1,7 @@
 {
   "compilerOptions": {
     "target": "es2017",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
+    "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -21,39 +17,17 @@
     "noUncheckedIndexedAccess": true,
     "baseUrl": ".",
     "paths": {
-      "~/*": [
-        "src/*"
-      ],
-      "@/ui/*": [
-        "src/components/ui/*"
-      ],
-      "@/components/*": [
-        "src/components/*"
-      ],
-      "@/prisma/*": [
-        "prisma/*"
-      ],
-      "@/router/*": [
-        "src/server/trpc/router/*"
-      ],
-      "@/shared/*": [
-        "src/shared/*"
-      ],
-      "@/shared/components/*": [
-        "src/shared/components/*"
-      ],
-      "@/shared/hooks/*": [
-        "src/shared/hooks/*"
-      ],
-      "@/schemas/*": [
-        "src/schemas/*"
-      ],
-      "@/utils/*": [
-        "src/utils/*"
-      ],
-      "@/services/*": [
-        "src/server/services/*"
-      ]
+      "~/*": ["src/*"],
+      "@/ui/*": ["src/components/ui/*"],
+      "@/components/*": ["src/components/*"],
+      "@/prisma/*": ["prisma/*"],
+      "@/router/*": ["src/server/trpc/router/*"],
+      "@/shared/*": ["src/shared/*"],
+      "@/shared/components/*": ["src/shared/components/*"],
+      "@/shared/hooks/*": ["src/shared/hooks/*"],
+      "@/schemas/*": ["src/schemas/*"],
+      "@/utils/*": ["src/utils/*"],
+      "@/services/*": ["src/server/services/*"]
     },
     "plugins": [
       {
@@ -68,7 +42,5 @@
     "**/*.js",
     ".next/types/**/*.ts"
   ],
-  "exclude": [
-    "node_modules"
-  ]
+  "exclude": ["node_modules"]
 }

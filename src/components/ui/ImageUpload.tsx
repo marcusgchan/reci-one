@@ -123,7 +123,7 @@ export type UploadedImageResult =
 
 // SetFileMetadata is used to sync file metadeta stored in form state with file
 export function useImageUpload(
-  setFileMetadata: (file: File | undefined) => void
+  setFileMetadata: (file: File | undefined) => void,
 ) {
   const [file, setFile] = useState<File>();
   // For image preview

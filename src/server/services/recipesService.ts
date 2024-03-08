@@ -252,7 +252,7 @@ export async function recipeExists(
 export async function getRecipeFormFields(
   ctx: Context,
   recipeId: string,
-  userId: string
+  userId: string,
 ) {
   const recipe = await ctx.prisma.recipe.findUnique({
     select: {
@@ -277,7 +277,7 @@ export async function getRecipeFormFields(
 export async function getMainImage(
   ctx: Context,
   recipeId: string,
-  userId: string
+  userId: string,
 ) {
   const recipe = await ctx.prisma.recipe.findUnique({
     select: {

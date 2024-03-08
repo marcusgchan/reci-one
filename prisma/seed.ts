@@ -136,7 +136,7 @@ async function createDefaultRecipies() {
             })),
           },
         },
-      })
+      }),
   );
 }
 

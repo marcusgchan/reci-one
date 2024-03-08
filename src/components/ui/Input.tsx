@@ -14,7 +14,7 @@ type InputProps = Omit<
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
   { intent, size, className, ...props }: InputProps,
-  ref
+  ref,
 ) {
   return (
     <input
@@ -41,5 +41,5 @@ const input = cva(
       intent: "primary",
       size: "medium",
     },
-  }
+  },
 );

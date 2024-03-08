@@ -1,4 +1,8 @@
-import { NextAuthOptions, type DefaultSession, getServerSession } from "next-auth";
+import {
+  NextAuthOptions,
+  type DefaultSession,
+  getServerSession,
+} from "next-auth";
 import GithubProvider from "next-auth/providers/github";
 
 // Prisma adapter for NextAuth, optional and can be removed
@@ -49,9 +53,8 @@ declare module "next-auth" {
 }
 
 /**
-* Wrapper for `getServerSession` so that you don't need to import the `authOptions` in every file.
-*
-* @see https://next-auth.js.org/configuration/nextjs
-*/
+ * Wrapper for `getServerSession` so that you don't need to import the `authOptions` in every file.
+ *
+ * @see https://next-auth.js.org/configuration/nextjs
+ */
 export const getServerAuthSession = () => getServerSession(authOptions);
-

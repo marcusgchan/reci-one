@@ -63,7 +63,7 @@ export function Combobox<T extends { name: string; id: string }>({
                 className={({ active }) =>
                   classNames(
                     "relative cursor-default select-none py-2 pl-3 pr-9",
-                    active ? "bg-accent-400 text-white" : "text-gray-900"
+                    active ? "bg-accent-400 text-white" : "text-gray-900",
                   )
                 }
               >
@@ -73,7 +73,7 @@ export function Combobox<T extends { name: string; id: string }>({
                       <span
                         className={classNames(
                           "block truncate",
-                          !multiple && selected && "font-semibold"
+                          !multiple && selected && "font-semibold",
                         )}
                       >
                         {data.name}
@@ -85,7 +85,7 @@ export function Combobox<T extends { name: string; id: string }>({
                         <span
                           className={classNames(
                             "absolute inset-y-0 right-0 flex items-center pr-4",
-                            active ? "text-white" : "text-accent-400"
+                            active ? "text-white" : "text-accent-400",
                           )}
                         >
                           {((!multiple && selected) || multiple) && (
