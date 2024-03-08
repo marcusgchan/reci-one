@@ -63,7 +63,7 @@ function DesktopNav() {
           <button
             className="cursor-pointer"
             onClick={() => {
-              signOut({ callbackUrl: "/login" });
+              void signOut({ callbackUrl: "/login" });
             }}
           >
             LOG OUT
@@ -174,7 +174,7 @@ function MobileNav() {
               className="cursor-pointer"
               onClick={() => {
                 toggleMenu();
-                signOut({ callbackUrl: "/login" });
+                void signOut({ callbackUrl: "/login" });
               }}
             >
               LOG OUT

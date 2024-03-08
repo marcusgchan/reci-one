@@ -100,7 +100,7 @@ function Notification({ message, type, dispatch }: Notification) {
       },
     );
     animationRef.current.play();
-    animationRef.current.finished.then(() => {
+    void animationRef.current.finished.then(() => {
       dispatch({ type: "REMOVE_NOTIFICATION" });
     });
   });

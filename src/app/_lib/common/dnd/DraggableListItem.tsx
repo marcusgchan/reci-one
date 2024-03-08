@@ -8,7 +8,8 @@ export function DraggableListItem({
   canDrag: boolean;
   children: React.ReactNode;
 }) {
-  const { attributes, listeners, ref } = useSortableItemContext();
+  // eslint-disable-next-line @typescript-eslint/unbound-method
+  const { attributes, listeners, ref: r } = useSortableItemContext();
   return (
     <div className="flex h-10 items-stretch">
       {canDrag && (
@@ -17,7 +18,7 @@ export function DraggableListItem({
           className="mr-2 touch-manipulation"
           {...attributes}
           {...listeners}
-          ref={ref}
+          ref={r}
         >
           <GrDrag size={25} className="cursor-grab" />
         </button>

@@ -19,7 +19,7 @@ export function useListDnd() {
     }),
   );
   const [canDrag, setCanDrag] = useState(false);
-  const toggleCanDrag = (e: React.MouseEvent<HTMLButtonElement>) => {
+  const toggleCanDrag = () => {
     setCanDrag((cd) => !cd);
   };
   return {

@@ -1,8 +1,8 @@
 import { createContext, useContext } from "react";
-import { DraggableSyntheticListeners } from "@dnd-kit/core";
+import { type DraggableSyntheticListeners } from "@dnd-kit/core";
 
 interface Context {
-  attributes: Record<string, any>;
+  attributes: Record<string, unknown>;
   listeners: DraggableSyntheticListeners;
   ref(node: HTMLElement | null): void;
 }
@@ -10,6 +10,7 @@ interface Context {
 export const SortableItemContext = createContext<Context>({
   attributes: {},
   listeners: undefined,
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   ref() {},
 });
 
