@@ -70,6 +70,7 @@ async function createDefaultRecipies() {
   const cookingMethods = await prisma.cookingMethod.findMany();
 
   Array.from({ length: 10 }).forEach(
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises
     async () =>
       await prisma.recipe.create({
         data: {
@@ -136,7 +137,7 @@ async function createDefaultRecipies() {
             })),
           },
         },
-      })
+      }),
   );
 }
 

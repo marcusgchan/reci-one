@@ -1,11 +1,11 @@
 import {
-  GetRecipe,
-  addRecipe,
-  addParsedRecipe,
-  EditRecipe,
-  EditUrlImageRecipe,
+  type GetRecipe,
+  type AddRecipe,
+  type AddParsedRecipe,
+  type EditRecipe,
+  type EditUrlImageRecipe,
 } from "@/schemas/recipe";
-import { Context } from "src/server/trpc/router/context";
+import { type Context } from "~/server/api/trpc";
 import type { PrismaClient } from "@prisma/client";
 
 type PrismaTx = Parameters<Parameters<PrismaClient["$transaction"]>[0]>[0];
@@ -13,8 +13,8 @@ type PrismaTx = Parameters<Parameters<PrismaClient["$transaction"]>[0]>[0];
 export async function createRecipe(
   ctx: Context,
   userId: string,
-  input: addRecipe,
-  uuid: string
+  input: AddRecipe,
+  uuid: string,
 ) {
   const recipe = await ctx.prisma.$transaction(async (tx) => {
     // Unable to connect multiple on create b/c it requires recipeId
@@ -38,7 +38,7 @@ export async function createRecipe(
         authorId: userId,
         ingredients: {
           createMany: {
-            data: input.ingredients.map(({ id, ...rest }, i) => ({
+            data: input.ingredients.map(({ id: _, ...rest }, i) => ({
               ...rest,
               order: i,
             })),
@@ -46,7 +46,7 @@ export async function createRecipe(
         },
         steps: {
           createMany: {
-            data: input.steps.map(({ id, ...rest }, i) => ({
+            data: input.steps.map(({ id: _, ...rest }, i) => ({
               ...rest,
               order: i,
             })),
@@ -93,7 +93,7 @@ export async function createRecipe(
 export async function createParsedRecipe(
   ctx: Context,
   userId: string,
-  input: addParsedRecipe
+  input: AddParsedRecipe,
 ) {
   const recipe = await ctx.prisma.$transaction(async (tx) => {
     // Unable to connect multiple on create b/c it requires recipeId
@@ -111,7 +111,7 @@ export async function createParsedRecipe(
         authorId: userId,
         ingredients: {
           createMany: {
-            data: input.ingredients.map(({ id, ...rest }, i) => ({
+            data: input.ingredients.map(({ id: _, ...rest }, i) => ({
               ...rest,
               order: i,
             })),
@@ -119,7 +119,7 @@ export async function createParsedRecipe(
         },
         steps: {
           createMany: {
-            data: input.steps.map(({ id, ...rest }, i) => ({
+            data: input.steps.map(({ id: _, ...rest }, i) => ({
               ...rest,
               order: i,
             })),
@@ -165,8 +165,8 @@ export async function createParsedRecipe(
 
 export async function getRecipes(
   ctx: Context,
-  userId: string | undefined,
-  input: GetRecipe
+  userId: string,
+  input: GetRecipe,
 ) {
   const recipes = await ctx.prisma.recipe.findMany({
     select: {
@@ -179,27 +179,27 @@ export async function getRecipes(
       name: {
         contains: input.search,
       },
-      ingredients: {
-        none: {
-          OR: input.filters.ingredientsExclude.map((ingredient) => ({
-            name: { contains: ingredient },
-          })),
-        },
-      },
+      // ingredients: {
+      //   none: {
+      //     OR: input.filters.ingredientsExclude.map((ingredient) => ({
+      //       name: { contains: ingredient },
+      //     })),
+      //   },
+      // },
       /*nationalities: {
         none: {
           nationalityId: { in: input.filters.nationalitiesExclude },
         },
       },*/
-      AND: input.filters.ingredientsInclude
-        .map((ingredient) => ({
-          ingredients: { some: { name: { contains: ingredient } } },
-        }))
-        .concat(
-          input.filters.nationalitiesInclude.map((nationality) => ({
-            ingredients: { some: { name: { contains: nationality } } },
-          }))
-        ),
+      // AND: input.filters.ingredientsInclude
+      //   .map((ingredient) => ({
+      //     ingredients: { some: { name: { contains: ingredient } } },
+      //   }))
+      //   .concat(
+      //     input.filters.nationalitiesInclude.map((nationality) => ({
+      //       ingredients: { some: { name: { contains: nationality } } },
+      //     }))
+      //   ),
       // prepTime: {
       //   gt: input.filters.prepTimeMin,
       //   lt: input.filters.prepTimeMax,
@@ -216,7 +216,7 @@ export async function getRecipes(
 export async function getRecipe(
   ctx: Context,
   recipeId: string,
-  userId: string
+  userId: string,
 ) {
   const recipe = await ctx.prisma.recipe.findFirst({
     where: { id: recipeId, authorId: userId },
@@ -237,7 +237,7 @@ export async function getRecipe(
 export async function recipeExists(
   ctx: Context,
   recipeId: string,
-  userId: string
+  userId: string,
 ) {
   const recipe = await ctx.prisma.recipe.findFirst({
     select: { id: true, mainImage: { select: { metadataImage: true } } },
@@ -252,7 +252,7 @@ export async function recipeExists(
 export async function getRecipeFormFields(
   ctx: Context,
   recipeId: string,
-  userId: string
+  userId: string,
 ) {
   const recipe = await ctx.prisma.recipe.findUnique({
     select: {
@@ -263,7 +263,8 @@ export async function getRecipeFormFields(
       prepTime: true,
       cookTime: true,
       mainImage: { include: { urlImage: true, metadataImage: true } },
-      ingredients: true,
+      ingredients: { select: { name: true, isHeader: true, order: true } },
+      steps: { select: { name: true, isHeader: true, order: true } },
       cookingMethods: { include: { cookingMethod: true } },
       mealTypes: { include: { mealType: true } },
       nationalities: { include: { nationality: true } },
@@ -276,7 +277,7 @@ export async function getRecipeFormFields(
 export async function getMainImage(
   ctx: Context,
   recipeId: string,
-  userId: string
+  userId: string,
 ) {
   const recipe = await ctx.prisma.recipe.findUnique({
     select: {
@@ -542,7 +543,7 @@ async function updateManyToMany({
   const deleteNationalitiesPromise = prismaTx.nationalitiesOnRecipes.deleteMany(
     {
       where: { recipeId: recipeId },
-    }
+    },
   );
   const deleteCookingMethodsPromise =
     prismaTx.cookingMethodsOnRecipies.deleteMany({
@@ -562,7 +563,7 @@ async function updateManyToMany({
         nationalityId: id,
         recipeId: recipeId,
       })),
-    }
+    },
   );
   const createCookingMethodsPromise =
     prismaTx.cookingMethodsOnRecipies.createMany({

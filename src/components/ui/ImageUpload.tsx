@@ -78,7 +78,7 @@ export function ImageUpload({
               </button>
               <Image
                 unoptimized
-                src={(src || defaultSrc) as string}
+                src={src ?? defaultSrc ?? ""}
                 className="object-cover"
                 fill={true}
                 alt="uploaded image"
@@ -123,7 +123,7 @@ export type UploadedImageResult =
 
 // SetFileMetadata is used to sync file metadeta stored in form state with file
 export function useImageUpload(
-  setFileMetadata: (file: File | undefined) => void
+  setFileMetadata: (file: File | undefined) => void,
 ) {
   const [file, setFile] = useState<File>();
   // For image preview
@@ -131,7 +131,7 @@ export function useImageUpload(
     useState<UploadedImageResult>({ src: null, isLoading: false, error: null });
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const fileList = e.target.files;
-    if (fileList && fileList[0] && fileList[0].type.includes("image/")) {
+    if (fileList?.[0] && fileList[0].type.includes("image/")) {
       setFile(fileList[0]);
       setFileMetadata(fileList[0]);
       const fileReader = new FileReader();

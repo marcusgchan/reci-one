@@ -1,4 +1,4 @@
-import { cva, VariantProps } from "class-variance-authority";
+import { cva, type VariantProps } from "class-variance-authority";
 import { forwardRef } from "react";
 
 type TextareaProps = Omit<
@@ -19,7 +19,7 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
         {...props}
       />
     );
-  }
+  },
 );
 
 const textarea = cva("border-gray-500 border-2 p-1", {

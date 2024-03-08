@@ -3,17 +3,6 @@ import { z } from "zod";
 
 export const getRecipesSchema = z.object({
   search: z.string(),
-  filters: z.object({
-    ingredientsInclude: z.string().array(),
-    ingredientsExclude: z.string().array(),
-    nationalitiesInclude: z.string().array(),
-    nationalitiesExclude: z.string().array(),
-    prepTimeMin: z.number(),
-    prepTimeMax: z.number(),
-    cookTimeMin: z.number(),
-    cookTimeMax: z.number(),
-    rating: z.number().min(0).max(5),
-  }),
 });
 export type GetRecipe = z.infer<typeof getRecipesSchema>;
 
@@ -26,14 +15,14 @@ const baseAddRecipeSchema = z.object({
   description: z.string(),
   ingredients: z
     .object({
-      id: z.string(),
+      id: z.string().optional(),
       name: z.string().trim().min(1, { message: "Can't be empty string" }),
       isHeader: z.boolean(),
     })
     .array(),
   steps: z
     .object({
-      id: z.string(),
+      id: z.string().optional(),
       name: z.string().trim().min(1, { message: "Can't be empty string" }),
       isHeader: z.boolean(),
     })
@@ -69,12 +58,12 @@ export const addRecipeSchema = baseAddRecipeSchema.extend({
     size: z.number({ invalid_type_error: "Image too big" }),
   }),
 });
-export type addRecipe = z.infer<typeof addRecipeSchema>;
+export type AddRecipe = z.infer<typeof addRecipeSchema>;
 
 export const addUrlImageRecipeSchema = baseAddRecipeSchema.extend({
   urlSourceImage: z.string().url(),
 });
-export type addParsedRecipe = z.infer<typeof addUrlImageRecipeSchema>;
+export type AddParsedRecipe = z.infer<typeof addUrlImageRecipeSchema>;
 
 export const addRecipeFormSchema = baseAddRecipeSchema.extend({
   image: z.object({

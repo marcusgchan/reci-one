@@ -1,4 +1,4 @@
-import { cva, VariantProps } from "class-variance-authority";
+import { cva, type VariantProps } from "class-variance-authority";
 import { forwardRef } from "react";
 
 // Exclude size b/c it clashes with cva 'size'
@@ -14,7 +14,7 @@ type InputProps = Omit<
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
   { intent, size, className, ...props }: InputProps,
-  ref
+  ref,
 ) {
   return (
     <input
@@ -41,5 +41,5 @@ const input = cva(
       intent: "primary",
       size: "medium",
     },
-  }
+  },
 );

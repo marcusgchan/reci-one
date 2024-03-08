@@ -2,16 +2,16 @@ import { DeleteObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
 import { createPresignedPost } from "@aws-sdk/s3-presigned-post";
 import { s3Client } from "@/utils/s3Client";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { env } from "src/server/env.mjs";
+import { env } from "~/env";
 import { config } from "src/server/config";
 import { TRPCError } from "@trpc/server";
-import { addRecipe } from "@/schemas/recipe";
+import { type AddRecipe } from "@/schemas/recipe";
 
 export const getUploadSignedUrl = async (
   userId: string,
   recipeId: string,
-  imageMetadata: addRecipe["imageMetadata"],
-  uuid: string
+  imageMetadata: AddRecipe["imageMetadata"],
+  uuid: string,
 ) => {
   try {
     const { name, size, type } = imageMetadata;
@@ -45,7 +45,7 @@ export const getImageSignedUrl = async (
   userId: string,
   recipeId: string,
   imageName: string,
-  roundedDate: string
+  roundedDate: string,
 ) => {
   const command = new GetObjectCommand({
     Bucket: `${env.BUCKET_NAME}`,
@@ -61,7 +61,7 @@ export const getImageSignedUrl = async (
 export const remove = async (
   userId: string,
   recipeId: string,
-  fileName: string
+  fileName: string,
 ) => {
   const bucketParams = {
     Bucket: `${env.BUCKET_NAME}`,
@@ -73,18 +73,18 @@ export const remove = async (
       throw new Error("Minio port not found");
     }
     const prevEndpoint = s3Client.config.endpoint;
-    s3Client.config.endpoint =
-      `http://host.docker.internal:${minioPort}` as any;
+    s3Client.config.endpoint = `http://minio:${minioPort}` as never;
     try {
       // Delete the object.
       await s3Client.send(
         new DeleteObjectCommand({
           Bucket: bucketParams.Bucket,
           Key: bucketParams.Key,
-        })
+        }),
       );
+      console.log("Deleted object dev");
     } catch (err) {
-      console.log("Error deleting object", err);
+      console.log("Error deleting object dev", err);
     } finally {
       s3Client.config.endpoint = prevEndpoint;
     }
@@ -95,10 +95,10 @@ export const remove = async (
         new DeleteObjectCommand({
           Bucket: bucketParams.Bucket,
           Key: bucketParams.Key,
-        })
+        }),
       );
     } catch (err) {
-      console.log("Error deleting object", err);
+      console.log("Error deleting object prod", err);
     }
   }
 };

@@ -1,9 +1,13 @@
-import { useSession } from "next-auth/react";
-import React, { useRef, useState } from "react";
+"use client";
+
+import { signOut, useSession } from "next-auth/react";
+import React, { useEffect, useRef, useState } from "react";
 import { FaBars } from "react-icons/fa";
 import { CgClose } from "react-icons/cg";
-import { useRouter } from "next/router";
+import { useRouter, usePathname } from "next/navigation";
 import { motion } from "framer-motion";
+import Link from "next/link";
+import { SignOutButton } from "~/app/_lib/auth/SignOut";
 
 export function NavBar() {
   return (
@@ -16,13 +20,14 @@ export function NavBar() {
 
 function DesktopNav() {
   const router = useRouter();
+  const pathname = usePathname();
   const navigate = (path: string) => {
-    if (router.pathname !== path) {
+    if (pathname !== path) {
       router.push(path);
     }
   };
   return (
-    <nav className="hidden w-full max-w-7xl justify-between border-4 border-gray-500 p-2 px-3 text-2xl text-gray-500 md:flex">
+    <nav className="hidden w-full justify-between border-4 border-gray-500 p-2 px-3 text-2xl text-gray-500 md:flex">
       <h1>
         <button
           onClick={() => navigate("/recipes")}
@@ -32,12 +37,9 @@ function DesktopNav() {
         </button>
       </h1>
       <ul className="flex min-w-0 gap-4 text-xl text-accent-500">
-        <li className="grid place-items-center">
-          <button className="cursor-pointer">HOME</button>
-        </li>
-        <li className="grid place-items-center">
-          <button className="cursor-pointer">FAVOURITES</button>
-        </li>
+        {/* <li className="grid place-items-center"> */}
+        {/*   <button className="cursor-pointer">FAVOURITES</button> */}
+        {/* </li> */}
         <li className="grid place-items-center">
           <button
             className="cursor-pointer"
@@ -46,15 +48,25 @@ function DesktopNav() {
             RECIPES
           </button>
         </li>
-        <li className="grid place-items-center">
-          <button className="cursor-pointer">NOTES</button>
-        </li>
+        {/* <li className="grid place-items-center"> */}
+        {/*   <button className="cursor-pointer">NOTES</button> */}
+        {/* </li> */}
         <li className="grid place-items-center">
           <button
             className="cursor-pointer"
             onClick={() => navigate("/recipes/create")}
           >
             ADD RECIPE
+          </button>
+        </li>
+        <li className="grid place-items-center capitalize">
+          <button
+            className="cursor-pointer"
+            onClick={() => {
+              void signOut({ callbackUrl: "/login" });
+            }}
+          >
+            LOG OUT
           </button>
         </li>
       </ul>
@@ -67,10 +79,11 @@ function MobileNav() {
   const [isOpen, setIsOpen] = useState(false);
   const navRef = useRef<HTMLElement>(null);
   const [nextRoute, setNextRoute] = useState("");
-  const html = document.querySelector("html");
-  const toggleMenu = () => {
-    setIsOpen((io) => !io);
-  };
+  const htmlRef = useRef<HTMLElement>();
+  useEffect(() => {
+    htmlRef.current = document.querySelector("html") as HTMLElement;
+  }, [htmlRef]);
+  const toggleMenu = () => setIsOpen((io) => !io);
   const queueNavigation = (path: string) => {
     toggleMenu();
     setNextRoute(path);
@@ -96,14 +109,15 @@ function MobileNav() {
       <motion.nav
         ref={navRef}
         onAnimationStart={() => {
+          if (!htmlRef.current) return;
           // Animating opening state
           if (isOpen && navRef.current) {
             navRef.current.style.display = "flex";
-            (html as HTMLHtmlElement).style.overflow = "hidden";
+            htmlRef.current.style.overflow = "hidden";
           }
           // Closing state
           else {
-            (html as HTMLHtmlElement).style.overflow = "auto";
+            htmlRef.current.style.overflow = "auto";
           }
         }}
         onAnimationComplete={() => {
@@ -130,24 +144,22 @@ function MobileNav() {
           <CgClose size={35} />
         </button>
         <ul>
-          <li className="text-center">
-            <button className="cursor-pointer">HOME</button>
-          </li>
-          <li className="text-center">
-            <button className="cursor-pointer">FAVOURITES</button>
-          </li>
+          {/* <li className="text-center"> */}
+          {/*   <button className="cursor-pointer">FAVOURITES</button> */}
+          {/* </li> */}
           <li className="text-center">
             <button
               className="cursor-pointer"
-              onClick={toggleMenu}
-              onAnimationEnd={() => queueNavigation("/recipes")}
+              onClick={() => {
+                queueNavigation("/recipes");
+              }}
             >
               RECIPES
             </button>
           </li>
-          <li className="text-center">
-            <button className="cursor-pointer">NOTES</button>
-          </li>
+          {/* <li className="text-center"> */}
+          {/*   <button className="cursor-pointer">NOTES</button> */}
+          {/* </li> */}
           <li className="text-center">
             <button
               className="cursor-pointer"
@@ -156,31 +168,19 @@ function MobileNav() {
               ADD RECIPE
             </button>
           </li>
+          <li className="text-center">
+            <button
+              className="cursor-pointer"
+              onClick={() => {
+                toggleMenu();
+                void signOut({ callbackUrl: "/login" });
+              }}
+            >
+              LOG OUT
+            </button>
+          </li>
         </ul>
       </motion.nav>
     </div>
-  );
-}
-
-function LoggedIn(
-  props: React.HTMLAttributes<HTMLParagraphElement | HTMLAnchorElement>
-) {
-  const { status, data } = useSession();
-  const isLoggedIn = status === "authenticated";
-  // if (isLoggedIn) {
-  //   return <p {...props}>Logged in as {data?.user?.name}</p>;
-  // }
-
-  // return <a {...props}>Login</a>;
-  return (
-    <p className="ml-auto flex min-w-0 items-center gap-2 overflow-hidden whitespace-nowrap">
-      Logged in as
-      <span
-        style={{ maxWidth: "5rem" }}
-        className="inline-block w-full min-w-0 overflow-hidden text-ellipsis whitespace-nowrap"
-      >
-        very long name for testing purposes
-      </span>
-    </p>
   );
 }
