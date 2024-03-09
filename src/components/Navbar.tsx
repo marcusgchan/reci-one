@@ -37,9 +37,14 @@ function DesktopNav() {
         </button>
       </h1>
       <ul className="flex min-w-0 gap-4 text-xl text-accent-500">
-        {/* <li className="grid place-items-center"> */}
-        {/*   <button className="cursor-pointer">FAVOURITES</button> */}
-        {/* </li> */}
+        <li className="grid place-items-center">
+          <button
+            className="cursor-pointer"
+            onClick={() => navigate("/recipes/favourites")}
+          >
+            FAVOURITES
+          </button>
+        </li>
         <li className="grid place-items-center">
           <button
             className="cursor-pointer"
@@ -144,9 +149,14 @@ function MobileNav() {
           <CgClose size={35} />
         </button>
         <ul>
-          {/* <li className="text-center"> */}
-          {/*   <button className="cursor-pointer">FAVOURITES</button> */}
-          {/* </li> */}
+          <li className="text-center">
+            <button
+              className="cursor-pointer"
+              onClick={() => queueNavigation("/recipes/favourites")}
+            >
+              RECIPES
+            </button>
+          </li>
           <li className="text-center">
             <button
               className="cursor-pointer"

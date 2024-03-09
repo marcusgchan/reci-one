@@ -7,9 +7,11 @@ import {
   editUrlImageRecipeSchema,
 } from "@/schemas/recipe";
 import {
+  addFavourite,
   createParsedRecipe,
   createRecipe,
   deleteRecipe,
+  getFavouriteRecipes,
   getMainImage,
   getRecipe,
   getRecipeFormFields,
@@ -366,6 +368,44 @@ export const recipesRouter = createTRPCRouter({
       }
       await deleteRecipe({ ctx, id });
       revalidatePath("/recipes");
+    }),
+  getFavourites: protectedProcedure.query(async ({ ctx }) => {
+    const userId = ctx.session.user.id;
+    const recipes = await getFavouriteRecipes({ ctx, userId });
+    const formattedRecipes = recipes.map(async (recipe) => {
+      const url = recipe.mainImage?.urlImage?.url;
+      const key = recipe.mainImage?.metadataImage?.key;
+      if (url) {
+        return { ...recipe, mainImage: { type: "url" as const, url } };
+      } else if (key) {
+        const url = await getImageSignedUrl(
+          userId,
+          recipe.id,
+          key,
+          getFormattedUtcDate(),
+        );
+        return {
+          ...recipe,
+          mainImage: { type: "presignedUrl" as const, url },
+        };
+      }
+      // Shouldn't reach this point since image is required unless
+      // a recipe is missing a mainImage
+      // This can happen if an image upload fails
+      // TODO: add proper dummy image
+      return { ...recipe, mainImage: { type: "noImage" as const, url: "" } };
+    });
+    return Promise.all(formattedRecipes);
+  }),
+  toggleFavourite: protectedProcedure
+    .input(z.object({ recipeId: z.string(), favourite: z.boolean() }))
+    .mutation(async ({ ctx, input: { recipeId, favourite } }) => {
+      await addFavourite({
+        ctx,
+        favourite,
+        userId: ctx.session.user.id,
+        recipeId,
+      });
     }),
 });
 

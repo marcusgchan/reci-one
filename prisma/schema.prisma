@@ -1,5 +1,5 @@
 generator client {
-  provider        = "prisma-client-js"
+  provider = "prisma-client-js"
 }
 
 datasource db {
@@ -40,15 +40,16 @@ model Session {
 }
 
 model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String?   @unique
-  emailVerified DateTime?
-  image         String?
-  accounts      Account[]
-  sessions      Session[]
-  comments      Comment[]
-  recipes       Recipe[]
+  id               String            @id @default(cuid())
+  name             String?
+  email            String?           @unique
+  emailVerified    DateTime?
+  image            String?
+  accounts         Account[]
+  sessions         Session[]
+  comments         Comment[]
+  recipes          Recipe[]
+  favouriteRecipes FavouriteRecipe[]
 
   @@map("users")
 }
@@ -80,10 +81,24 @@ model Recipe {
   cookingMethods CookingMethodsOnRecipies[]
   comments       Comment[]
   nationalities  NationalitiesOnRecipes[]
+  favourites     FavouriteRecipe[]
   author         User                       @relation(fields: [authorId], references: [id])
 
   @@index([authorId])
   @@map("recipes")
+}
+
+model FavouriteRecipe {
+  userId    String  @db.VarChar(255)
+  recipeId  String  @db.VarChar(255)
+  user      User    @relation(fields: [userId], references: [id])
+  recipe    Recipe  @relation(fields: [recipeId], references: [id])
+  favourite Boolean @default(true)
+
+  @@id([userId, recipeId])
+  @@index([userId])
+  @@index([recipeId])
+  @@map("favourite_recipes")
 }
 
 model ParsedSiteInfo {

@@ -221,6 +221,7 @@ export async function getRecipe(
   const recipe = await ctx.prisma.recipe.findFirst({
     where: { id: recipeId, authorId: userId },
     include: {
+      favourites: { select: { favourite: true } },
       mainImage: { include: { urlImage: true, metadataImage: true } },
       ingredients: true,
       cookingMethods: { include: { cookingMethod: true } },
@@ -608,5 +609,59 @@ export async function deleteRecipe({ ctx, id }: { ctx: Context; id: string }) {
     });
     await tx.image.deleteMany({ where: { mainImageToRecipe: { id } } });
     await tx.recipe.delete({ where: { id } });
+  });
+}
+
+export async function getFavouriteRecipes({
+  ctx,
+  userId,
+}: {
+  ctx: Context;
+  userId: string;
+}) {
+  const recipes = await ctx.prisma.recipe.findMany({
+    select: {
+      mainImage: { include: { urlImage: true, metadataImage: true } },
+      id: true,
+      name: true,
+    },
+    where: {
+      authorId: userId,
+      favourites: {
+        some: {
+          userId,
+          favourite: true,
+        },
+      },
+    },
+  });
+  return recipes;
+}
+
+export async function addFavourite({
+  ctx,
+  favourite,
+  recipeId,
+  userId,
+}: {
+  ctx: Context;
+  favourite: boolean;
+  recipeId: string;
+  userId: string;
+}) {
+  await ctx.prisma.favouriteRecipe.upsert({
+    create: {
+      recipeId,
+      userId,
+      favourite,
+    },
+    update: {
+      recipeId,
+      userId,
+      favourite,
+    },
+    where: {
+      userId_recipeId: { recipeId: recipeId, userId: userId },
+    },
   });
 }
