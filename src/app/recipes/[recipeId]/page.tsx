@@ -13,7 +13,7 @@ export default async function RecipePage({
 }) {
   const session = await getServerAuthSession();
   if (!session) {
-    redirect("/login");
+    redirect("/api/auth/signin");
   }
 
   const recipe = await api.recipes.getRecipe.query({
