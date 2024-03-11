@@ -30,6 +30,12 @@ export default async function Create({
   searchParams: Record<string, string | string[]> | undefined;
 }) {
   noStore();
+
+  const session = await getServerAuthSession();
+  if (!session) {
+    redirect("/api/auth/signin");
+  }
+
   const params = searchParamsSchema.safeParse(searchParams);
   if (!params.success) {
     if (params.error.formErrors.fieldErrors.url) {
@@ -40,29 +46,18 @@ export default async function Create({
   }
 
   if (params.data.formStage === "1") {
-    return (
-      <Auth>
-        <FormStage1 />
-      </Auth>
-    );
+    return <FormStage1 />;
   }
 
   if (params.data.formStage === "2") {
     return (
-      <Auth>
-        <div className="mt-10 flex justify-center text-gray-500">
-          <div className="flex w-full max-w-md flex-col gap-4 rounded border-4 border-gray-400 p-8">
-            <h1>Enter a recipe website URL to parse</h1>
-            <Stage2Form />
-          </div>
+      <div className="mt-10 flex justify-center text-gray-500">
+        <div className="flex w-full max-w-md flex-col gap-4 rounded border-4 border-gray-400 p-8">
+          <h1>Enter a recipe website URL to parse</h1>
+          <Stage2Form />
         </div>
-      </Auth>
+      </div>
     );
-  }
-
-  const session = await getServerAuthSession();
-  if (!session) {
-    redirect("/login");
   }
 
   if (params.data.url) {

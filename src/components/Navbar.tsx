@@ -154,7 +154,7 @@ function MobileNav() {
               className="cursor-pointer"
               onClick={() => queueNavigation("/recipes/favourites")}
             >
-              RECIPES
+              FAVOURITES
             </button>
           </li>
           <li className="text-center">
