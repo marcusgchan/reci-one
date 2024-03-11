@@ -72,19 +72,23 @@ export default async function RecipePage({
       <section>
         <h2 className="mb-3 text-2xl font-bold">Steps</h2>
         {!!recipe.steps.length ? (
-          <ol className="flex flex-col gap-2">
-            {recipe.steps.map(({ name, isHeader, order }) => (
-              <li
-                key={order}
-                className={
-                  isHeader ? "text-xl font-bold" : "flex items-start gap-2"
-                }
-              >
-                {!isHeader && <span>{order + 1}.</span>}
-                {name}
-              </li>
-            ))}
-          </ol>
+          <ul className="flex flex-col gap-2">
+            {recipe.steps.map((step) => {
+              return (
+                <li
+                  key={step.order}
+                  className={
+                    step.isHeader
+                      ? "text-xl font-bold"
+                      : "flex items-start gap-2"
+                  }
+                >
+                  {step.count !== -1 && <span>{step.count}.</span>}
+                  {step.name}
+                </li>
+              );
+            })}
+          </ul>
         ) : (
           <p>This recipe doesn&apos;t have steps</p>
         )}

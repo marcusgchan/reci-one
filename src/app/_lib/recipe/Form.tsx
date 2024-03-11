@@ -28,7 +28,6 @@ export function RecipeForm({
   initialData: RecipeFormData | undefined;
 }) {
   const usingUploadedImage =
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     (data?.initialData && data.initialData.image.urlSourceImage.length == 0) ??
     true;
   const [isUploadedImage, setIsUploadedImage] = useState(usingUploadedImage);
@@ -84,7 +83,11 @@ export function RecipeForm({
     handleFileDrop,
     removeFile,
   } = useImageUpload(setFileMetadata);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const addRecipeMutation = api.recipes.addRecipe.useMutation({
+    onError() {
+      setIsSubmitting(false);
+    },
     async onSuccess(presignedPost) {
       if (!file) {
         // error unable to upload file or user somehow removed img after upload
@@ -92,6 +95,7 @@ export function RecipeForm({
           type: "ERROR",
           message: "There was a problem with uploading your image",
         });
+        setIsSubmitting(false);
         return;
       }
       if (!presignedPost) {
@@ -127,10 +131,14 @@ export function RecipeForm({
           type: "ERROR",
           message: "There was a problem with uploading your image",
         });
+        setIsSubmitting(false);
       }
     },
   });
   const addParsedRecipeMutation = api.recipes.addParsedRecipe.useMutation({
+    onError() {
+      setIsSubmitting(false);
+    },
     onSuccess() {
       snackbarDispatch({
         type: "SUCCESS",
@@ -159,6 +167,7 @@ export function RecipeForm({
       };
       addParsedRecipeMutation.mutate(formattedData);
     }
+    setIsSubmitting(true);
   });
   const navigateToRecipes = () => router.push("/recipes");
   return (
@@ -207,7 +216,7 @@ export function RecipeForm({
           <SectionWrapper>
             <CookingMethodsSection />
           </SectionWrapper>
-          <Button disabled={addRecipeMutation.isLoading}>Create</Button>
+          <Button disabled={isSubmitting}>Create</Button>
         </form>
       </FormProvider>
     </section>
