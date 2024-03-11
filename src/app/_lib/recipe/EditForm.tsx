@@ -68,7 +68,11 @@ export function EditForm({
     removeFile();
   };
   const queryUtils = api.useUtils();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const editRecipe = api.recipes.editRecipe.useMutation({
+    onError() {
+      setIsSubmitting(false);
+    },
     async onSuccess(presignedPost) {
       if (!presignedPost) {
         snackbarDispatch({
@@ -80,12 +84,12 @@ export function EditForm({
         return;
       }
       if (!file) {
-        console.log("file is missing");
-        // error unable to upload file or user somehow removed img after upload
+        // Didn't update image
         snackbarDispatch({
           type: "ERROR",
           message: "There was a problem with uploading your image",
         });
+        setIsSubmitting(false);
         return;
       }
       // Add fields that are required for presigned post
@@ -117,11 +121,15 @@ export function EditForm({
           type: "ERROR",
           message: "There was a problem with uploading your image",
         });
+        setIsSubmitting(false);
       }
     },
   });
   const editUrlImageRecipeMutation = api.recipes.editUrlImageRecipe.useMutation(
     {
+      onError() {
+        setIsSubmitting(false);
+      },
       async onSuccess() {
         snackbarDispatch({
           type: "SUCCESS",
@@ -143,7 +151,9 @@ export function EditForm({
     if (isUploadedImage && validData.image.imageMetadata) {
       const formattedData = {
         id: params.recipeId as string,
-        updateImage: !!dirtyFields.image?.imageMetadata,
+        updateImage:
+          !!dirtyFields.image?.imageMetadata &&
+          (dirtyFields.image.imageMetadata as unknown as boolean) === true,
         fields: {
           ...validData,
           imageMetadata: validData.image.imageMetadata,
@@ -231,7 +241,7 @@ export function EditForm({
           <SectionWrapper>
             <CookingMethodsSection />
           </SectionWrapper>
-          <Button disabled={editRecipe.isLoading}>Edit</Button>
+          <Button disabled={isSubmitting}>Edit</Button>
         </form>
       </FormProvider>
     </section>

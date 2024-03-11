@@ -296,16 +296,34 @@ export async function updateRecipe({
   userId,
 }: {
   ctx: Context;
-  id: EditRecipe["id"];
+  id: string;
   fields: EditRecipe["fields"];
   userId: string;
 }) {
   await ctx.prisma.$transaction(async (prisma) => {
+    await prisma.ingredient.deleteMany({ where: { recipeId: id } });
+    await prisma.step.deleteMany({ where: { recipeId: id } });
     await prisma.recipe.update({
       where: { id, authorId: userId },
       data: {
         name: fields.name,
         description: fields.description,
+        ingredients: {
+          createMany: {
+            data: fields.ingredients.map(({ id: _, ...rest }, i) => ({
+              ...rest,
+              order: i,
+            })),
+          },
+        },
+        steps: {
+          createMany: {
+            data: fields.steps.map(({ id: _, ...rest }, i) => ({
+              ...rest,
+              order: i,
+            })),
+          },
+        },
         prepTime: fields.prepTime,
         cookTime: fields.cookTime,
       },
@@ -326,6 +344,8 @@ export async function updateRecipeSignedToSigned({
   uuid: string;
 }) {
   await ctx.prisma.$transaction(async (prisma) => {
+    await prisma.ingredient.deleteMany({ where: { recipeId: id } });
+    await prisma.step.deleteMany({ where: { recipeId: id } });
     await prisma.recipe.update({
       where: { id },
       data: {
@@ -333,6 +353,22 @@ export async function updateRecipeSignedToSigned({
         description: fields.description,
         prepTime: fields.prepTime,
         cookTime: fields.cookTime,
+        ingredients: {
+          createMany: {
+            data: fields.ingredients.map(({ id: _, ...rest }, i) => ({
+              ...rest,
+              order: i,
+            })),
+          },
+        },
+        steps: {
+          createMany: {
+            data: fields.steps.map(({ id: _, ...rest }, i) => ({
+              ...rest,
+              order: i,
+            })),
+          },
+        },
         mainImage: {
           update: {
             metadataImage: {
@@ -364,6 +400,8 @@ export async function updateRecipeUrlToSigned({
   uuid: string;
 }) {
   await ctx.prisma.$transaction(async (prisma) => {
+    await prisma.ingredient.deleteMany({ where: { recipeId: id } });
+    await prisma.step.deleteMany({ where: { recipeId: id } });
     await prisma.recipe.update({
       where: { id },
       data: {
@@ -371,6 +409,22 @@ export async function updateRecipeUrlToSigned({
         description: fields.description,
         prepTime: fields.prepTime,
         cookTime: fields.cookTime,
+        ingredients: {
+          createMany: {
+            data: fields.ingredients.map(({ id: _, ...rest }, i) => ({
+              ...rest,
+              order: i,
+            })),
+          },
+        },
+        steps: {
+          createMany: {
+            data: fields.steps.map(({ id: _, ...rest }, i) => ({
+              ...rest,
+              order: i,
+            })),
+          },
+        },
         mainImage: {
           update: {
             urlImage: {
@@ -405,13 +459,31 @@ export async function updateRecipeSignedToUrl({
   fields: EditUrlImageRecipe["fields"];
 }) {
   await ctx.prisma.$transaction(async (prisma) => {
-    await ctx.prisma.recipe.update({
+    await prisma.ingredient.deleteMany({ where: { recipeId: id } });
+    await prisma.step.deleteMany({ where: { recipeId: id } });
+    await prisma.recipe.update({
       where: { id },
       data: {
         name: fields.name,
         description: fields.description,
         prepTime: fields.prepTime,
         cookTime: fields.cookTime,
+        ingredients: {
+          createMany: {
+            data: fields.ingredients.map(({ id: _, ...rest }, i) => ({
+              ...rest,
+              order: i,
+            })),
+          },
+        },
+        steps: {
+          createMany: {
+            data: fields.steps.map(({ id: _, ...rest }, i) => ({
+              ...rest,
+              order: i,
+            })),
+          },
+        },
         mainImage: {
           update: {
             urlImage: {
@@ -442,13 +514,31 @@ export async function updateRecipeUrlToUrl({
   fields: EditUrlImageRecipe["fields"];
 }) {
   await ctx.prisma.$transaction(async (prisma) => {
-    await ctx.prisma.recipe.update({
+    await prisma.ingredient.deleteMany({ where: { recipeId: id } });
+    await prisma.step.deleteMany({ where: { recipeId: id } });
+    await prisma.recipe.update({
       where: { id },
       data: {
         name: fields.name,
         description: fields.description,
         prepTime: fields.prepTime,
         cookTime: fields.cookTime,
+        ingredients: {
+          createMany: {
+            data: fields.ingredients.map(({ id: _, ...rest }, i) => ({
+              ...rest,
+              order: i,
+            })),
+          },
+        },
+        steps: {
+          createMany: {
+            data: fields.steps.map(({ id: _, ...rest }, i) => ({
+              ...rest,
+              order: i,
+            })),
+          },
+        },
         mainImage: {
           update: {
             urlImage: {
@@ -474,13 +564,31 @@ export async function updateRecipeNoneToUrl({
   fields: EditUrlImageRecipe["fields"];
 }) {
   await ctx.prisma.$transaction(async (prisma) => {
-    await ctx.prisma.recipe.update({
+    await prisma.ingredient.deleteMany({ where: { recipeId: id } });
+    await prisma.step.deleteMany({ where: { recipeId: id } });
+    await prisma.recipe.update({
       where: { id },
       data: {
         name: fields.name,
         description: fields.description,
         prepTime: fields.prepTime,
         cookTime: fields.cookTime,
+        ingredients: {
+          createMany: {
+            data: fields.ingredients.map(({ id: _, ...rest }, i) => ({
+              ...rest,
+              order: i,
+            })),
+          },
+        },
+        steps: {
+          createMany: {
+            data: fields.steps.map(({ id: _, ...rest }, i) => ({
+              ...rest,
+              order: i,
+            })),
+          },
+        },
         mainImage: {
           create: {
             urlImage: {
@@ -508,6 +616,8 @@ export async function updateRecipeNoneToSigned({
   uuid: string;
 }) {
   await ctx.prisma.$transaction(async (prisma) => {
+    await prisma.ingredient.deleteMany({ where: { recipeId: id } });
+    await prisma.step.deleteMany({ where: { recipeId: id } });
     await prisma.recipe.update({
       where: { id },
       data: {
@@ -515,6 +625,22 @@ export async function updateRecipeNoneToSigned({
         description: fields.description,
         prepTime: fields.prepTime,
         cookTime: fields.cookTime,
+        ingredients: {
+          createMany: {
+            data: fields.ingredients.map(({ id: _, ...rest }, i) => ({
+              ...rest,
+              order: i,
+            })),
+          },
+        },
+        steps: {
+          createMany: {
+            data: fields.steps.map(({ id: _, ...rest }, i) => ({
+              ...rest,
+              order: i,
+            })),
+          },
+        },
         mainImage: {
           create: {
             metadataImage: {
@@ -593,6 +719,7 @@ export async function deleteRecipe({ ctx, id }: { ctx: Context; id: string }) {
     await tx.mealTypesOnRecipies.deleteMany({ where: { recipeId: id } });
     await tx.nationalitiesOnRecipes.deleteMany({ where: { recipeId: id } });
     await tx.cookingMethodsOnRecipies.deleteMany({ where: { recipeId: id } });
+    await tx.favouriteRecipe.deleteMany({ where: { recipeId: id } });
     await tx.urlImage.deleteMany({
       where: {
         image: {

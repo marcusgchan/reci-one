@@ -32,6 +32,10 @@ export default async function Create({
   noStore();
   const params = searchParamsSchema.safeParse(searchParams);
   if (!params.success) {
+    if (params.error.formErrors.fieldErrors.url) {
+      redirect(`/recipes/create?formStage=2`);
+    }
+
     redirect(`/recipes/create?formStage=1`);
   }
 

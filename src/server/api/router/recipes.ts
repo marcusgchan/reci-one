@@ -95,9 +95,25 @@ export const recipesRouter = createTRPCRouter({
       if (!recipe) {
         return null;
       }
+      let count = 1;
+      type FormattedStep = (typeof recipe.steps)[number] & {
+        count: number;
+      };
+      const formattedSteps: FormattedStep[] = recipe.steps.reduce(
+        (acc, step) => {
+          if (step.isHeader) {
+            acc.push({ ...step, count: -1 });
+            return acc;
+          }
+          acc.push({ ...step, count: count++ });
+          return acc;
+        },
+        [] as FormattedStep[],
+      );
       if (recipe.mainImage?.urlImage?.url) {
         return {
           ...recipe,
+          steps: formattedSteps,
           mainImage: {
             type: "url" as const,
             url: recipe.mainImage.urlImage.url,
@@ -113,12 +129,17 @@ export const recipesRouter = createTRPCRouter({
           );
           return {
             ...recipe,
+            steps: formattedSteps,
             mainImage: { type: "presignedUrl" as const, url },
           };
         } catch (e) {}
       }
       // Should only reach here if there isn't an image
-      return { ...recipe, mainImage: { type: "noImage" as const, url: "" } };
+      return {
+        ...recipe,
+        steps: formattedSteps,
+        mainImage: { type: "noImage" as const, url: "" },
+      };
     }),
   addRecipe: protectedProcedure
     .input(addRecipeSchema)
@@ -177,11 +198,14 @@ export const recipesRouter = createTRPCRouter({
           prepTime: recipe.prepTime ? recipe.prepTime.toNumber() : "",
           cookTime: recipe.cookTime ? recipe.cookTime.toNumber() : "",
           image: {
-            imageMetadata: {
-              name: recipe.mainImage?.metadataImage?.key ?? "",
-              type: recipe.mainImage?.metadataImage?.type ?? "",
-              size: recipe.mainImage?.metadataImage?.size ?? 0,
-            },
+            imageMetadata:
+              type === "presignedUrl"
+                ? {
+                    name: recipe.mainImage?.metadataImage?.key,
+                    type: recipe.mainImage?.metadataImage?.type,
+                    size: recipe.mainImage?.metadataImage?.size,
+                  }
+                : undefined,
             urlSourceImage: recipe.mainImage?.urlImage?.url ?? "",
           },
           nationalities: recipe.nationalities.map(

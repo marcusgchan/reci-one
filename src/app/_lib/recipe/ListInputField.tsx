@@ -53,7 +53,6 @@ export function ListInput({
           intent="noBoarder"
           type="button"
           onClick={() => {
-            console.log("remove", index);
             remove(index);
           }}
         >
